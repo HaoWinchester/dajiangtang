@@ -55,18 +55,18 @@ class RecruitmentSearchPaginationTest {
     }
 
     @Test
-    void paginatesWithRequestedPageAndPageSize() throws Exception {
+    void paginatesWithFixedPageSizeAndIgnoresRequestedPageSize() throws Exception {
         mockMvc.perform(get("/api/recruitments")
                         .param("page", "2")
                         .param("pageSize", "5")
                         .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page").value(2))
-                .andExpect(jsonPath("$.pageSize").value(5))
+                .andExpect(jsonPath("$.pageSize").value(10))
                 .andExpect(jsonPath("$.totalItems").value(13))
-                .andExpect(jsonPath("$.totalPages").value(3))
-                .andExpect(jsonPath("$.items.length()").value(5))
-                .andExpect(jsonPath("$.items[0].id").value("rec-005"));
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.items.length()").value(3))
+                .andExpect(jsonPath("$.items[0].id").value("rec-010"));
     }
 
     @Test

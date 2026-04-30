@@ -11,6 +11,7 @@ Thumbs.db
 node_modules/
 dist/
 coverage/
+.npm-cache/
 
 # Java / Maven
 target/

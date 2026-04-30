@@ -21,4 +21,22 @@ describe('recruitment route guard', () => {
 
     expect(requireAuthGuard({ meta: { requiresAuth: true } })).toBe(true);
   });
+
+  it('redirects regular users away from the recruitment create route', async () => {
+    localStorage.setItem('USER_ROLE', 'USER');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, requiresAdmin: true } })).toEqual({
+      name: 'recruitments'
+    });
+  });
+
+  it('redirects company users away from the recruitment create route', async () => {
+    localStorage.setItem('USER_ROLE', 'COMPANY');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, requiresAdmin: true } })).toEqual({
+      name: 'recruitments'
+    });
+  });
 });
