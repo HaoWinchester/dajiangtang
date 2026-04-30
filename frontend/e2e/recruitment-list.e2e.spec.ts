@@ -1,0 +1,285 @@
+import { expect, test, type Page } from '@playwright/test';
+
+const defaultItems = [
+  {
+    id: 'rec-001',
+    position: '项目经理',
+    salary: '15k-25k',
+    companyName: '北京示例科技有限公司',
+    city: '北京市',
+    owner: '赵义民',
+    headcount: 3,
+    contactPhone: '13800000000',
+    jobDescription: '详情字段不应出现在列表'
+  },
+  {
+    id: 'rec-002',
+    position: 'Java 后端工程师',
+    salary: '20k-35k',
+    companyName: '上海云启软件有限公司',
+    city: '上海市',
+    owner: '钱启航',
+    headcount: 5
+  }
+];
+
+function response(overrides: Record<string, unknown> = {}) {
+  return {
+    items: defaultItems,
+    page: 1,
+    pageSize: 10,
+    totalItems: defaultItems.length,
+    totalPages: 1,
+    canCreate: false,
+    ...overrides
+  };
+}
+
+async function loginAs(page: Page, role: 'ADMIN' | 'USER' | 'COMPANY') {
+  await page.addInitScript((userRole) => {
+    window.localStorage.setItem('USER_ROLE', userRole);
+  }, role);
+}
+
+async function mockRecruitments(page: Page) {
+  await page.route('**/api/recruitments**', async (route) => {
+    const url = new URL(route.request().url());
+    const role = await page.evaluate(() => window.localStorage.getItem('USER_ROLE'));
+    const positionKeyword = url.searchParams.get('positionKeyword');
+    const city = url.searchParams.get('city');
+    const requestedPage = Number(url.searchParams.get('page') ?? '1');
+
+    if (positionKeyword === '错误') {
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: '招聘信息加载失败，请稍后重试。' })
+      });
+      return;
+    }
+
+    if (positionKeyword === '不存在' || city === '北京') {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(response({ items: [], totalItems: 0, totalPages: 0, canCreate: role === 'ADMIN' }))
+      });
+      return;
+    }
+
+    if (requestedPage === 2) {
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(
+          response({
+            items: [
+              {
+                id: 'rec-011',
+                position: '客户成功经理',
+                salary: '12k-22k',
+                companyName: '深圳企服科技有限公司',
+                city: '深圳市',
+                owner: '何念',
+                headcount: 3
+              }
+            ],
+            page: 2,
+            totalItems: 11,
+            totalPages: 2,
+            canCreate: role === 'ADMIN'
+          })
+        )
+      });
+      return;
+    }
+
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(response({ totalItems: 11, totalPages: 2, canCreate: role === 'ADMIN' }))
+    });
+  });
+}
+
+test('未登录访问招聘列表会进入登录提示页', async ({ page }) => {
+  await page.goto('/recruitments');
+
+  await expect(page.getByRole('heading', { name: '请先登录' })).toBeVisible();
+  await expect(page.getByText('招聘信息列表仅面向已登录的管理员、普通用户和企业用户开放。')).toBeVisible();
+});
+
+test('根路径会重定向到受保护的招聘列表并要求登录', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(page).toHaveURL(/\/login-required$/);
+});
+
+test('管理员能看到招聘列表必需字段和新增按钮', async ({ page }) => {
+  await loginAs(page, 'ADMIN');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+
+  await expect(page.getByRole('heading', { name: '招聘信息列表' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: '岗位' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: '薪资' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: '公司名称' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: '城市' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: '负责人' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: '需求人数' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '新增' })).toBeVisible();
+});
+
+test('普通用户能看列表但看不到新增按钮', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+
+  await expect(page.getByText('项目经理')).toBeVisible();
+  await expect(page.getByRole('link', { name: '新增' })).toHaveCount(0);
+});
+
+test('企业用户能看列表但看不到新增按钮', async ({ page }) => {
+  await loginAs(page, 'COMPANY');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+
+  await expect(page.getByText('项目经理')).toBeVisible();
+  await expect(page.getByRole('link', { name: '新增' })).toHaveCount(0);
+});
+
+test('管理员点击新增按钮能进入新增入口', async ({ page }) => {
+  await loginAs(page, 'ADMIN');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByRole('link', { name: '新增' }).click();
+
+  await expect(page).toHaveURL(/\/recruitments\/new$/);
+  await expect(page.getByRole('heading', { name: '招聘新增入口' })).toBeVisible();
+});
+
+test('普通用户直访新增入口会被重定向回招聘列表', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments/new');
+
+  await expect(page).toHaveURL(/\/recruitments$/);
+  await expect(page.getByRole('heading', { name: '招聘信息列表' })).toBeVisible();
+});
+
+test('企业用户直访新增入口会被重定向回招聘列表', async ({ page }) => {
+  await loginAs(page, 'COMPANY');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments/new');
+
+  await expect(page).toHaveURL(/\/recruitments$/);
+  await expect(page.getByRole('heading', { name: '招聘信息列表' })).toBeVisible();
+});
+
+test('列表页面不展示后端返回的联系电话和详情字段', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+
+  await expect(page.getByText('13800000000')).toHaveCount(0);
+  await expect(page.getByText('详情字段不应出现在列表')).toHaveCount(0);
+});
+
+test('岗位和城市组合搜索会刷新列表并携带查询条件', async ({ page }) => {
+  await loginAs(page, 'ADMIN');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByLabel('岗位').fill('Java');
+  await page.getByLabel('城市').fill('上海市');
+
+  const requestPromise = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === '/api/recruitments'
+      && url.searchParams.get('positionKeyword') === 'Java'
+      && url.searchParams.get('city') === '上海市'
+      && url.searchParams.get('page') === '1'
+      && url.searchParams.get('pageSize') === '10';
+  });
+  await page.getByRole('button', { name: '搜索', exact: true }).click();
+  await requestPromise;
+
+  await expect(page.getByText('Java 后端工程师')).toBeVisible();
+});
+
+test('清空搜索会清掉两个输入框并回到第一页默认查询', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByLabel('岗位').fill('Java');
+  await page.getByLabel('城市').fill('上海市');
+
+  const requestPromise = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === '/api/recruitments'
+      && !url.searchParams.has('positionKeyword')
+      && !url.searchParams.has('city')
+      && url.searchParams.get('page') === '1';
+  });
+  await page.getByRole('button', { name: '清空搜索' }).click();
+  await requestPromise;
+
+  await expect(page.getByLabel('岗位')).toHaveValue('');
+  await expect(page.getByLabel('城市')).toHaveValue('');
+});
+
+test('下一页会请求第二页并展示分页范围', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByRole('button', { name: '下一页' }).click();
+
+  await expect(page.getByText('客户成功经理')).toBeVisible();
+  await expect(page.getByText('11-11 / 共 11 条')).toBeVisible();
+  await expect(page.getByText('第 2 / 2 页')).toBeVisible();
+});
+
+test('没有匹配结果时展示空状态', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByLabel('岗位').fill('不存在');
+  await page.getByRole('button', { name: '搜索', exact: true }).click();
+
+  await expect(page.getByText('暂无匹配的招聘信息')).toBeVisible();
+  await expect(page.getByText('请调整岗位或城市条件后再试。')).toBeVisible();
+});
+
+test('加载失败时展示错误并允许重试', async ({ page }) => {
+  await loginAs(page, 'USER');
+  let failNext = true;
+  await page.route('**/api/recruitments**', async (route) => {
+    if (failNext) {
+      failNext = false;
+      await route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: '招聘信息加载失败，请稍后重试。' })
+      });
+      return;
+    }
+
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(response())
+    });
+  });
+
+  await page.goto('/recruitments');
+  await expect(page.getByText('招聘信息加载失败，请稍后重试。')).toBeVisible();
+  await page.getByRole('button', { name: '重试' }).click();
+
+  await expect(page.getByText('项目经理')).toBeVisible();
+});

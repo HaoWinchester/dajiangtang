@@ -54,6 +54,33 @@ class RecruitmentCreatePermissionTest {
     }
 
     @Test
+    void requestHeaderRoleTakesPriorityOverCookieRole() throws Exception {
+        MockCookie roleCookie = new MockCookie(CurrentUserRoleResolver.ROLE_COOKIE, "ADMIN");
+
+        mockMvc.perform(get("/api/recruitments")
+                        .cookie(roleCookie)
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.canCreate").value(false));
+    }
+
+    @Test
+    void invalidRoleReturns401() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "GUEST"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("未登录或登录态失效。"));
+    }
+
+    @Test
+    void blankRoleReturns401() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "   "))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("未登录或登录态失效。"));
+    }
+
+    @Test
     void unauthenticatedRequestReturns401() throws Exception {
         mockMvc.perform(get("/api/recruitments"))
                 .andExpect(status().isUnauthorized())

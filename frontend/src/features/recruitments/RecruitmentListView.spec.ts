@@ -77,6 +77,123 @@ describe('RecruitmentListView', () => {
     expect(wrapper.text()).toContain('3');
   });
 
+  it('renders the position field in the first data row', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.findAll('tbody td')[0].text()).toBe('项目经理');
+  });
+
+  it('renders the salary field in the first data row', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.findAll('tbody td')[1].text()).toBe('15k-25k');
+  });
+
+  it('renders the company name field in the first data row', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.findAll('tbody td')[2].text()).toBe('北京示例科技有限公司');
+  });
+
+  it('renders the city field in the first data row', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.findAll('tbody td')[3].text()).toBe('北京市');
+  });
+
+  it('renders the owner field in the first data row', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.findAll('tbody td')[4].text()).toBe('赵义民');
+  });
+
+  it('renders the headcount field in the first data row', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.findAll('tbody td')[5].text()).toBe('3');
+  });
+
+  it('renders one table row for each recruitment item', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          listResponse({
+            items: [
+              listResponse().items[0],
+              {
+                id: 'rec-002',
+                position: 'Java 后端工程师',
+                salary: '20k-35k',
+                companyName: '上海云启软件有限公司',
+                city: '上海市',
+                owner: '钱启航',
+                headcount: 5
+              }
+            ],
+            totalItems: 2
+          })
+        )
+      )
+    );
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.findAll('tbody tr')).toHaveLength(2);
+  });
+
+  it('renders current range text from pagination metadata', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        jsonResponse(
+          listResponse({
+            page: 2,
+            totalItems: 13,
+            totalPages: 2
+          })
+        )
+      )
+    );
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('11-13 / 共 13 条');
+  });
+
+  it('renders zero range text when list is empty', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(jsonResponse(listResponse({ items: [], totalItems: 0, totalPages: 0 })))
+    );
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('暂无匹配的招聘信息');
+    expect(wrapper.text()).not.toContain('共 0 条');
+  });
+
   it('does not render detail-only fields returned by the backend', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
 

@@ -31,6 +31,27 @@ class RecruitmentSearchPaginationTest {
     }
 
     @Test
+    void searchesPositionCaseInsensitively() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("positionKeyword", "java")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItems").value(2))
+                .andExpect(jsonPath("$.items[0].id").value("rec-013"))
+                .andExpect(jsonPath("$.items[1].id").value("rec-002"));
+    }
+
+    @Test
+    void trimsPositionKeywordBeforeSearching() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("positionKeyword", "  产品  ")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItems").value(1))
+                .andExpect(jsonPath("$.items[0].id").value("rec-005"));
+    }
+
+    @Test
     void searchesCityByStandardCityName() throws Exception {
         mockMvc.perform(get("/api/recruitments")
                         .param("city", "北京市")
@@ -40,6 +61,17 @@ class RecruitmentSearchPaginationTest {
                 .andExpect(jsonPath("$.items[0].id").value("rec-013"))
                 .andExpect(jsonPath("$.items[1].id").value("rec-001"))
                 .andExpect(jsonPath("$.items[2].id").value("rec-005"));
+    }
+
+    @Test
+    void trimsStandardCityNameBeforeSearching() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("city", "  深圳市  ")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItems").value(2))
+                .andExpect(jsonPath("$.items[0].id").value("rec-003"))
+                .andExpect(jsonPath("$.items[1].id").value("rec-012"));
     }
 
     @Test
@@ -55,6 +87,30 @@ class RecruitmentSearchPaginationTest {
     }
 
     @Test
+    void combinedFiltersReturnEmptyWhenOnlyOneConditionMatches() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("positionKeyword", "Java")
+                        .param("city", "深圳市")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItems").value(0))
+                .andExpect(jsonPath("$.items.length()").value(0));
+    }
+
+    @Test
+    void blankSearchConditionsRestoreDefaultList() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("positionKeyword", "   ")
+                        .param("city", "   ")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.pageSize").value(10))
+                .andExpect(jsonPath("$.totalItems").value(13))
+                .andExpect(jsonPath("$.items.length()").value(10));
+    }
+
+    @Test
     void paginatesWithFixedPageSizeAndIgnoresRequestedPageSize() throws Exception {
         mockMvc.perform(get("/api/recruitments")
                         .param("page", "2")
@@ -67,6 +123,29 @@ class RecruitmentSearchPaginationTest {
                 .andExpect(jsonPath("$.totalPages").value(2))
                 .andExpect(jsonPath("$.items.length()").value(3))
                 .andExpect(jsonPath("$.items[0].id").value("rec-010"));
+    }
+
+    @Test
+    void invalidPageNumberFallsBackToFirstPage() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("page", "0")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.items[0].id").value("rec-013"));
+    }
+
+    @Test
+    void outOfRangePageReturnsEmptyItemsWithStableMetadata() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("page", "99")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(99))
+                .andExpect(jsonPath("$.pageSize").value(10))
+                .andExpect(jsonPath("$.totalItems").value(13))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.items.length()").value(0));
     }
 
     @Test

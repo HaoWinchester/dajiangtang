@@ -98,6 +98,70 @@ describe('Recruitment search and pagination', () => {
     expect(elapsed).toBeLessThan(2000);
   });
 
+  it('trims search form values before submitting', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(response()))
+      .mockResolvedValueOnce(jsonResponse(response()));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await wrapper.find('input[name="positionKeyword"]').setValue('  Java  ');
+    await wrapper.find('input[name="city"]').setValue('  上海市  ');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/recruitments?positionKeyword=Java&city=%E4%B8%8A%E6%B5%B7%E5%B8%82&page=1&pageSize=10',
+      expect.any(Object)
+    );
+  });
+
+  it('resets to page 1 when submitting a new search after pagination', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(responseWithPages(1, 2))
+      .mockResolvedValueOnce(responseWithPages(2, 2))
+      .mockResolvedValueOnce(jsonResponse(response()));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await findButton(wrapper, '下一页').trigger('click');
+    await flushPromises();
+
+    await wrapper.find('input[name="positionKeyword"]').setValue('产品');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/recruitments?positionKeyword=%E4%BA%A7%E5%93%81&page=1&pageSize=10',
+      expect.any(Object)
+    );
+  });
+
+  it('keeps typed form values after search results load', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(response()))
+      .mockResolvedValueOnce(jsonResponse(response()));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await wrapper.find('input[name="positionKeyword"]').setValue('Java');
+    await wrapper.find('input[name="city"]').setValue('上海市');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+
+    expect((wrapper.find('input[name="positionKeyword"]').element as HTMLInputElement).value).toBe('Java');
+    expect((wrapper.find('input[name="city"]').element as HTMLInputElement).value).toBe('上海市');
+  });
+
   it('clears search conditions and restores the default first page', async () => {
     const fetchMock = vi
       .fn()
@@ -122,6 +186,25 @@ describe('Recruitment search and pagination', () => {
     );
     expect((wrapper.find('input[name="positionKeyword"]').element as HTMLInputElement).value).toBe('');
     expect((wrapper.find('input[name="city"]').element as HTMLInputElement).value).toBe('');
+  });
+
+  it('clears both filters even when only city was filled', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(response()))
+      .mockResolvedValueOnce(jsonResponse(response()));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await wrapper.find('input[name="city"]').setValue('北京市');
+    await findButton(wrapper, '清空搜索').trigger('click');
+    await flushPromises();
+
+    expect((wrapper.find('input[name="positionKeyword"]').element as HTMLInputElement).value).toBe('');
+    expect((wrapper.find('input[name="city"]').element as HTMLInputElement).value).toBe('');
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/recruitments?page=1&pageSize=10', expect.any(Object));
   });
 
   it('requests the next page with the default page size', async () => {
@@ -169,6 +252,72 @@ describe('Recruitment search and pagination', () => {
     expect(wrapper.text()).toContain('第 2 / 2 页');
   });
 
+  it('requests the previous page with the active search filters', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(responseWithPages(1, 2))
+      .mockResolvedValueOnce(responseWithPages(2, 2))
+      .mockResolvedValueOnce(responseWithPages(1, 2));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await wrapper.find('input[name="positionKeyword"]').setValue('Java');
+    await wrapper.find('form').trigger('submit');
+    await flushPromises();
+    await findButton(wrapper, '上一页').trigger('click');
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/recruitments?positionKeyword=Java&page=1&pageSize=10',
+      expect.any(Object)
+    );
+  });
+
+  it('disables the previous button on the first page', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(responseWithPages(1, 2)));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(findButton(wrapper, '上一页').attributes('disabled')).toBeDefined();
+  });
+
+  it('enables the next button when another page exists', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(responseWithPages(1, 2)));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(findButton(wrapper, '下一页').attributes('disabled')).toBeUndefined();
+  });
+
+  it('disables the next button on the last page', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(responseWithPages(2, 2)));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(findButton(wrapper, '下一页').attributes('disabled')).toBeDefined();
+  });
+
+  it('disables search and clear buttons while loading', async () => {
+    let resolveFetch: (response: Response) => void = () => {};
+    const pendingFetch = new Promise<Response>((resolve) => {
+      resolveFetch = resolve;
+    });
+    vi.stubGlobal('fetch', vi.fn(() => pendingFetch));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(findButton(wrapper, '搜索').attributes('disabled')).toBeDefined();
+    expect(findButton(wrapper, '清空搜索').attributes('disabled')).toBeDefined();
+
+    resolveFetch(jsonResponse(response()));
+  });
+
   it('shows an empty state when no recruitments match', async () => {
     vi.stubGlobal(
       'fetch',
@@ -180,6 +329,18 @@ describe('Recruitment search and pagination', () => {
 
     expect(wrapper.text()).toContain('暂无匹配的招聘信息');
     expect(wrapper.find('table').exists()).toBe(false);
+  });
+
+  it('shows the empty state guidance copy', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(jsonResponse(response({ items: [], totalItems: 0, totalPages: 0 })))
+    );
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    expect(wrapper.text()).toContain('请调整岗位或城市条件后再试。');
   });
 
   it('shows an error state and retries the current request', async () => {
@@ -203,4 +364,49 @@ describe('Recruitment search and pagination', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(wrapper.text()).toContain('项目经理');
   });
+
+  it('keeps the current requested page when retrying a failed pagination request', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(responseWithPages(1, 2))
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({ message: '招聘信息加载失败，请稍后重试。' })
+      } as Response)
+      .mockResolvedValueOnce(responseWithPages(2, 2));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await findButton(wrapper, '下一页').trigger('click');
+    await flushPromises();
+    await findButton(wrapper, '重试').trigger('click');
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/recruitments?page=2&pageSize=10', expect.any(Object));
+  });
 });
+
+function responseWithPages(page: number, totalPages: number): Promise<Response> {
+  return Promise.resolve(
+    jsonResponse(
+      response({
+        page,
+        totalItems: 12,
+        totalPages,
+        items: [
+          {
+            id: `rec-page-${page}`,
+            position: page === 1 ? '项目经理' : '实施顾问',
+            salary: '12k-18k',
+            companyName: '杭州示例咨询有限公司',
+            city: '杭州市',
+            owner: '孙岚',
+            headcount: 1
+          }
+        ]
+      })
+    )
+  );
+}
