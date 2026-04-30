@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "background": "#fbf8ff",
+                "surface-container-low": "#f4f2fc",
+                "on-surface-variant": "#444653",
+                "primary-fixed-dim": "#b8c4ff",
+                "on-primary-fixed": "#001453",
+                "on-primary-container": "#a8b8ff",
+                "on-tertiary": "#ffffff",
+                "inverse-on-surface": "#f1f0fa",
+                "primary": "#00288e",
+                "on-error": "#ffffff",
+                "outline": "#757684",
+                "on-error-container": "#93000a",
+                "on-secondary": "#ffffff",
+                "surface-tint": "#3755c3",
+                "tertiary-fixed": "#dae2fd",
+                "secondary-container": "#d5e3fc",
+                "primary-fixed": "#dde1ff",
+                "secondary": "#515f74",
+                "tertiary": "#2d3449",
+                "inverse-surface": "#2f3037",
+                "inverse-primary": "#b8c4ff",
+                "on-tertiary-fixed": "#131b2e",
+                "on-secondary-fixed": "#0d1c2e",
+                "surface-container-high": "#e8e7f1",
+                "surface-dim": "#dad9e3",
+                "on-tertiary-container": "#b4bbd5",
+                "primary-container": "#1e40af",
+                "tertiary-container": "#434b60",
+                "error": "#ba1a1a",
+                "surface-bright": "#fbf8ff",
+                "surface-container-lowest": "#ffffff",
+                "secondary-fixed": "#d5e3fc",
+                "error-container": "#ffdad6",
+                "surface-variant": "#e3e1eb",
+                "on-surface": "#1a1b22",
+                "tertiary-fixed-dim": "#bec6e0",
+                "on-background": "#1a1b22",
+                "surface": "#fbf8ff",
+                "outline-variant": "#c4c5d5",
+                "on-secondary-container": "#57657a",
+                "on-primary": "#ffffff",
+                "on-secondary-fixed-variant": "#3a485b",
+                "surface-container": "#eeedf7",
+                "surface-container-highest": "#e3e1eb",
+                "on-tertiary-fixed-variant": "#3f465c",
+                "on-primary-fixed-variant": "#173bab"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "sm": "8px",
+                "3xl": "64px",
+                "2xl": "48px",
+                "base": "4px",
+                "md": "16px",
+                "xs": "4px",
+                "lg": "24px",
+                "max_width": "1440px",
+                "gutter": "24px",
+                "xl": "32px",
+                "margin": "32px"
+            },
+            "fontFamily": {
+                "label-sm": ["Inter"], "h3": ["Inter"], "body-sm": ["Inter"], "body-lg": ["Inter"], "h2": ["Inter"], "label-md": ["Inter"], "h1": ["Inter"], "code": ["Inter"], "body-md": ["Inter"]
+            },
+            "fontSize": {
+                "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 max-w-[1440px] mx-auto bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-xl">
+<span class="text-xl font-bold text-blue-900 dark:text-blue-100">TalentArch</span>
+<nav class="hidden md:flex items-center gap-lg h-full">
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">控制台</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">职位</a>
+<a class="font-sans text-sm font-medium tracking-tight text-blue-700 dark:text-blue-400 border-b-2 border-blue-700 dark:border-blue-400 pb-1" href="#">人才</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">数据分析</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-sm pr-4 border-r border-slate-200">
+<button class="p-2 text-on-surface-variant hover:bg-slate-50 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-slate-50 rounded-lg transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<button class="px-md py-sm bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity">发布职位</button>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNMTw_67Q78Ec-6NMW8LzMXDOVtoWPz4o-9fZg-tEw8ymxGhOCzgyXzpTdlNvArL6VdzTVxRCUH7bwN05bpjs87DwMFV0kOOkQQhEZMxnqRj8Tt75EFIPQItWUKvMdTB-e5nY55y09_NshhCNdUcxYfsT9lF9eWX7ss7-StZMI08Fo5NHVWqnxd-mmzLLfnSkUb5uqXmo0sEgq4uFbjC4liIN_O5IK4Gr4qArc696kTSgLDx5YYKkAMKvH0WmrmD6JdvaamI0mpn2U"/>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col py-4 z-40 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
+<div class="px-6 mb-6">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="domain">domain</span>
+</div>
+<div>
+<p class="text-lg font-black text-blue-900 dark:text-blue-50">环球科技集团</p>
+<p class="text-xs text-slate-500 uppercase tracking-widest">企业合作伙伴</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-r-4 border-blue-800 dark:border-blue-400 font-sans text-sm font-semibold tracking-wide uppercase transition-all duration-200 hover:pl-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+            基本资料
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-sans text-sm font-semibold tracking-wide uppercase transition-all duration-200 hover:pl-1" href="#">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+            工作经历
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-sans text-sm font-semibold tracking-wide uppercase transition-all duration-200 hover:pl-1" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+            项目历史
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-sans text-sm font-semibold tracking-wide uppercase transition-all duration-200 hover:pl-1" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+            教育背景
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-sans text-sm font-semibold tracking-wide uppercase transition-all duration-200 hover:pl-1" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+            专业技能
+        </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-sans text-sm font-semibold tracking-wide uppercase transition-all duration-200 hover:pl-1" href="#">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+            资质证书
+        </a>
+</nav>
+<div class="mt-auto px-4 space-y-1 pt-4 border-t border-slate-100">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-blue-800 font-label-sm text-label-sm uppercase transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+            帮助中心
+        </a>
+<a class="flex items-center gap-3 px-4 py-2 text-error hover:opacity-80 font-label-sm text-label-sm uppercase transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+            退出登录
+        </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 pt-16 p-lg bg-background min-h-screen">
+<div class="max-w-[1200px] mx-auto py-xl">
+<!-- Page Header -->
+<div class="flex items-center justify-between mb-xl">
+<div>
+<h1 class="font-h1 text-h1 text-on-background">企业中心 - 资料维护</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">管理环球科技集团的品牌身份及运营细节。</p>
+</div>
+<div class="flex gap-md">
+<button class="px-xl py-md border border-outline text-on-surface-variant font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors">取消</button>
+<button class="px-xl py-md bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:opacity-90 transition-opacity flex items-center gap-sm shadow-sm">
+<span class="material-symbols-outlined text-[18px]" data-icon="save">save</span>
+                    保存修改
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-lg">
+<!-- Left Column: Form Sections -->
+<div class="col-span-12 lg:col-span-8 space-y-lg">
+<!-- Section: Identity -->
+<div class="bg-surface-container-lowest p-xl rounded-xl border border-slate-200 shadow-sm">
+<div class="flex items-center gap-md mb-xl">
+<div class="w-1 bg-primary h-6 rounded-full"></div>
+<h2 class="font-h3 text-h3 text-primary">核心标识</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">公司类型</label>
+<select class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md">
+<option>上市公司</option>
+<option>私有企业</option>
+<option>合伙制企业</option>
+<option>政府机构</option>
+</select>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">状态</label>
+<div class="flex items-center gap-md pt-sm">
+<label class="flex items-center gap-sm cursor-pointer">
+<input checked="" class="text-primary focus:ring-primary" name="status" type="radio"/>
+<span class="font-body-md text-body-md text-on-surface">重点</span>
+</label>
+<label class="flex items-center gap-sm cursor-pointer">
+<input class="text-primary focus:ring-primary" name="status" type="radio"/>
+<span class="font-body-md text-body-md text-on-surface">一般</span>
+</label>
+</div>
+</div>
+<div class="space-y-sm md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface-variant">公司简称</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="例如：环球科技" type="text"/>
+</div>
+<div class="space-y-sm md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface-variant">企业全称</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="环球科技有限公司" type="text"/>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">公司规模</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="例如：5000人以上" type="text"/>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">行业</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="信息技术与服务" type="text"/>
+</div>
+</div>
+</div>
+<!-- Section: Operations -->
+<div class="bg-surface-container-lowest p-xl rounded-xl border border-slate-200 shadow-sm">
+<div class="flex items-center gap-md mb-xl">
+<div class="w-1 bg-primary h-6 rounded-full"></div>
+<h2 class="font-h3 text-h3 text-primary">运营逻辑</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">上班时间</label>
+<div class="flex items-center gap-sm">
+<input class="flex-1 border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary" type="time" value="09:00"/>
+<span class="text-slate-400">至</span>
+<input class="flex-1 border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary" type="time" value="18:00"/>
+</div>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">总部城市</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="加利福尼亚州 旧金山" type="text"/>
+</div>
+<div class="space-y-sm md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface-variant">福利待遇</label>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-md p-md bg-surface-container-low rounded-lg">
+<label class="flex items-center gap-sm">
+<input checked="" class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-sm">医疗保险</span>
+</label>
+<label class="flex items-center gap-sm">
+<input checked="" class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-sm">住房公积金</span>
+</label>
+<label class="flex items-center gap-sm">
+<input class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-sm">工作餐补</span>
+</label>
+<label class="flex items-center gap-sm">
+<input checked="" class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-sm">交通补助</span>
+</label>
+<label class="flex items-center gap-sm">
+<input class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-sm">健身房福利</span>
+</label>
+<label class="flex items-center gap-sm">
+<input checked="" class="rounded text-primary focus:ring-primary" type="checkbox"/>
+<span class="text-body-sm">远程办公</span>
+</label>
+</div>
+</div>
+<div class="space-y-sm md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface-variant">客户简介</label>
+<textarea class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="简要描述企业的愿景与核心价值..." rows="4"></textarea>
+</div>
+</div>
+</div>
+<!-- Section: Contact & Media -->
+<div class="bg-surface-container-lowest p-xl rounded-xl border border-slate-200 shadow-sm">
+<div class="flex items-center gap-md mb-xl">
+<div class="w-1 bg-primary h-6 rounded-full"></div>
+<h2 class="font-h3 text-h3 text-primary">联系方式</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">总机电话</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">官方邮箱</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="contact@globaltech.com" type="email"/>
+</div>
+<div class="space-y-sm md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface-variant">官方网站</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="https://www.globaltech.com" type="url"/>
+</div>
+<div class="space-y-sm md:col-span-2">
+<label class="font-label-md text-label-md text-on-surface-variant">办公地址</label>
+<input class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-md" placeholder="加利福尼亚州 硅谷 创新大道101号" type="text"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Meta & Sidebar Cards -->
+<div class="col-span-12 lg:col-span-4 space-y-lg">
+<!-- Administration Card -->
+<div class="bg-surface-container-lowest p-xl rounded-xl border border-slate-200 shadow-sm">
+<div class="flex items-center gap-md mb-lg">
+<span class="material-symbols-outlined text-primary" data-icon="admin_panel_settings">admin_panel_settings</span>
+<h3 class="font-label-md text-label-md text-on-surface">行政控制</h3>
+</div>
+<div class="space-y-xl">
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">负责人</label>
+<div class="flex items-center gap-sm p-sm bg-surface-container-low rounded-lg">
+<img alt="Admin avatar" class="w-8 h-8 rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsKNhHjMbD0Fdlavebi05Udx0cKlDzMq-rj8CXs52g_SlU8692kaOGz9nb4DuIH8uvct_Pu32G_td_7gQm8U_6NJUcNx5XiOjWcQfyBEaro2UGJ3Fu3T8YaYTOxyPCom8INY6cxJGu26kVZKct6btX0VkxPZWsCPpk2wTSDNjPI99XxV7glIcwK_cfodgKNH1l4PKvfw_dlHPRFaGOANpzs6dgZIzJRExmQloDVilZcFrSuVA9sfwz-esyWEZcEkMq_o8Dyn1YY7Zq"/>
+<div class="flex-1">
+<p class="text-label-sm font-semibold">Sarah Jenkins</p>
+<p class="text-[11px] text-slate-500 uppercase">首席顾问</p>
+</div>
+<button class="p-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="swap_horiz">swap_horiz</span>
+</button>
+</div>
+</div>
+<div class="space-y-sm">
+<label class="font-label-md text-label-md text-on-surface-variant">内部备注</label>
+<textarea class="w-full border-slate-300 rounded-lg py-md focus:ring-2 focus:ring-primary focus:border-primary text-body-sm" placeholder="关于该企业的私密内部备注..." rows="5"></textarea>
+</div>
+<div class="pt-md">
+<p class="text-[12px] text-slate-400 italic">最后修改由 Sarah J. 于 2023年10月24日</p>
+</div>
+</div>
+</div>
+<!-- Visual Asset Card -->
+<div class="bg-surface-container-lowest overflow-hidden rounded-xl border border-slate-200 shadow-sm">
+<div class="h-48 relative bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="A wide-angle interior photograph of a modern corporate skyscraper lobby. The space is filled with floor-to-ceiling glass windows allowing bright, natural afternoon light to flood the polished white marble floors. High-end minimalist furniture in navy and slate tones is arranged neatly. The atmosphere is professional, airy, and high-status, reflecting a top-tier corporate headquarters." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCui3IM-ycdYsz4bD0L9QUgCnpeO8ppG4jcswa5OCmiVw7LRr3VGnTNPW_VdKCraKLpDw0ZxEMXfRxy6orVEHfnns2sPYNaJkZvTz9OZ_UaXCD5f166bsIyl-1aaDAkTjexx_WkPjk1eX4kfdPeT0p7wRA3FwLwnASPrs0Zk4wl4tieBEU5T0VWdGdNC625-lf_utPiAV-7JS0C33MOkFYWMD2iyVTsYuc_NGINwzyuX5bA8r5SsjWPhSPwgaby-3LvbLzu94C2fhic"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-lg">
+<span class="text-white font-label-md text-label-md uppercase tracking-wider">园区全景</span>
+</div>
+</div>
+<div class="p-lg">
+<button class="w-full py-md border border-dashed border-slate-300 text-slate-500 rounded-lg hover:border-primary hover:text-primary transition-all flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined" data-icon="add_a_photo">add_a_photo</span>
+                            更新品牌素材
+                        </button>
+</div>
+</div>
+<!-- Quick Location Card -->
+<div class="bg-surface-container-lowest p-xl rounded-xl border border-slate-200 shadow-sm">
+<h3 class="font-label-md text-label-md text-on-surface mb-md">地点详情</h3>
+<div class="h-40 rounded-lg overflow-hidden border border-slate-100 mb-md relative">
+<img class="w-full h-full object-cover" data-alt="A clean, schematic-style digital map rendering of a metropolitan business district. The map uses a sophisticated color palette of light grays, whites, and corporate blues to denote blocks and transit lines. A single navy blue pin marks a specific location. The design is minimalist and functional, prioritizing clarity and urban precision in a modern UI context." data-location="San Francisco" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiDXeNkmByJnzdvnNE0wxEW830XgBWr9oWlM_CbswEmT7nUrMO6mQNEu28xWv3j9nJ9IcYEOk3euvvQjdeKITyNyNj2wK7ISPvnB3mCUaJJxX8hxVFppJAzAS1t-wRg4z3QMTXiYpTmkeg60GDit5klv9wg3dMjlBVjnuNT1NVbKz5DhYLNj58K_BxginqKZ5ikYXaKXjqiiKtHI4FSJaLxtCrvP60O4zW0fN5434mWuUYlj5xjBpYGUGmqnn3M9e4eyO-61ml31My"/>
+</div>
+<p class="text-body-sm text-on-surface-variant flex items-start gap-sm">
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="location_on">location_on</span>
+                        主要地点已通过 GIS 验证。总部集群位于第4区。
+                    </p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB: Help Context -->
+<button class="fixed bottom-lg right-lg w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-50">
+<span class="material-symbols-outlined" data-icon="contact_support" data-weight="fill" style="font-variation-settings: 'FILL' 1;">contact_support</span>
+</button>
+</body></html>

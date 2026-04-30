@@ -1,11 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import AuthRequiredView from '@/features/recruitments/AuthRequiredView.vue';
-import HomeView from '@/features/recruitments/HomeView.vue';
-import LoginView from '@/features/recruitments/LoginView.vue';
 import RecruitmentCreateEntryView from '@/features/recruitments/RecruitmentCreateEntryView.vue';
 import RecruitmentListView from '@/features/recruitments/RecruitmentListView.vue';
-import RegisterView from '@/features/recruitments/RegisterView.vue';
+import StitchFrameView from '@/features/recruitments/StitchFrameView.vue';
 
 const ROLE_COOKIE = 'USER_ROLE';
 const ROLE_STORAGE_KEY = 'USER_ROLE';
@@ -54,17 +52,56 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: StitchFrameView,
+      props: {
+        src: '/stitch_cspm/_1/code.html',
+        title: 'TalentArch 首页'
+      }
     },
     {
       path: '/login',
       name: 'login',
-      component: LoginView
+      component: StitchFrameView,
+      props: {
+        src: '/stitch_cspm/_2/code.html',
+        title: 'TalentArch 登录'
+      }
     },
     {
       path: '/register',
       name: 'register',
-      component: RegisterView
+      component: StitchFrameView,
+      props: {
+        src: '/stitch_cspm/_3/code.html',
+        title: 'TalentArch 注册'
+      }
+    },
+    {
+      path: '/enterprise-center',
+      name: 'enterprise-center',
+      component: StitchFrameView,
+      props: {
+        src: '/stitch_cspm/_4/code.html',
+        title: '企业中心 - 资料维护'
+      }
+    },
+    {
+      path: '/personal-center',
+      name: 'personal-center',
+      component: StitchFrameView,
+      props: {
+        src: '/stitch_cspm/_5/code.html',
+        title: '个人中心 - 基础信息'
+      }
+    },
+    {
+      path: '/personal-center/work-experience',
+      name: 'personal-work-experience',
+      component: StitchFrameView,
+      props: {
+        src: '/stitch_cspm/_6/code.html',
+        title: '个人中心 - 工作经历'
+      }
     },
     {
       path: '/login-required',

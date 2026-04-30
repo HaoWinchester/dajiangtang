@@ -1,11 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/features/recruitments/AuthRequiredView.vue', () => ({ default: {} }));
-vi.mock('@/features/recruitments/HomeView.vue', () => ({ default: {} }));
-vi.mock('@/features/recruitments/LoginView.vue', () => ({ default: {} }));
 vi.mock('@/features/recruitments/RecruitmentCreateEntryView.vue', () => ({ default: {} }));
 vi.mock('@/features/recruitments/RecruitmentListView.vue', () => ({ default: {} }));
-vi.mock('@/features/recruitments/RegisterView.vue', () => ({ default: {} }));
+vi.mock('@/features/recruitments/StitchFrameView.vue', () => ({ default: {} }));
 
 describe('recruitment route guard', () => {
   beforeEach(() => {
@@ -119,5 +117,23 @@ describe('recruitment route guard', () => {
 
     expect(router.resolve('/login').name).toBe('login');
     expect(router.resolve('/login').meta.requiresAuth).toBeUndefined();
+  });
+
+  it('maps enterprise center to the stitch enterprise design', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/enterprise-center').name).toBe('enterprise-center');
+  });
+
+  it('maps personal center to the stitch personal basic info design', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/personal-center').name).toBe('personal-center');
+  });
+
+  it('maps work experience to the stitch work experience design', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/personal-center/work-experience').name).toBe('personal-work-experience');
   });
 });

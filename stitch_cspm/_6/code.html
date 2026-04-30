@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#fbf8ff",
+                        "surface-container-low": "#f4f2fc",
+                        "on-surface-variant": "#444653",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-primary-fixed": "#001453",
+                        "on-primary-container": "#a8b8ff",
+                        "on-tertiary": "#ffffff",
+                        "inverse-on-surface": "#f1f0fa",
+                        "primary": "#00288e",
+                        "on-error": "#ffffff",
+                        "outline": "#757684",
+                        "on-error-container": "#93000a",
+                        "on-secondary": "#ffffff",
+                        "surface-tint": "#3755c3",
+                        "tertiary-fixed": "#dae2fd",
+                        "secondary-container": "#d5e3fc",
+                        "primary-fixed": "#dde1ff",
+                        "secondary": "#515f74",
+                        "tertiary": "#2d3449",
+                        "inverse-surface": "#2f3037",
+                        "inverse-primary": "#b8c4ff",
+                        "on-tertiary-fixed": "#131b2e",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "surface-container-high": "#e8e7f1",
+                        "surface-dim": "#dad9e3",
+                        "on-tertiary-container": "#b4bbd5",
+                        "primary-container": "#1e40af",
+                        "tertiary-container": "#434b60",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#fbf8ff",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d5e3fc",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#e3e1eb",
+                        "on-surface": "#1a1b22",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "on-background": "#1a1b22",
+                        "surface": "#fbf8ff",
+                        "outline-variant": "#c4c5d5",
+                        "on-secondary-container": "#57657a",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "surface-container": "#eeedf7",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "surface-container-highest": "#e3e1eb",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-primary-fixed-variant": "#173bab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "3xl": "64px",
+                        "2xl": "48px",
+                        "base": "4px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "lg": "24px",
+                        "max_width": "1440px",
+                        "gutter": "24px",
+                        "xl": "32px",
+                        "margin": "32px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h2": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h1": ["Inter"],
+                        "code": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- TopNavBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 max-w-[1440px] mx-auto bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-blue-900 dark:text-blue-100">TalentArch</span>
+<nav class="hidden md:flex gap-6">
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">仪表盘</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">职位</a>
+<a class="font-sans text-sm font-medium tracking-tight text-blue-700 dark:text-blue-400 border-b-2 border-blue-700 dark:border-blue-400 pb-1" href="#">人才</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">数据分析</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-slate-50 rounded-full transition-colors">notifications</button>
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-slate-50 rounded-full transition-colors">settings</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-slate-200">
+<img alt="User profile" data-alt="A professional headshot of a corporate individual with a warm, confident expression. The lighting is soft and natural, emphasizing a high-end corporate aesthetic. The background is a blurred office interior with cool blue and grey tones, maintaining the project's professional navy and white color palette. The image quality is sharp and high-resolution, suitable for a professional user profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhKoCFAnHYcCfEAl7NZhKyinN-OQyQvQyWhbUezmjUKeCbIlQ6D5cP_Qyssj_hGeRCLirXzG7QX6aQEMgBHmAVMGg50Dw6sGVfj3SgSiU6WIskyVf0POTe7QLPdK0WE1cneJrQLLREmYPFN9wtEdIFBDCweA-ajRzQiS3RpHyQ1alULOH31zbdCZelfYhqr7nhvGI0oxeaabtTV0U1J0KAd6YcZUxdi5aCFxYRCNH8aX-lYcfZCWT8QapyyTOMh6u9-bKQKRxpzm9i"/>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity">发布职位</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col py-4 z-40 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">corporate_fare</span>
+</div>
+<div>
+<h2 class="text-lg font-black text-blue-900 dark:text-blue-50 leading-tight">Global Tech Corp</h2>
+<p class="text-[10px] text-slate-500 font-semibold tracking-widest uppercase">企业合作伙伴</p>
+</div>
+</div>
+<nav class="flex-1 px-2 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">person</span>
+<span>基本信息</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-r-4 border-blue-800 dark:border-blue-400 translate-x-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">work</span>
+<span>工作经历</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">account_tree</span>
+<span>项目历史</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">school</span>
+<span>教育背景</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">psychology</span>
+<span>专业技能</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">verified</span>
+<span>证书奖励</span>
+</a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<button class="w-full bg-slate-100 text-slate-700 py-2.5 rounded font-label-md text-label-md mb-4 hover:bg-slate-200 transition-colors">编辑资料</button>
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 hover:bg-slate-50 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">help</span>
+<span>帮助中心</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-error hover:bg-error-container/20 transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-xl">logout</span>
+<span>退出登录</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pl-64 pt-16 min-h-screen bg-background">
+<div class="max-w-[1140px] mx-auto p-10">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h1 class="font-h1 text-h1 text-on-background mb-2">个人中心 - 工作经历</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+                        通过记录您的职业旅程和成就，构建您的专业叙事。详细的经历有助于我们的匹配引擎为您找到合适的角色。
+                    </p>
+</div>
+<button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded shadow-sm hover:opacity-90 transition-all font-label-md text-label-md">
+<span class="material-symbols-outlined">add</span>
+<span>添加经历</span>
+</button>
+</div>
+<!-- Bento Grid of Experiences -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Entry 1: Featured/Recent (Larger) -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-6 items-start">
+<div class="w-16 h-16 rounded bg-slate-50 flex items-center justify-center border border-slate-100">
+<img alt="CSPM Logo" class="w-12 h-12 object-contain" src="https://lh3.googleusercontent.com/aida/ADBb0uh4eRnAfUhEeQEkfFkljnRCUwwW0Ky6CIalDWYQhlXbfpTeA21QvnsU1z6i4I7lwqn79ZqQ21G62fP9JCn8-_9-mgx6X39WQxms85XmzaZEcKeNyOlP_JJDiMSXLSpAt4yZ--3p1C-u-gjWpa-dy9lsRwpkitQG5g4b5iFPhbBDWKvVmZkVMHMtyB2hbg_6NUVRjWS0M9XHZrIc4tP7SyFq2qBdjA8TRB_8MqZsy0dammhUZ_dsP2lYzCHlJi8QK6GKlOrOojX5PXw"/>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-on-background mb-1">高级产品架构师</h3>
+<div class="flex items-center gap-3 text-on-surface-variant font-label-md text-label-md">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">corporate_fare</span>Global Tech Corp</span>
+<span class="w-1 h-1 bg-slate-300 rounded-full"></span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">calendar_today</span>2021年3月 - 至今</span>
+</div>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-slate-50 rounded">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-error transition-colors hover:bg-slate-50 rounded">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="font-label-md text-label-md text-primary uppercase tracking-wider">职责与成就</h4>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            领导企业级 TalentArch 招聘平台的架构设计。成功扩展基础设施以支持超过 200 万月度活跃用户，同时通过战略性云原生优化将延迟降低了 40%。
+                        </p>
+<div class="flex flex-wrap gap-2 pt-2">
+<span class="px-3 py-1 bg-slate-50 text-slate-600 rounded text-xs font-medium border border-slate-100">系统架构</span>
+<span class="px-3 py-1 bg-slate-50 text-slate-600 rounded text-xs font-medium border border-slate-100">团队领导</span>
+<span class="px-3 py-1 bg-slate-50 text-slate-600 rounded text-xs font-medium border border-slate-100">云战略</span>
+</div>
+</div>
+</div>
+<!-- Entry 2: Stats/Insight (Small) -->
+<div class="col-span-12 lg:col-span-4 bg-primary text-on-primary rounded-xl p-8 flex flex-col justify-center">
+<span class="material-symbols-outlined text-4xl mb-4" data-weight="fill">insights</span>
+<h3 class="font-h3 text-h3 mb-2">影响力统计</h3>
+<p class="font-body-sm text-body-sm opacity-80 mb-6">在您的职业生涯中，您参与的项目跨越了 3 个不同的行业。</p>
+<div class="grid grid-cols-2 gap-4">
+<div class="border-l-2 border-on-primary/30 pl-4">
+<p class="text-h2 font-h2">8+</p>
+<p class="text-xs uppercase tracking-widest opacity-70">工作年限</p>
+</div>
+<div class="border-l-2 border-on-primary/30 pl-4">
+<p class="text-h2 font-h2">12</p>
+<p class="text-xs uppercase tracking-widest opacity-70">重大项目</p>
+</div>
+</div>
+</div>
+<!-- Entry 3: Previous Experience (Standard) -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4 items-start">
+<div class="w-12 h-12 rounded bg-slate-50 flex items-center justify-center border border-slate-100 text-slate-400">
+<span class="material-symbols-outlined text-2xl">domain</span>
+</div>
+<div>
+<h3 class="font-body-lg font-bold text-on-background mb-1">主导软件工程师</h3>
+<p class="text-sm text-on-surface-variant font-medium">Innovate Softwares</p>
+<p class="text-xs text-slate-400">2018年1月 - 2021年2月 (3年2个月)</p>
+</div>
+</div>
+<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">
+                        使用 React 和 Node.js 开发和维护全栈应用程序。指导初级开发人员，并实施 CI/CD 流水线，使部署频率提高了 60%。
+                    </p>
+</div>
+<!-- Entry 4: Previous Experience (Standard) -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group">
+<div class="flex justify-between items-start mb-6">
+<div class="flex gap-4 items-start">
+<div class="w-12 h-12 rounded bg-slate-50 flex items-center justify-center border border-slate-100 text-slate-400">
+<span class="material-symbols-outlined text-2xl">apartment</span>
+</div>
+<div>
+<h3 class="font-body-lg font-bold text-on-background mb-1">后端开发工程师</h3>
+<p class="text-sm text-on-surface-variant font-medium">DataStream Systems</p>
+<p class="text-xs text-slate-400">2015年6月 - 2017年12月 (2年7个月)</p>
+</div>
+</div>
+<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">
+                        专注于数据库优化和高并发 API 设计。通过高效的资源管理和查询调优，将服务器成本降低了 25%。
+                    </p>
+</div>
+<!-- Placeholder / Add More -->
+<div class="col-span-12 border-2 border-dashed border-slate-200 rounded-xl p-10 flex flex-col items-center justify-center text-slate-400 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-4xl mb-3">add_circle</span>
+<span class="font-label-md text-label-md">点击此处添加职业生涯中的其他经历</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Success Feedback Overlay (Visual only) -->
+<div class="fixed bottom-8 right-8 z-50 flex items-center gap-3 bg-white border border-slate-200 px-5 py-4 rounded shadow-lg border-l-4 border-l-primary">
+<span class="material-symbols-outlined text-primary" data-weight="fill">check_circle</span>
+<div>
+<p class="font-label-md text-label-md text-on-background">已自动保存</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">最近更新于 2 分钟前</p>
+</div>
+</div>
+</body></html>

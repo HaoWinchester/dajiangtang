@@ -24,6 +24,15 @@ body {
     #eef3f8;
 }
 
+.stitch-frame {
+  display: block;
+  width: 100vw;
+  min-width: 320px;
+  height: 100vh;
+  border: 0;
+  background: #fbf8ff;
+}
+
 button,
 input,
 select {

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#fbf8ff",
+                    "surface-container-low": "#f4f2fc",
+                    "on-surface-variant": "#444653",
+                    "primary-fixed-dim": "#b8c4ff",
+                    "on-primary-fixed": "#001453",
+                    "on-primary-container": "#a8b8ff",
+                    "on-tertiary": "#ffffff",
+                    "inverse-on-surface": "#f1f0fa",
+                    "primary": "#00288e",
+                    "on-error": "#ffffff",
+                    "outline": "#757684",
+                    "on-error-container": "#93000a",
+                    "on-secondary": "#ffffff",
+                    "surface-tint": "#3755c3",
+                    "tertiary-fixed": "#dae2fd",
+                    "secondary-container": "#d5e3fc",
+                    "primary-fixed": "#dde1ff",
+                    "secondary": "#515f74",
+                    "tertiary": "#2d3449",
+                    "inverse-surface": "#2f3037",
+                    "inverse-primary": "#b8c4ff",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-secondary-fixed": "#0d1c2e",
+                    "surface-container-high": "#e8e7f1",
+                    "surface-dim": "#dad9e3",
+                    "on-tertiary-container": "#b4bbd5",
+                    "primary-container": "#1e40af",
+                    "tertiary-container": "#434b60",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#fbf8ff",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed": "#d5e3fc",
+                    "error-container": "#ffdad6",
+                    "surface-variant": "#e3e1eb",
+                    "on-surface": "#1a1b22",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "on-background": "#1a1b22",
+                    "surface": "#fbf8ff",
+                    "outline-variant": "#c4c5d5",
+                    "on-secondary-container": "#57657a",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed-variant": "#3a485b",
+                    "surface-container": "#eeedf7",
+                    "secondary-fixed-dim": "#b9c7df",
+                    "surface-container-highest": "#e3e1eb",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "on-primary-fixed-variant": "#173bab"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "3xl": "64px",
+                    "2xl": "48px",
+                    "base": "4px",
+                    "md": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "max_width": "1440px",
+                    "gutter": "24px",
+                    "xl": "32px",
+                    "margin": "32px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Inter"], "h3": ["Inter"], "body-sm": ["Inter"], "body-lg": ["Inter"], "h2": ["Inter"], "label-md": ["Inter"], "h1": ["Inter"], "code": ["Inter"], "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; color: #1a1b22; }
+    </style>
+</head>
+<body class="min-h-screen">
+<!-- TopNavBar Implementation -->
+<nav class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 max-w-[1440px] mx-auto bg-white border-b border-slate-200">
+<div class="flex items-center gap-8">
+<img alt="TalentArch Logo" class="h-8 w-auto object-contain" src="/assets/logo.png"/>
+<div class="hidden md:flex gap-6 font-sans text-sm font-medium tracking-tight">
+<a class="text-slate-600 hover:text-blue-700 transition-colors" href="#">仪表盘</a>
+<a class="text-slate-600 hover:text-blue-700 transition-colors" href="#">职位</a>
+<a class="text-slate-600 hover:text-blue-700 transition-colors" href="#">人才</a>
+<a class="text-slate-600 hover:text-blue-700 transition-colors" href="#">数据分析</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
+<input class="pl-10 pr-4 py-1.5 rounded-lg border border-slate-200 text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none w-64 bg-slate-50" placeholder="搜索..." type="text"/>
+</div>
+<button class="material-symbols-outlined text-slate-600 p-2 hover:bg-slate-50 transition-colors rounded-full">notifications</button>
+<button class="material-symbols-outlined text-slate-600 p-2 hover:bg-slate-50 transition-colors rounded-full">settings</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlBxzXOgtA9skRM_du_6EQ8Qk-9__PibkXMJK6lFA8UEr16m-0nVKABLsp5MpwUBFzrcnokWSF1arqJiNvqLMiUTEcgiz37kkEdGm2ZRu9KVqtl8nz2CC4zce6njWet61Ikn-3QaGdE6uQZeEat2ruSF0xB-gerIcXqNYSAOchSVTz9JAvbrEn6GiT7_rFFRb9q3CSv0UIFBafZ8f1oaQCeBwALbM8w2H0R3kkovI50tGNyoxR1LwJcW4cJEuCuFuXZwEYXRgbGF1K"/>
+</div>
+<button class="bg-primary text-white px-4 py-2 rounded font-medium text-sm hover:opacity-90 transition-opacity">发布职位</button>
+</div>
+</nav>
+<div class="flex pt-16 h-screen overflow-hidden">
+<!-- SideNavBar Implementation -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col py-4 z-40 bg-white border-r border-slate-100 overflow-y-auto">
+<div class="px-6 mb-8 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-white">apartment</span>
+</div>
+<div>
+<h3 class="text-lg font-black text-blue-900 leading-none">Global Tech Corp</h3>
+<p class="text-[10px] uppercase font-bold text-slate-400 tracking-widest mt-1">企业合作伙伴</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-800 border-r-4 border-blue-800 font-sans text-sm font-semibold tracking-wide transition-all duration-200 translate-x-1" href="#">
+<span class="material-symbols-outlined">person</span>
+                基础信息
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 font-sans text-sm font-semibold tracking-wide transition-all duration-200 hover:pl-5" href="#">
+<span class="material-symbols-outlined">work</span>
+                工作经历
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 font-sans text-sm font-semibold tracking-wide transition-all duration-200 hover:pl-5" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+                项目经历
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 font-sans text-sm font-semibold tracking-wide transition-all duration-200 hover:pl-5" href="#">
+<span class="material-symbols-outlined">school</span>
+                教育经历
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 font-sans text-sm font-semibold tracking-wide transition-all duration-200 hover:pl-5" href="#">
+<span class="material-symbols-outlined">psychology</span>
+                专业技能
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 font-sans text-sm font-semibold tracking-wide transition-all duration-200 hover:pl-5" href="#">
+<span class="material-symbols-outlined">verified</span>
+                资格证书
+            </a>
+</nav>
+<div class="mt-auto px-4 space-y-1 pt-4 border-t border-slate-50">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 font-sans text-sm font-semibold tracking-wide transition-all duration-200 hover:pl-5" href="#">
+<span class="material-symbols-outlined">help</span>
+                帮助中心
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 font-sans text-sm font-semibold tracking-wide transition-all duration-200 hover:pl-5" href="#">
+<span class="material-symbols-outlined">logout</span>
+                退出登录
+            </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 overflow-y-auto bg-background px-8 py-10">
+<div class="max-w-4xl mx-auto">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<h1 class="font-h1 text-h1 text-on-background">个人中心 - 基础信息</h1>
+<p class="text-on-surface-variant font-body-md text-body-md mt-2">管理您的核心学习者档案和职业偏好。</p>
+</div>
+<button class="bg-primary text-white px-6 py-2.5 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+                    编辑资料
+                </button>
+</div>
+<!-- Profile Overview Card -->
+<div class="bg-surface-container-lowest border border-slate-100 rounded-xl p-8 mb-8 flex items-center gap-8">
+<div class="relative">
+<div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-slate-50 ring-offset-2">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASkWBthCH2Cz37xqwf3WHsx7M_cYVY3jSpEJMeuAgJXreG-u_5yF-hjdFu7-nt33LmhfZIGFuc8saimTd4dkNffRRpxuruqfzAakx2tDqDwTkTb2phowxJiL7G-pGWfgFCh9XkJR58xJoFHvILa93EQtOo2-s0cUkAqleXSQvWI7gDV7EDEnNVFZjtR6O4POBnBHJL79Gezj55FOVh4YR4Sh53SvIfckPMhofbijJKygu9HF-kYUUQLM2yTmvRCSupElYJwcUhZuP_"/>
+</div>
+<button class="absolute bottom-1 right-1 bg-white p-1.5 rounded-full shadow-lg border border-slate-100 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">photo_camera</span>
+</button>
+</div>
+<div>
+<h2 class="text-h2 font-h2 text-primary mb-1">Chen Wei (陈伟)</h2>
+<p class="text-on-surface-variant font-body-md text-body-md mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+                        中国, 上海 • 高级产品设计师
+                    </p>
+<div class="flex gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[12px] font-semibold tracking-wider uppercase">审核中</span>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full text-[12px] font-semibold tracking-wider uppercase">认证人才</span>
+</div>
+</div>
+</div>
+<!-- Form Section -->
+<div class="bg-surface-container-lowest border border-slate-100 rounded-xl p-8 space-y-8">
+<!-- Personal Identity -->
+<section>
+<h3 class="text-h3 font-h3 text-on-background mb-6 flex items-center gap-2">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        个人身份
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">姓名</label>
+<input class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="text" value="Chen Wei"/>
+</div>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">性别</label>
+<select class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md">
+<option>男</option>
+<option>女</option>
+<option>其他</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">出生年月</label>
+<div class="relative">
+<input class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="date" value="1992-05-15"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">政治面貌</label>
+<input class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="text" value="中共党员"/>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-100"></div>
+<!-- Career & Salary -->
+<section>
+<h3 class="text-h3 font-h3 text-on-background mb-6 flex items-center gap-2">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        职业期望
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">求职意向</label>
+<input class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="text" value="高级 UX/UI 架构师"/>
+</div>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">期望薪资 (年薪)</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">¥</span>
+<input class="w-full pl-8 pr-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md font-semibold" type="text" value="450,000 - 600,000"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">所在城市</label>
+<input class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="text" value="上海 / 杭州"/>
+</div>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">所在行业</label>
+<input class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="text" value="金融科技 / 云计算"/>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-100"></div>
+<!-- Contact & Communication -->
+<section>
+<h3 class="text-h3 font-h3 text-on-background mb-6 flex items-center gap-2">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        联系方式
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">联系电话</label>
+<div class="flex">
+<span class="px-3 py-3 bg-slate-50 border border-r-0 border-slate-200 rounded-l text-sm text-slate-500">+86</span>
+<input class="flex-1 px-4 py-3 rounded-r border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="text" value="138-xxxx-8888"/>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">电子邮箱</label>
+<input class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md" type="email" value="chen.wei@example.com"/>
+</div>
+</div>
+</section>
+<div class="h-px bg-slate-100"></div>
+<!-- Personal Advantages -->
+<section>
+<h3 class="text-h3 font-h3 text-on-background mb-6 flex items-center gap-2">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        个人优势
+                    </h3>
+<div class="space-y-2">
+<label class="text-label-md font-label-md text-on-surface-variant block">核心竞争力与职业亮点</label>
+<textarea class="w-full px-4 py-3 rounded border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md resize-none" placeholder="描述您的独特优势..." rows="5">拥有超过8年领导世界500强科技公司跨学科设计团队的经验。精通设计系统、用户研究和数据驱动的设计优化。曾为企业级SaaS产品实现转化率提升25%的优异战绩。具备出色的干系人管理和双语沟通能力。</textarea>
+</div>
+<div class="flex flex-wrap gap-2 mt-4">
+<span class="bg-primary/5 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-sm font-medium">设计系统</span>
+<span class="bg-primary/5 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-sm font-medium">用户研究</span>
+<span class="bg-primary/5 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-sm font-medium">团队领导力</span>
+<span class="bg-primary/5 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-sm font-medium">战略思维</span>
+<button class="text-primary text-sm font-bold ml-2">+ 添加技能</button>
+</div>
+</section>
+<div class="pt-6 flex justify-end gap-4">
+<button class="px-8 py-3 rounded-lg border border-slate-200 text-on-surface-variant font-label-md text-label-md hover:bg-slate-50 transition-colors">取消更改</button>
+<button class="px-8 py-3 rounded-lg bg-primary text-white font-label-md text-label-md hover:opacity-90 shadow-sm transition-opacity">保存资料</button>
+</div>
+</div>
+<!-- Bottom Spacing -->
+<div class="h-16"></div>
+</div>
+</main>
+</div>
+</body></html>
