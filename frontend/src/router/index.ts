@@ -80,6 +80,7 @@ const router = createRouter({
       path: '/enterprise-center',
       name: 'enterprise-center',
       component: StitchFrameView,
+      meta: { requiresAuth: true },
       props: {
         src: '/stitch_cspm/_4/code.html',
         title: '企业中心 - 资料维护'
@@ -89,6 +90,7 @@ const router = createRouter({
       path: '/personal-center',
       name: 'personal-center',
       component: StitchFrameView,
+      meta: { requiresAuth: true },
       props: {
         src: '/stitch_cspm/_5/code.html',
         title: '个人中心 - 基础信息'
@@ -98,6 +100,7 @@ const router = createRouter({
       path: '/personal-center/work-experience',
       name: 'personal-work-experience',
       component: StitchFrameView,
+      meta: { requiresAuth: true },
       props: {
         src: '/stitch_cspm/_6/code.html',
         title: '个人中心 - 工作经历'

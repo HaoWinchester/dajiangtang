@@ -14,10 +14,18 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] }
     }
   ],
-  webServer: {
-    command: 'npm run dev -- --port 5173',
-    url: 'http://127.0.0.1:5173',
-    reuseExistingServer: true,
-    timeout: 120_000
-  }
+  webServer: [
+    {
+      command: 'cd ../backend && JAVA_HOME=/opt/homebrew/opt/openjdk@17 PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH" mvn spring-boot:run',
+      url: 'http://127.0.0.1:8080/api/recruitments',
+      reuseExistingServer: true,
+      timeout: 120_000
+    },
+    {
+      command: 'npm run dev -- --port 5173',
+      url: 'http://127.0.0.1:5173',
+      reuseExistingServer: true,
+      timeout: 120_000
+    }
+  ]
 });

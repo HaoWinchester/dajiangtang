@@ -123,17 +123,28 @@ describe('recruitment route guard', () => {
     const { default: router } = await import('./index');
 
     expect(router.resolve('/enterprise-center').name).toBe('enterprise-center');
+    expect(router.resolve('/enterprise-center').meta.requiresAuth).toBe(true);
   });
 
   it('maps personal center to the stitch personal basic info design', async () => {
     const { default: router } = await import('./index');
 
     expect(router.resolve('/personal-center').name).toBe('personal-center');
+    expect(router.resolve('/personal-center').meta.requiresAuth).toBe(true);
   });
 
   it('maps work experience to the stitch work experience design', async () => {
     const { default: router } = await import('./index');
 
     expect(router.resolve('/personal-center/work-experience').name).toBe('personal-work-experience');
+    expect(router.resolve('/personal-center/work-experience').meta.requiresAuth).toBe(true);
+  });
+
+  it('redirects unauthenticated visitors away from protected center pages', async () => {
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true } })).toEqual({
+      name: 'login-required'
+    });
   });
 });

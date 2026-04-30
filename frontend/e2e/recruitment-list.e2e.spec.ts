@@ -102,12 +102,20 @@ async function mockRecruitments(page: Page) {
 test('未登录访问招聘列表会进入登录提示页', async ({ page }) => {
   await page.goto('/recruitments');
 
-  await expect(page.getByRole('heading', { name: '请先登录' })).toBeVisible();
-  await expect(page.getByText('招聘信息列表仅面向已登录的管理员、普通用户和企业用户开放。')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '请先登录后查看招聘信息' })).toBeVisible();
+  await expect(page.getByText('招聘信息、人才信息与企业资料属于平台内部业务数据')).toBeVisible();
+  await expect(page.getByRole('banner').getByText('全国项目管理标准化技术委员会 - 人才库')).toBeVisible();
+});
+
+test('未登录访问人才信息会进入登录提示页', async ({ page }) => {
+  await page.goto('/personal-center');
+
+  await expect(page).toHaveURL(/\/login-required$/);
+  await expect(page.getByRole('heading', { name: '请先登录后查看招聘信息' })).toBeVisible();
 });
 
 test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
   const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 首页"]');
 
   await expect(design.getByRole('heading', { name: '发现战略性人才' })).toBeVisible();
@@ -120,7 +128,7 @@ test('登录页会百分百承载 Stitch 登录设计', async ({ page }) => {
   const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 登录"]');
 
   await expect(design.getByRole('heading', { name: '欢迎回来' })).toBeVisible();
-  await expect(design.getByRole('button', { name: '登录' })).toBeVisible();
+  await expect(design.locator('main').getByRole('button', { name: '登录' })).toBeVisible();
 });
 
 test('注册页会百分百承载 Stitch 注册设计', async ({ page }) => {
@@ -133,6 +141,7 @@ test('注册页会百分百承载 Stitch 注册设计', async ({ page }) => {
 });
 
 test('企业中心会承载 Stitch 企业资料维护设计', async ({ page }) => {
+  await loginAs(page, 'COMPANY');
   await page.goto('/enterprise-center');
   const design = page.frameLocator('iframe[title="企业中心 - 资料维护"]');
 
@@ -141,6 +150,7 @@ test('企业中心会承载 Stitch 企业资料维护设计', async ({ page }) =
 });
 
 test('个人中心会承载 Stitch 基础信息设计', async ({ page }) => {
+  await loginAs(page, 'USER');
   await page.goto('/personal-center');
   const design = page.frameLocator('iframe[title="个人中心 - 基础信息"]');
 
@@ -149,6 +159,7 @@ test('个人中心会承载 Stitch 基础信息设计', async ({ page }) => {
 });
 
 test('工作经历页会承载 Stitch 工作经历设计', async ({ page }) => {
+  await loginAs(page, 'USER');
   await page.goto('/personal-center/work-experience');
   const design = page.frameLocator('iframe[title="个人中心 - 工作经历"]');
 

@@ -13,6 +13,200 @@
     element.dataset.stitchAction = action;
   }
 
+  function readInputValue(selector) {
+    const input = document.querySelector(selector);
+    return input instanceof HTMLInputElement ? input.value.trim() : '';
+  }
+
+  function currentRegisterRole() {
+    const enterpriseTab = document.getElementById('enterprise-tab');
+    return enterpriseTab?.getAttribute('aria-selected') === 'true' ? 'COMPANY' : 'USER';
+  }
+
+  function accountLabel(role) {
+    return role === 'COMPANY' ? '企业账号' : '个人账号';
+  }
+
+  function storeRole(role) {
+    localStorage.setItem(roleKey, role);
+    document.cookie = roleKey + '=' + role + '; path=/';
+  }
+
+  async function postJson(url, body) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.message || '请求失败，请稍后重试。');
+    }
+    return payload;
+  }
+
+  function renderSharedHeader() {
+    const originalHeader = document.querySelector('body > header, body > nav');
+    if (!originalHeader) {
+      return;
+    }
+
+    if (!document.getElementById('stitch-global-header-style')) {
+      const style = document.createElement('style');
+      style.id = 'stitch-global-header-style';
+      style.textContent = `
+        .stitch-global-header {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 9990;
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 20px;
+          padding: 0 24px;
+          background: rgba(255, 255, 255, 0.96);
+          border-bottom: 1px solid #d9e3ec;
+          box-shadow: 0 10px 30px rgba(31, 49, 68, 0.08);
+          backdrop-filter: blur(16px);
+          font-family: 'Inter', 'Noto Sans SC', sans-serif;
+        }
+        .stitch-global-brand,
+        .stitch-global-nav,
+        .stitch-global-actions {
+          display: flex;
+          align-items: center;
+        }
+        .stitch-global-brand {
+          min-width: 0;
+          gap: 10px;
+          color: #12355b;
+          font-size: 16px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+        .stitch-global-brand img {
+          width: 34px;
+          height: 34px;
+          object-fit: contain;
+        }
+        .stitch-global-nav {
+          flex: 1;
+          justify-content: center;
+          gap: 8px;
+        }
+        .stitch-global-nav button,
+        .stitch-global-actions button {
+          min-height: 38px;
+          border: 0;
+          border-radius: 6px;
+          padding: 0 13px;
+          background: transparent;
+          color: #4b5e72;
+          font: inherit;
+          font-size: 14px;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .stitch-global-nav button:hover,
+        .stitch-global-actions button:hover {
+          background: #eef5f8;
+          color: #135f83;
+        }
+        .stitch-global-nav button.is-active {
+          color: #135f83;
+          background: #e8f3f7;
+        }
+        .stitch-global-actions {
+          gap: 8px;
+        }
+        .stitch-global-actions .is-primary {
+          color: #fff;
+          background: #135f83;
+          box-shadow: 0 8px 18px rgba(19, 95, 131, 0.2);
+        }
+        .stitch-global-actions .is-primary:hover {
+          color: #fff;
+          background: #0f516f;
+        }
+        @media (max-width: 900px) {
+          .stitch-global-header {
+            height: auto;
+            min-height: 64px;
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 12px 16px;
+          }
+          .stitch-global-brand {
+            white-space: normal;
+          }
+          .stitch-global-nav {
+            width: 100%;
+            justify-content: flex-start;
+            overflow-x: auto;
+          }
+          .stitch-global-actions {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const path = window.parent.location.pathname;
+    const isLoggedIn = Boolean(localStorage.getItem(roleKey));
+    const navItems = [
+      { label: '首页', action: 'home', active: path === '/' },
+      { label: '招聘信息', action: 'recruitments', active: path.startsWith('/recruitments') },
+      { label: '人才信息', action: 'personal-center', active: path.startsWith('/personal-center') },
+      { label: '企业中心', action: 'enterprise-center', active: path.startsWith('/enterprise-center') }
+    ];
+    let actionItems = [{ label: '退出登录', action: 'logout', primary: false }];
+    if (!isLoggedIn && path === '/login') {
+      actionItems = [{ label: '注册', action: 'register', primary: true }];
+    } else if (!isLoggedIn && path === '/register') {
+      actionItems = [{ label: '立即登录', action: 'login', primary: true }];
+    } else if (!isLoggedIn) {
+      actionItems = [
+        { label: '注册', action: 'register', primary: false },
+        { label: '登录', action: 'login', primary: true }
+      ];
+    }
+
+    const header = document.createElement('header');
+    header.className = 'stitch-global-header';
+    header.innerHTML = `
+      <div class="stitch-global-brand">
+        <img alt="全国项目管理标准化技术委员会 - 人才库 Logo" src="/assets/logo.png" />
+        <span>全国项目管理标准化技术委员会 - 人才库</span>
+      </div>
+      <nav class="stitch-global-nav" aria-label="主要导航">
+        ${navItems.map((item) => `
+          <button type="button" class="${item.active ? 'is-active' : ''}" data-stitch-action="${item.action}">
+            ${item.label}
+          </button>
+        `).join('')}
+      </nav>
+      <div class="stitch-global-actions">
+        ${actionItems.map((item) => `
+          <button type="button" class="${item.primary ? 'is-primary' : ''}" data-stitch-action="${item.action}">
+            ${item.label}
+          </button>
+        `).join('')}
+      </div>
+    `;
+
+    originalHeader.replaceWith(header);
+  }
+
   function toast(message) {
     let panel = document.getElementById('stitch-toast');
     if (!panel) {
@@ -27,25 +221,64 @@
     window.__stitchToastTimer = window.setTimeout(() => panel.classList.add('hidden'), 1800);
   }
 
-  function completeLogin() {
-    localStorage.setItem(roleKey, 'ADMIN');
-    document.cookie = roleKey + '=ADMIN; path=/';
-    toast('验证通过，正在进入招聘列表');
-    window.setTimeout(() => go('/recruitments'), 260);
+  async function completeLogin() {
+    const username = readInputValue('#username');
+    const password = readInputValue('#password');
+
+    if (!username) {
+      toast('请输入用户名');
+      return;
+    }
+    if (!password) {
+      toast('请输入密码');
+      return;
+    }
+
+    try {
+      const result = await postJson('/api/auth/login', { username, password });
+      storeRole(result.role);
+      toast('验证通过，正在进入' + accountLabel(result.role));
+      window.setTimeout(() => go(result.role === 'ADMIN' ? '/recruitments' : result.role === 'COMPANY' ? '/enterprise-center' : '/personal-center'), 260);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : '登录失败，请稍后重试。');
+    }
   }
 
   function sendCode(button) {
     button.textContent = '验证码已发送';
     button.disabled = true;
     button.classList.add('opacity-70');
+    const smsInput = document.querySelector('#sms');
+    if (smsInput instanceof HTMLInputElement) {
+      smsInput.value = '123456';
+    }
     toast('短信验证码已发送');
   }
 
-  function submitRegistration() {
-    localStorage.setItem(roleKey, 'USER');
-    document.cookie = roleKey + '=USER; path=/';
-    toast('注册成功，正在进入个人中心');
-    window.setTimeout(() => go('/personal-center'), 260);
+  async function submitRegistration() {
+    const role = currentRegisterRole();
+    const username = readInputValue('#username') || (role === 'COMPANY' ? 'company_' : 'user_') + Date.now();
+    const password = readInputValue('#password') || 'Cspm@2026';
+    const confirmPassword = readInputValue('#confirm-password') || password;
+    const phone = readInputValue('input[type="tel"], input[placeholder*="手机"]')
+      || (role === 'COMPANY' ? '13800000002' : '13800000001');
+    const smsCode = readInputValue('#sms') || '123456';
+
+    try {
+      const result = await postJson('/api/auth/register', {
+        username,
+        password,
+        confirmPassword,
+        phone,
+        smsCode,
+        role
+      });
+      storeRole(result.role);
+      toast(accountLabel(result.role) + '注册成功，正在进入对应中心');
+      window.setTimeout(() => go(result.role === 'COMPANY' ? '/enterprise-center' : '/personal-center'), 260);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : '注册失败，请稍后重试。');
+    }
   }
 
   function activateRegisterTab(button) {
@@ -103,10 +336,12 @@
     if (/退出登录/.test(label)) return 'logout';
     if (/登录|立即登录/.test(label)) return 'login';
     if (/注册|申请加入/.test(label)) return 'register';
+    if (/首页/.test(label)) return 'home';
     if (/招聘信息|职位/.test(label)) return 'recruitments';
     if (/发布职位/.test(label)) return 'new-recruitment';
     if (/基础信息|基本信息/.test(label)) return 'personal-center';
     if (/工作经历/.test(label)) return 'work-experience';
+    if (/企业中心/.test(label)) return 'enterprise-center';
     if (/人才信息|人才画像/.test(label)) return 'personal-center';
     if (/人才\b/.test(label)) return 'personal-center';
     if (/控制台|仪表盘/.test(label)) return 'home';
@@ -207,6 +442,8 @@
   }
 
   function bindControls() {
+    renderSharedHeader();
+
     document.querySelectorAll('a').forEach((link) => {
       const label = textOf(link);
       const href = link.getAttribute('href') || '';
