@@ -1,0 +1,10 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: dajiangtang-backend
+
+management:
+  endpoints:
+    enabled-by-default: false

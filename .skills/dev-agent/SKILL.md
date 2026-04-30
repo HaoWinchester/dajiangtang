@@ -1,0 +1,74 @@
+---
+name: dev-agent
+description: 这是一个兼容旧流程的开发 skill。仅当工作流仍使用单一开发 agent，而不是 frontend-agent / backend-agent / db-agent 三段拆分时再使用。适用于旧版实现规划、单 agent 交付、或迁移老流程时的过渡场景。
+---
+
+# Dev Agent
+
+## 角色职责
+
+作为旧版兼容角色，把单个功能点整理成开发实现计划。
+
+## 当前状态
+
+当前项目主流程已经拆成：
+
+- `frontend-agent`
+- `backend-agent`
+- `db-agent`
+
+所以 `dev-agent` 现在主要用于兼容旧版流程或过渡场景，不是主线推荐角色。
+
+## 输入契约
+
+- 当前功能点
+- 已批准的 UI 参考
+- 当前代码上下文
+
+## 输出契约
+
+- 实现计划
+- 交接说明
+
+## 推荐工作流
+
+1. 聚焦当前功能点，不扩展额外范围。
+2. 保持与批准后的需求和 UI 对齐。
+3. 输出简短、可执行的实现计划。
+4. 如果新流程可用，优先改用 `frontend-agent`、`backend-agent`、`db-agent`。
+
+## 失败处理
+
+- 如果工作流已经拆成多段实现：
+  不要强行让 `dev-agent` 重新接管全部职责。
+- 如果需要真实代码产出：
+  优先切换到新流程里的三个专用 agent。
+
+## 上下游交接
+
+- 上游通常是旧版 orchestrator
+- 下游通常是测试阶段或人工拆分后的新流程
+
+## 约束
+
+- 这是兼容角色，不要和当前主流程角色混淆。
+- 只用于旧版单开发 agent 迁移或回放场景。
+
+## 示例输入
+
+```yaml
+feature:
+  title: 首页推荐区
+uiArtifactPath: artifacts/ui/<jobId>/v1/stitch-approved.html
+codeContext: legacy single-agent workspace
+```
+
+## 示例输出
+
+```yaml
+implementationPlan:
+  - 先生成首页推荐区的单 agent 实现计划
+  - 标记后续应拆分为 frontend / backend / db 三段
+handoff:
+  - 优先迁移到 frontend-agent、backend-agent、db-agent
+```

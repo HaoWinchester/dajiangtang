@@ -1,0 +1,139 @@
+openapi: 3.0.3
+info:
+  title: 招聘信息列表接口
+  version: 1.0.0
+  description: 支持招聘信息列表展示、岗位搜索、城市搜索、翻页和角色权限展示。
+paths:
+  /api/recruitments:
+    get:
+      summary: 查询招聘信息列表
+      description: 返回当前登录用户可查看的招聘信息列表，默认只包含正在招聘或有效岗位。
+      operationId: listRecruitments
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: positionKeyword
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 岗位关键词，使用模糊匹配。
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+          description: 标准城市名，按标准城市名匹配。
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: 页码，默认第 1 页。
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            enum: [10]
+            default: 10
+          description: 每页数量，当前功能固定为 10。
+      responses:
+        "200":
+          description: 查询成功。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecruitmentListResponse"
+        "401":
+          description: 未登录或登录态失效。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: 服务异常。
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: SESSION
+  schemas:
+    RecruitmentListResponse:
+      type: object
+      required:
+        - items
+        - page
+        - pageSize
+        - totalItems
+        - totalPages
+        - canCreate
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RecruitmentListItem"
+        page:
+          type: integer
+          example: 1
+        pageSize:
+          type: integer
+          example: 10
+        totalItems:
+          type: integer
+          example: 26
+        totalPages:
+          type: integer
+          example: 3
+        canCreate:
+          type: boolean
+          description: 当前用户是否可以看到新增按钮。
+          example: true
+    RecruitmentListItem:
+      type: object
+      required:
+        - id
+        - position
+        - salary
+        - companyName
+        - city
+        - owner
+        - headcount
+      properties:
+        id:
+          type: string
+          example: rec-001
+        position:
+          type: string
+          example: 项目经理
+        salary:
+          type: string
+          example: 15k-25k
+        companyName:
+          type: string
+          example: 北京示例科技有限公司
+        city:
+          type: string
+          example: 北京市
+        owner:
+          type: string
+          example: 赵义民
+        headcount:
+          type: integer
+          minimum: 0
+          example: 3
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: 招聘信息加载失败，请稍后重试。

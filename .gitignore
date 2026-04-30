@@ -1,0 +1,19 @@
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+*.log
+.env*
+
+# Node / Vue
+node_modules/
+dist/
+coverage/
+
+# Java / Maven
+target/
+*.class
+*.jar
+build/

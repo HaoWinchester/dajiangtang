@@ -1,0 +1,115 @@
+---
+name: fix-agent
+description: 当测试失败、出现 bug，或者 monitor-agent 发现前端、后端、数据库层发生偏航时，必须使用这个 skill。适用于针对当前功能点做最小修复、处理重复失败、消除 TODO 占位实现、以及把偏航 finding 转成定向代码修补的场景。
+---
+
+# Fix Agent
+
+## 角色职责
+
+把 bug、失败记忆和偏航 finding 收敛成最小修复集，并直接输出可落盘的修复代码。
+
+## 适用场景
+
+- 功能点测试失败。
+- monitor-agent 发现前端、后端或数据库偏航。
+- 同一个问题重复出现，需要针对失败记忆做定向修复。
+
+## 不适用场景
+
+- 只是解释测试结果，没有进入修复环。
+- 需求还没澄清完成。
+- 只是准备发布审批，没有代码问题需要修。
+
+## 输入契约
+
+- `feature`
+  当前功能点对象。
+- `bugReports`
+  当前轮测试或监控产出的 bug 列表。
+- `codeWorkspace`
+  当前代码工作区。
+- `alignmentFindings`
+  monitor-agent 输出的偏航 finding，可选。
+
+## 输出契约
+
+- `fileEdits`
+  修复后的代码文件改动。
+- `changedFiles`
+  本轮修复文件列表。
+- `repairPlan`
+  修复计划摘要。
+- `summary`
+  给 orchestrator 和日志系统使用的简短说明。
+
+## 推荐工作流
+
+1. 先对照失败记忆，识别是不是重复踩了同一个坑。
+2. 聚合同类 bug，判断最小可修复根因。
+3. 如果有偏航 finding，先按层定位：
+   - 前端
+   - 后端
+   - 数据库
+   - 工作流标记
+4. 直接输出结构化 file edits，不只给口头建议。
+5. 优先把功能点送回测试环，而不是趁机大改架构。
+
+## 推荐工具顺序
+
+1. 读取当前生成代码
+2. 读取 bug 列表和失败记忆
+3. 定位目标文件
+4. 生成最小修复改动
+5. 交给 orchestrator 落盘并进入复测
+
+## 失败处理
+
+- 如果多个 bug 指向同一根因：
+  一次修根因，不要逐个做表层补丁。
+- 如果命中重复失败：
+  在 summary 和风险里显式提醒这是重复问题。
+- 如果模型修复失败：
+  回退到模板修复逻辑，但仍要输出可落盘代码。
+
+## 上下游交接
+
+- 上游通常是：
+  - `test-agent`
+  - `monitor-agent`
+- 下游通常是：
+  - `test-agent`
+  - `monitor-agent`
+  - 失败记忆落盘逻辑
+
+## 约束
+
+- 不要顺手做和当前 bug 无关的重构。
+- 不要忽略重复失败信号。
+- 不要只给口头建议而不输出修复结果。
+- 文件写入范围必须限制在代码工作区。
+
+## 示例输入
+
+```yaml
+feature:
+  title: 首页推荐内容读取
+bugReports:
+  - title: 前端缺少实现完成标记
+alignmentFindings:
+  - layer: database
+    rule: repository_delegate_mismatch
+    file: database/src/features/anime-home/repository.ts
+```
+
+## 示例输出
+
+```yaml
+repairPlan:
+  - 为前端主组件补上完成标记
+  - 修正数据库 repository 使用的 Prisma delegate
+changedFiles:
+  - frontend/src/features/anime-home/FeatureView.tsx
+  - database/src/features/anime-home/repository.ts
+summary: 已按前端和数据库两层定向修复，下一步进入复测与重新对齐检查。
+```
