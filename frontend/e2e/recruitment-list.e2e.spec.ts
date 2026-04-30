@@ -108,7 +108,7 @@ test('未登录访问招聘列表会进入登录提示页', async ({ page }) => 
 
 test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => {
   await page.goto('/');
-  const design = page.frameLocator('iframe[title="TalentArch 首页"]');
+  const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 首页"]');
 
   await expect(design.getByRole('heading', { name: '发现战略性人才' })).toBeVisible();
   await expect(design.getByText('招聘信息')).toBeVisible();
@@ -117,7 +117,7 @@ test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => 
 
 test('登录页会百分百承载 Stitch 登录设计', async ({ page }) => {
   await page.goto('/login');
-  const design = page.frameLocator('iframe[title="TalentArch 登录"]');
+  const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 登录"]');
 
   await expect(design.getByRole('heading', { name: '欢迎回来' })).toBeVisible();
   await expect(design.getByRole('button', { name: '登录' })).toBeVisible();
@@ -125,7 +125,7 @@ test('登录页会百分百承载 Stitch 登录设计', async ({ page }) => {
 
 test('注册页会百分百承载 Stitch 注册设计', async ({ page }) => {
   await page.goto('/register');
-  const design = page.frameLocator('iframe[title="TalentArch 注册"]');
+  const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 注册"]');
 
   await expect(design.getByRole('heading', { name: '创建账号' })).toBeVisible();
   await expect(design.getByText('个人注册')).toBeVisible();
@@ -153,7 +153,7 @@ test('工作经历页会承载 Stitch 工作经历设计', async ({ page }) => {
   const design = page.frameLocator('iframe[title="个人中心 - 工作经历"]');
 
   await expect(design.getByRole('heading', { name: '个人中心 - 工作经历' })).toBeVisible();
-  await expect(design.getByText('领导企业级 TalentArch 招聘平台的架构设计')).toBeVisible();
+  await expect(design.getByText('领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计')).toBeVisible();
 });
 
 test('管理员能看到招聘列表必需字段和新增按钮', async ({ page }) => {

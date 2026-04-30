@@ -55,7 +55,7 @@ const router = createRouter({
       component: StitchFrameView,
       props: {
         src: '/stitch_cspm/_1/code.html',
-        title: 'TalentArch 首页'
+        title: '全国项目管理标准化技术委员会 - 人才库 首页'
       }
     },
     {
@@ -64,7 +64,7 @@ const router = createRouter({
       component: StitchFrameView,
       props: {
         src: '/stitch_cspm/_2/code.html',
-        title: 'TalentArch 登录'
+        title: '全国项目管理标准化技术委员会 - 人才库 登录'
       }
     },
     {
@@ -73,7 +73,7 @@ const router = createRouter({
       component: StitchFrameView,
       props: {
         src: '/stitch_cspm/_3/code.html',
-        title: 'TalentArch 注册'
+        title: '全国项目管理标准化技术委员会 - 人才库 注册'
       }
     },
     {
