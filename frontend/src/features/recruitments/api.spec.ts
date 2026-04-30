@@ -21,6 +21,8 @@ function jsonResponse(body: RecruitmentListResponse = okResponse): Response {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  document.cookie = 'USER_ROLE=; Max-Age=0; path=/';
+  localStorage.removeItem('USER_ROLE');
 });
 
 describe('fetchRecruitments API client', () => {
@@ -122,6 +124,75 @@ describe('fetchRecruitments API client', () => {
           Accept: 'application/json'
         },
         credentials: 'include'
+      })
+    );
+  });
+
+  it('sends local storage role marker as backend role header', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse());
+    localStorage.setItem('USER_ROLE', 'ADMIN');
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchRecruitments();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'X-User-Role': 'ADMIN'
+        })
+      })
+    );
+  });
+
+  it('sends cookie role marker as backend role header when local storage is empty', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse());
+    document.cookie = 'USER_ROLE=COMPANY; path=/';
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchRecruitments();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'X-User-Role': 'COMPANY'
+        })
+      })
+    );
+  });
+
+  it('uses cookie role marker before local storage role marker', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse());
+    document.cookie = 'USER_ROLE=USER; path=/';
+    localStorage.setItem('USER_ROLE', 'ADMIN');
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchRecruitments();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'X-User-Role': 'USER'
+        })
+      })
+    );
+  });
+
+  it('does not send invalid role marker as backend role header', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse());
+    localStorage.setItem('USER_ROLE', 'GUEST');
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchRecruitments();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        headers: {
+          Accept: 'application/json'
+        }
       })
     );
   });

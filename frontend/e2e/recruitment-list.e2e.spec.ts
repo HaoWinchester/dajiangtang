@@ -128,6 +128,20 @@ test('管理员能看到招聘列表必需字段和新增按钮', async ({ page 
   await expect(page.getByRole('link', { name: '新增' })).toBeVisible();
 });
 
+test('前端接口请求会把本地角色标记透传给后端', async ({ page }) => {
+  await loginAs(page, 'ADMIN');
+  await mockRecruitments(page);
+
+  const requestPromise = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === '/api/recruitments'
+      && request.headers()['x-user-role'] === 'ADMIN';
+  });
+  await page.goto('/recruitments');
+
+  await requestPromise;
+});
+
 test('普通用户能看列表但看不到新增按钮', async ({ page }) => {
   await loginAs(page, 'USER');
   await mockRecruitments(page);

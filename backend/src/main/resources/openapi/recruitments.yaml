@@ -10,8 +10,16 @@ paths:
       description: 返回当前登录用户可查看的招聘信息列表，默认只包含正在招聘或有效岗位。
       operationId: listRecruitments
       security:
-        - sessionAuth: []
+        - roleCookieAuth: []
+        - roleHeaderAuth: []
       parameters:
+        - name: X-User-Role
+          in: header
+          required: false
+          schema:
+            type: string
+            enum: [ADMIN, USER, COMPANY]
+          description: 当前演示环境的角色标记；正式登录接入后可由会话机制替代。
         - name: positionKeyword
           in: query
           required: false
@@ -61,10 +69,14 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
-    sessionAuth:
+    roleCookieAuth:
       type: apiKey
       in: cookie
-      name: SESSION
+      name: USER_ROLE
+    roleHeaderAuth:
+      type: apiKey
+      in: header
+      name: X-User-Role
   schemas:
     RecruitmentListResponse:
       type: object

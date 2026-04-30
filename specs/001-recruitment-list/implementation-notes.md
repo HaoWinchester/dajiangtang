@@ -7,7 +7,8 @@
 - 已实现 `GET /api/recruitments` 招聘信息列表接口。
 - 已实现招聘信息列表页、岗位搜索、城市搜索、清空搜索、分页、空状态、错误状态和重试。
 - 已实现管理员新增入口权限：`canCreate=true` 时显示新增按钮，并跳转到招聘新增流程入口占位页。
-- 已实现前端路由守卫：未登录访客不能进入招聘信息列表页或新增入口占位页。
+- 已实现前端路由守卫：未登录访客不能进入招聘信息列表页或新增入口占位页；普通用户和企业用户直访新增入口会回到招聘列表。
+- 已实现前端 API 角色标记透传：当登录态通过 `localStorage.USER_ROLE` 或 `USER_ROLE` cookie 模拟时，请求会携带 `X-User-Role`，避免路由已放行但后端接口返回未登录。
 - 已同步 OpenAPI 契约到前后端参考目录。
 
 ## 后端实现
@@ -17,7 +18,8 @@
 - 未登录或非法角色返回 `401`。
 - 默认只返回 `RECRUITING` / `ACTIVE` 状态招聘信息。
 - 岗位使用关键词模糊匹配，城市使用标准城市名匹配。
-- 默认每页 10 条，按 `publishedAt` / `updatedAt` 最近优先排序。
+- 默认每页 10 条，并固定按 10 条分页；外部传入其他 `pageSize` 时后端仍归一为 10。
+- 默认按 `publishedAt` / `updatedAt` 最近优先排序。
 - 列表响应只暴露允许字段，不返回联系电话等详情字段。
 
 ## 前端实现
@@ -27,13 +29,16 @@
 - API 客户端位于 `frontend/src/features/recruitments/api.ts`。
 - 类型定义位于 `frontend/src/features/recruitments/types.ts`。
 - 前端通过 `VITE_API_BASE_URL` 配置后端地址；未配置时使用相对路径 `/api/recruitments`。
+- 前端 API 客户端会优先读取 `USER_ROLE` cookie，其次读取 `localStorage.USER_ROLE`，并通过 `X-User-Role` header 与后端演示角色解析保持一致。
 
 ## 验证结果
 
 - 后端：`JAVA_HOME=/opt/homebrew/opt/openjdk@17 PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH" mvn test`
-  - 结果：通过，12 个测试全部通过。
+  - 结果：通过，34 个测试全部通过。
 - 前端：`npm_config_cache=./.npm-cache npm ci && npm test && npm run build`
-  - 结果：通过，4 个测试文件、11 个测试全部通过，生产构建成功。
+  - 结果：通过，5 个 Vitest 测试文件、56 个测试全部通过，生产构建成功。
+- 前端 E2E：`npm run test:e2e`
+  - 结果：通过，14 个 Playwright E2E 测试全部通过。
 
 ## 环境说明
 

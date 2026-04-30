@@ -1,6 +1,32 @@
 import type { RecruitmentListQuery, RecruitmentListResponse } from './types';
 
 const DEFAULT_PAGE_SIZE = 10 as const;
+const ROLE_COOKIE = 'USER_ROLE';
+const ROLE_STORAGE_KEY = 'USER_ROLE';
+const ROLE_HEADER = 'X-User-Role';
+const ALLOWED_ROLES = new Set(['ADMIN', 'USER', 'COMPANY']);
+
+function readCookie(name: string): string | undefined {
+  if (typeof document === 'undefined') {
+    return undefined;
+  }
+
+  return document.cookie
+    .split(';')
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${name}=`))
+    ?.split('=')
+    .slice(1)
+    .join('=');
+}
+
+function readRoleMarker(): string | undefined {
+  const cookieRole = readCookie(ROLE_COOKIE);
+  const storedRole = typeof localStorage === 'undefined' ? undefined : localStorage.getItem(ROLE_STORAGE_KEY);
+  const role = decodeURIComponent(cookieRole ?? storedRole ?? '');
+
+  return ALLOWED_ROLES.has(role) ? role : undefined;
+}
 
 function buildRecruitmentsUrl(query: RecruitmentListQuery): string {
   const baseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
@@ -29,11 +55,18 @@ function buildRecruitmentsUrl(query: RecruitmentListQuery): string {
 export async function fetchRecruitments(
   query: RecruitmentListQuery = {}
 ): Promise<RecruitmentListResponse> {
+  const headers: Record<string, string> = {
+    Accept: 'application/json'
+  };
+  const roleMarker = readRoleMarker();
+
+  if (roleMarker) {
+    headers[ROLE_HEADER] = roleMarker;
+  }
+
   const response = await fetch(buildRecruitmentsUrl(query), {
     method: 'GET',
-    headers: {
-      Accept: 'application/json'
-    },
+    headers,
     credentials: 'include'
   });
 
