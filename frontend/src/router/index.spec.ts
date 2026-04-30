@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/features/recruitments/AuthRequiredView.vue', () => ({ default: {} }));
+vi.mock('@/features/recruitments/HomeView.vue', () => ({ default: {} }));
+vi.mock('@/features/recruitments/LoginView.vue', () => ({ default: {} }));
 vi.mock('@/features/recruitments/RecruitmentCreateEntryView.vue', () => ({ default: {} }));
 vi.mock('@/features/recruitments/RecruitmentListView.vue', () => ({ default: {} }));
+vi.mock('@/features/recruitments/RegisterView.vue', () => ({ default: {} }));
 
 describe('recruitment route guard', () => {
   beforeEach(() => {
@@ -102,5 +105,19 @@ describe('recruitment route guard', () => {
     const { requireAuthGuard } = await import('./index');
 
     expect(requireAuthGuard({ meta: {} })).toBe(true);
+  });
+
+  it('keeps the home route public', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/').name).toBe('home');
+    expect(router.resolve('/').meta.requiresAuth).toBeUndefined();
+  });
+
+  it('keeps the login route public', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/login').name).toBe('login');
+    expect(router.resolve('/login').meta.requiresAuth).toBeUndefined();
   });
 });

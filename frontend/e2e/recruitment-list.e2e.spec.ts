@@ -106,10 +106,26 @@ test('未登录访问招聘列表会进入登录提示页', async ({ page }) => 
   await expect(page.getByText('招聘信息列表仅面向已登录的管理员、普通用户和企业用户开放。')).toBeVisible();
 });
 
-test('根路径会重定向到受保护的招聘列表并要求登录', async ({ page }) => {
+test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => {
   await page.goto('/');
 
-  await expect(page).toHaveURL(/\/login-required$/);
+  await expect(page.getByRole('heading', { name: '招聘信息预览' })).toBeVisible();
+  await expect(page.getByText('Java 架构师')).toBeVisible();
+  await expect(page.getByRole('link', { name: '登录', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: '注册', exact: true })).toBeVisible();
+});
+
+test('登录页可以模拟管理员登录并进入招聘列表', async ({ page }) => {
+  await mockRecruitments(page);
+  await page.goto('/login');
+  await page.getByLabel('用户名').fill('admin');
+  await page.getByLabel('密码').fill('password');
+  await page.getByLabel('演示角色').selectOption('ADMIN');
+  await page.getByLabel('拖动滑块完成拼图验证').check();
+  await page.getByRole('button', { name: '登录' }).click();
+
+  await expect(page).toHaveURL(/\/recruitments$/);
+  await expect(page.getByRole('link', { name: '新增' })).toBeVisible();
 });
 
 test('管理员能看到招聘列表必需字段和新增按钮', async ({ page }) => {

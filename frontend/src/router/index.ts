@@ -1,8 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import AuthRequiredView from '@/features/recruitments/AuthRequiredView.vue';
+import HomeView from '@/features/recruitments/HomeView.vue';
+import LoginView from '@/features/recruitments/LoginView.vue';
 import RecruitmentCreateEntryView from '@/features/recruitments/RecruitmentCreateEntryView.vue';
 import RecruitmentListView from '@/features/recruitments/RecruitmentListView.vue';
+import RegisterView from '@/features/recruitments/RegisterView.vue';
 
 const ROLE_COOKIE = 'USER_ROLE';
 const ROLE_STORAGE_KEY = 'USER_ROLE';
@@ -50,7 +53,18 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: { name: 'recruitments' }
+      name: 'home',
+      component: HomeView
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginView
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: RegisterView
     },
     {
       path: '/login-required',
