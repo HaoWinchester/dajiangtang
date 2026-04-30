@@ -1,5 +1,11 @@
 import { expect, test, type Frame, type Page } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+  await page.route('https://lh3.googleusercontent.com/**', async (route) => {
+    await route.abort();
+  });
+});
+
 const stitchPages = [
   { path: '/', title: '全国项目管理标准化技术委员会 - 人才库 首页' },
   { path: '/login', title: '全国项目管理标准化技术委员会 - 人才库 登录' },
@@ -58,16 +64,22 @@ async function authorizeProtectedStitchPage(page: Page, path: string) {
   }
 }
 
+async function gotoStitchPage(page: Page, path: string) {
+  await authorizeProtectedStitchPage(page, path);
+  await page.goto(path, { waitUntil: 'domcontentloaded' });
+}
+
 test.describe('单点功能 - Stitch 页面控件', () => {
   for (const item of stitchPages) {
     test(`${item.title} 没有未绑定按钮或空链接`, async ({ page }) => {
-      await authorizeProtectedStitchPage(page, item.path);
-      await page.goto(item.path);
+      await gotoStitchPage(page, item.path);
       const frame = await frameByTitle(page, item.title);
 
       const unboundControls = await frame.evaluate(() => {
         return Array.from(document.querySelectorAll('button, a')).filter((control) => {
-          return !(control instanceof HTMLElement) || !control.dataset.stitchAction;
+          return !(control instanceof HTMLElement)
+            || !control.dataset.stitchAction
+            || control.dataset.stitchAction === 'feedback';
         }).map((control) => (control.textContent || control.outerHTML).replace(/\s+/g, ' ').trim());
       });
 
@@ -77,8 +89,7 @@ test.describe('单点功能 - Stitch 页面控件', () => {
 
   test('所有 Stitch 页面都使用本地 assets logo', async ({ page }) => {
     for (const item of stitchPages) {
-      await authorizeProtectedStitchPage(page, item.path);
-      await page.goto(item.path);
+      await gotoStitchPage(page, item.path);
       const frame = await frameByTitle(page, item.title);
       const logoSources = await frame.locator('img[alt*="Logo"], img[alt*="logo"]').evaluateAll((images) => {
         return images.map((image) => image.getAttribute('src'));
@@ -92,8 +103,7 @@ test.describe('单点功能 - Stitch 页面控件', () => {
 
   test('所有 Stitch 页面使用一致的系统表头', async ({ page }) => {
     for (const item of stitchPages) {
-      await authorizeProtectedStitchPage(page, item.path);
-      await page.goto(item.path);
+      await gotoStitchPage(page, item.path);
       const frame = await frameByTitle(page, item.title);
       const header = frame.locator('.stitch-global-header');
 
@@ -127,6 +137,46 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.locator('#stitch-toast')).toContainText('短信验证码已发送');
   });
 
+  test('常见工具入口打开明确功能面板，不再显示兜底提示', async ({ page }) => {
+    await page.goto('/');
+    let frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 首页');
+
+    await frame.getByRole('button', { name: /筛选/ }).click();
+    await expect(frame.locator('#stitch-action-panel')).toContainText('筛选条件');
+    await expect.poll(() => frame.locator('body').innerText()).not.toContain('操作已触发');
+    await frame.locator('[data-panel-close]').click();
+
+    await page.goto('/login');
+    frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 登录');
+    await frame.getByText('忘记密码？').click();
+    await expect(frame.locator('#stitch-action-panel')).toContainText('找回密码');
+    await expect.poll(() => frame.locator('body').innerText()).not.toContain('操作已触发');
+  });
+
+  test('登录后的资料中心不展示设计稿测试数据', async ({ page }) => {
+    await loginAs(page, 'USER');
+    await page.goto('/personal-center');
+    let frame = await frameByTitle(page, '个人中心 - 基础信息');
+
+    await expect(frame.getByText('待完善个人信息')).toBeVisible();
+    await expect(frame.getByText('Chen Wei')).toHaveCount(0);
+    await expect(frame.getByText('Global Tech Corp')).toHaveCount(0);
+    await expect(frame.getByText('拥有超过8年')).toHaveCount(0);
+
+    await page.goto('/personal-center/work-experience');
+    frame = await frameByTitle(page, '个人中心 - 工作经历');
+    await expect(frame.getByText('暂无工作经历')).toBeVisible();
+    await expect(frame.getByText('Global Tech Corp')).toHaveCount(0);
+    await expect(frame.getByText('领导企业级')).toHaveCount(0);
+
+    await loginAs(page, 'COMPANY');
+    await page.goto('/enterprise-center');
+    frame = await frameByTitle(page, '企业中心 - 资料维护');
+    await expect(frame.getByText('资料待完善')).toBeVisible();
+    await expect(frame.getByText('环球科技集团')).toHaveCount(0);
+    await expect(frame.getByText('Sarah Jenkins')).toHaveCount(0);
+  });
+
   test('企业中心保存、取消、更新品牌素材都有反馈', async ({ page }) => {
     await loginAs(page, 'COMPANY');
     await page.goto('/enterprise-center');
@@ -139,7 +189,7 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.locator('#stitch-toast')).toContainText('已取消本次修改');
 
     await frame.getByRole('button', { name: '更新品牌素材' }).click();
-    await expect(frame.locator('#stitch-toast')).toContainText('已打开素材上传入口');
+    await expect(frame.locator('#stitch-action-panel')).toContainText('素材上传');
   });
 
   test('个人中心添加技能、保存资料、取消更改都有反馈', async ({ page }) => {

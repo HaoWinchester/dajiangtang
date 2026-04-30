@@ -1,5 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+  await page.route('https://lh3.googleusercontent.com/**', async (route) => {
+    await route.abort();
+  });
+});
+
 const defaultItems = [
   {
     id: 'rec-001',
@@ -118,7 +124,7 @@ test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 首页"]');
 
-  await expect(design.getByRole('heading', { name: '发现战略性人才' })).toBeVisible();
+  await expect(design.getByText('发现战略性人才')).toBeVisible();
   await expect(design.getByText('招聘信息')).toBeVisible();
   await expect(design.getByText('人才洞察')).toBeVisible();
 });
@@ -164,7 +170,8 @@ test('工作经历页会承载 Stitch 工作经历设计', async ({ page }) => {
   const design = page.frameLocator('iframe[title="个人中心 - 工作经历"]');
 
   await expect(design.getByRole('heading', { name: '个人中心 - 工作经历' })).toBeVisible();
-  await expect(design.getByText('领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计')).toBeVisible();
+  await expect(design.getByText('暂无工作经历')).toBeVisible();
+  await expect(design.getByText('领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计')).toHaveCount(0);
 });
 
 test('管理员能看到招聘列表必需字段和新增按钮', async ({ page }) => {

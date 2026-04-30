@@ -32,6 +32,46 @@
     document.cookie = roleKey + '=' + role + '; path=/';
   }
 
+  function clearFormValues(root = document) {
+    root.querySelectorAll('input').forEach((input) => {
+      if (!(input instanceof HTMLInputElement)) {
+        return;
+      }
+      if (input.type === 'checkbox' || input.type === 'radio') {
+        input.checked = false;
+      } else if (input.type !== 'hidden') {
+        input.value = '';
+      }
+    });
+    root.querySelectorAll('textarea').forEach((textarea) => {
+      textarea.value = '';
+      textarea.textContent = '';
+    });
+    root.querySelectorAll('select').forEach((select) => {
+      select.selectedIndex = -1;
+    });
+  }
+
+  function setText(selector, text) {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.textContent = text;
+    }
+  }
+
+  function replaceTextContent(search, replacement) {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode);
+    }
+    nodes.forEach((node) => {
+      if (node.textContent && node.textContent.includes(search)) {
+        node.textContent = node.textContent.replaceAll(search, replacement);
+      }
+    });
+  }
+
   async function postJson(url, body) {
     const response = await fetch(url, {
       method: 'POST',
@@ -55,10 +95,200 @@
       return;
     }
 
+    const path = window.parent.location.pathname;
+    const pageName = path === '/'
+      ? 'home'
+      : path.includes('/login')
+        ? 'login'
+        : path.includes('/register')
+          ? 'register'
+          : path.includes('/enterprise-center')
+            ? 'enterprise'
+            : path.includes('/personal-center/work-experience')
+              ? 'work'
+              : path.includes('/personal-center')
+                ? 'personal'
+                : 'default';
+    document.body.classList.add('stitch-page', `stitch-page-${pageName}`);
+
     if (!document.getElementById('stitch-global-header-style')) {
       const style = document.createElement('style');
       style.id = 'stitch-global-header-style';
       style.textContent = `
+        body.stitch-page {
+          min-width: 320px;
+          background:
+            linear-gradient(120deg, rgba(255, 255, 255, 0.92), rgba(236, 244, 247, 0.82)),
+            radial-gradient(circle at 16% 18%, rgba(19, 95, 131, 0.10), transparent 28%),
+            #eef3f8 !important;
+          color: #17202a !important;
+          font-family: 'Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
+        }
+        body.stitch-page::before {
+          position: fixed;
+          inset: 64px 0 0;
+          z-index: -1;
+          pointer-events: none;
+          background-image:
+            linear-gradient(rgba(18, 53, 91, 0.045) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(18, 53, 91, 0.045) 1px, transparent 1px);
+          background-size: 40px 40px;
+          mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 75%);
+          content: "";
+        }
+        body.stitch-page h1,
+        body.stitch-page h2,
+        body.stitch-page h3 {
+          color: #12263d !important;
+          letter-spacing: 0 !important;
+        }
+        body.stitch-page input,
+        body.stitch-page textarea,
+        body.stitch-page select {
+          border-color: #c9d6e2 !important;
+          border-radius: 6px !important;
+          background: #ffffff !important;
+          color: #17202a !important;
+          box-shadow: none !important;
+        }
+        body.stitch-page input:focus,
+        body.stitch-page textarea:focus,
+        body.stitch-page select:focus {
+          border-color: #1e6f94 !important;
+          box-shadow: 0 0 0 3px rgba(30, 111, 148, 0.14) !important;
+          outline: none !important;
+        }
+        body.stitch-page main button:not(.material-symbols-outlined),
+        body.stitch-page main a[data-stitch-action] {
+          border-radius: 6px !important;
+          font-weight: 700 !important;
+          letter-spacing: 0 !important;
+        }
+        body.stitch-page main button[data-stitch-action="login"],
+        body.stitch-page main button[data-stitch-action="register-submit"],
+        body.stitch-page main button[data-stitch-action="save"],
+        body.stitch-page main button[data-stitch-action="send-code"] {
+          border: 1px solid #135f83 !important;
+          background: #135f83 !important;
+          color: #fff !important;
+          box-shadow: 0 10px 22px rgba(19, 95, 131, 0.18) !important;
+        }
+        body.stitch-page main button[data-stitch-action="cancel"],
+        body.stitch-page main button[data-stitch-action="register-tab"],
+        body.stitch-page main button[data-stitch-action="upload"],
+        body.stitch-page main button[data-stitch-action="edit"],
+        body.stitch-page main button[data-stitch-action="delete"] {
+          border: 1px solid #c9d6e2 !important;
+          background: #fff !important;
+          color: #263548 !important;
+          box-shadow: none !important;
+        }
+        body.stitch-page-login > div.fixed.inset-0.overflow-hidden {
+          display: none !important;
+        }
+        body.stitch-page-login main,
+        body.stitch-page-register main {
+          min-height: calc(100vh - 64px) !important;
+          padding: 112px 24px 48px !important;
+        }
+        body.stitch-page-login main {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        body.stitch-page-login main > div {
+          width: min(460px, 100%) !important;
+          max-width: 460px !important;
+        }
+        body.stitch-page-login main .bg-surface-container-lowest,
+        body.stitch-page-register main .bg-surface-container-lowest,
+        body.stitch-page-register main form {
+          border: 1px solid #d9e3ec !important;
+          border-radius: 8px !important;
+          background: rgba(255, 255, 255, 0.96) !important;
+          box-shadow: 0 24px 70px rgba(30, 52, 73, 0.14) !important;
+        }
+        body.stitch-page-login main .bg-surface-container-lowest {
+          position: relative;
+          overflow: hidden;
+          padding: 34px !important;
+        }
+        body.stitch-page-login main .bg-surface-container-lowest::before,
+        body.stitch-page-register main form::before {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 5px;
+          background: linear-gradient(90deg, #135f83, #88a33e, #d0a344);
+          content: "";
+        }
+        body.stitch-page-login footer {
+          border-color: #d9e3ec !important;
+          background: transparent !important;
+        }
+        body.stitch-page-register main > div.grid {
+          max-width: 1120px !important;
+          gap: 0 !important;
+          overflow: hidden;
+          border: 1px solid #d9e3ec;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.96);
+          box-shadow: 0 24px 70px rgba(30, 52, 73, 0.14);
+        }
+        body.stitch-page-register main > div.grid > div:first-child {
+          min-height: 100%;
+          padding: 48px !important;
+          background: linear-gradient(180deg, rgba(18, 53, 91, 0.96), rgba(18, 77, 101, 0.95)) !important;
+        }
+        body.stitch-page-register main > div.grid > div:first-child h2,
+        body.stitch-page-register main > div.grid > div:first-child p,
+        body.stitch-page-register main > div.grid > div:first-child span,
+        body.stitch-page-register main > div.grid > div:first-child h4 {
+          color: #fff !important;
+        }
+        body.stitch-page-register main form {
+          position: relative;
+          overflow: hidden;
+          padding: 34px !important;
+          box-shadow: none !important;
+        }
+        body.stitch-page-register #personal-tab[aria-selected="true"],
+        body.stitch-page-register #enterprise-tab[aria-selected="true"] {
+          background: #e8f3f7 !important;
+          color: #135f83 !important;
+        }
+        body.stitch-page-home main,
+        body.stitch-page-enterprise main,
+        body.stitch-page-personal main,
+        body.stitch-page-work main {
+          padding-top: 96px !important;
+        }
+        body.stitch-page-home main {
+          position: relative;
+          z-index: 2;
+        }
+        body.stitch-page-home aside.fixed.right-6 {
+          z-index: 1 !important;
+          pointer-events: none;
+        }
+        body.stitch-page-enterprise aside,
+        body.stitch-page-personal aside,
+        body.stitch-page-work aside {
+          border-color: #d9e3ec !important;
+          background: #ffffff !important;
+          box-shadow: 0 18px 50px rgba(30, 52, 73, 0.10) !important;
+        }
+        body.stitch-page-enterprise section,
+        body.stitch-page-personal section,
+        body.stitch-page-work section,
+        body.stitch-page-enterprise .bg-white,
+        body.stitch-page-personal .bg-white,
+        body.stitch-page-work .bg-white {
+          border-color: #d9e3ec !important;
+          border-radius: 8px !important;
+          box-shadow: 0 14px 36px rgba(42, 58, 78, 0.08) !important;
+        }
         .stitch-global-header {
           position: fixed;
           top: 0;
@@ -161,7 +391,6 @@
       document.head.appendChild(style);
     }
 
-    const path = window.parent.location.pathname;
     const isLoggedIn = Boolean(localStorage.getItem(roleKey));
     const navItems = [
       { label: '首页', action: 'home', active: path === '/' },
@@ -207,6 +436,90 @@
     originalHeader.replaceWith(header);
   }
 
+  function renderBlankBusinessState() {
+    const path = window.parent.location.pathname;
+    const isPersonalPage = path === '/personal-center';
+    const isEnterprisePage = path === '/enterprise-center';
+    const isWorkPage = path === '/personal-center/work-experience';
+
+    if (!isPersonalPage && !isEnterprisePage && !isWorkPage) {
+      return;
+    }
+
+    clearFormValues();
+
+    if (isPersonalPage) {
+      setText('aside h3, aside h2', '个人资料');
+      setText('aside p', '资料待完善');
+      setText('main h2.text-h2, main h2.font-h2', '待完善个人信息');
+      const profileSummary = Array.from(document.querySelectorAll('main p')).find((item) => textOf(item).includes('中国, 上海'));
+      if (profileSummary) {
+        profileSummary.textContent = '请补充所在城市、所在行业与求职意向';
+      }
+      document.querySelectorAll('main img[src^="http"]').forEach((image) => {
+        image.setAttribute('src', '/assets/logo.png');
+      });
+      document.querySelectorAll('section span').forEach((item) => {
+        const text = textOf(item);
+        if (['设计系统', '用户研究', '团队领导力', '战略思维'].includes(text)) {
+          item.remove();
+        }
+      });
+      replaceTextContent('Chen Wei (陈伟)', '待完善个人信息');
+      replaceTextContent('Chen Wei', '');
+      replaceTextContent('高级产品设计师', '');
+      replaceTextContent('拥有超过8年领导世界500强科技公司跨学科设计团队的经验。精通设计系统、用户研究和数据驱动的设计优化。曾为企业级SaaS产品实现转化率提升25%的优异战绩。具备出色的干系人管理和双语沟通能力。', '');
+    }
+
+    if (isEnterprisePage) {
+      setText('aside p.text-lg, aside h3, aside h2', '企业资料');
+      setText('aside p.text-xs', '资料待完善');
+      const headerDescription = Array.from(document.querySelectorAll('main p')).find((item) => textOf(item).includes('管理环球科技集团'));
+      if (headerDescription) {
+        headerDescription.textContent = '请维护企业基础信息、联系方式与合作备注。';
+      }
+      document.querySelectorAll('main img[src^="http"], aside img[src^="http"]').forEach((image) => {
+        image.setAttribute('src', '/assets/logo.png');
+      });
+      replaceTextContent('环球科技集团', '企业资料待完善');
+      replaceTextContent('Sarah Jenkins', '未分配负责人');
+      replaceTextContent('Sarah J.', '未分配负责人');
+      replaceTextContent('2023年10月24日', '尚未保存');
+      replaceTextContent('加利福尼亚州 旧金山', '');
+      replaceTextContent('San Francisco', '');
+      replaceTextContent('contact@globaltech.com', '');
+      replaceTextContent('https://www.globaltech.com', '');
+      replaceTextContent('加利福尼亚州 硅谷 创新大道101号', '');
+    }
+
+    if (isWorkPage) {
+      setText('aside h2, aside h3', '个人资料');
+      setText('aside p', '资料待完善');
+      const grid = document.querySelector('main .grid.grid-cols-12');
+      if (grid) {
+        Array.from(grid.children).forEach((child) => {
+          const text = textOf(child);
+          if (!text.includes('点击此处添加职业生涯中的其他经历')) {
+            child.remove();
+          }
+        });
+        if (!document.getElementById('experience-empty')) {
+          const empty = document.createElement('div');
+          empty.id = 'experience-empty';
+          empty.className = 'col-span-12 bg-white border border-slate-200 rounded-xl p-8 text-slate-500';
+          empty.innerHTML = '<p class="font-label-md text-label-md text-on-background">暂无工作经历</p><p class="text-sm text-on-surface-variant mt-2">请点击下方入口添加您的第一段工作经历。</p>';
+          grid.prepend(empty);
+        }
+      }
+      document.querySelectorAll('body > div.fixed.bottom-8').forEach((item) => item.remove());
+      replaceTextContent('Global Tech Corp', '个人资料');
+      replaceTextContent('高级产品架构师', '');
+      replaceTextContent('主导软件工程师', '');
+      replaceTextContent('后端开发工程师', '');
+      replaceTextContent('领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计。成功扩展基础设施以支持超过 200 万月度活跃用户，同时通过战略性云原生优化将延迟降低了 40%。', '');
+    }
+  }
+
   function toast(message) {
     let panel = document.getElementById('stitch-toast');
     if (!panel) {
@@ -219,6 +532,61 @@
     panel.classList.remove('hidden');
     window.clearTimeout(window.__stitchToastTimer);
     window.__stitchToastTimer = window.setTimeout(() => panel.classList.add('hidden'), 1800);
+  }
+
+  function openPanel(title, description, actions = []) {
+    let panel = document.getElementById('stitch-action-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'stitch-action-panel';
+      panel.className = 'fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/30 px-4';
+      document.body.appendChild(panel);
+    }
+    const actionButtons = actions.map((action) => `
+      <button type="button" class="rounded border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700" data-panel-action="${action.action}">
+        ${action.label}
+      </button>
+    `).join('');
+    panel.innerHTML = `
+      <div class="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-[#135f83]">功能面板</p>
+            <h2 class="mt-2 text-xl font-bold text-[#12263d]">${title}</h2>
+          </div>
+          <button type="button" class="rounded border border-slate-200 px-3 py-1 text-sm font-bold text-slate-500" data-panel-close>关闭</button>
+        </div>
+        <p class="mt-4 text-sm leading-6 text-slate-600">${description}</p>
+        <div class="mt-6 flex flex-wrap justify-end gap-2">
+          ${actionButtons}
+        </div>
+      </div>
+    `;
+    panel.querySelector('[data-panel-close]')?.addEventListener('click', () => panel.remove());
+    panel.querySelectorAll('[data-panel-action]').forEach((button) => {
+      button.addEventListener('click', () => {
+        runAction(button.getAttribute('data-panel-action'), button);
+        panel.remove();
+      });
+    });
+  }
+
+  function saveCurrentPageDraft() {
+    const path = window.parent.location.pathname;
+    const fields = {};
+    document.querySelectorAll('input, textarea, select').forEach((field) => {
+      if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement)) {
+        return;
+      }
+      const key = field.id || field.name || field.closest('label')?.textContent?.trim() || field.getAttribute('placeholder') || `field-${Object.keys(fields).length}`;
+      if (field instanceof HTMLInputElement && (field.type === 'checkbox' || field.type === 'radio')) {
+        fields[key] = field.checked;
+      } else {
+        fields[key] = field.value;
+      }
+    });
+    localStorage.setItem(`PROFILE_DRAFT:${path}`, JSON.stringify(fields));
+    toast('保存成功，资料已写入当前账号草稿');
   }
 
   async function completeLogin() {
@@ -317,8 +685,18 @@
     const card = document.createElement('div');
     card.id = 'experience-new';
     card.className = 'col-span-12 bg-white border border-slate-200 rounded-xl p-6';
-    card.innerHTML = '<p class="font-label-md text-label-md text-on-background">新增工作经历</p><p class="text-sm text-on-surface-variant mt-2">已添加一条待完善的工作经历。</p>';
+    card.innerHTML = '<div class="flex justify-between gap-4"><div><p class="font-label-md text-label-md text-on-background">新增工作经历</p><p class="text-sm text-on-surface-variant mt-2">已添加一条待完善的工作经历。</p></div><div class="flex gap-2"><button type="button" data-stitch-action="edit" class="p-2 text-slate-500 border border-slate-200 rounded">编辑</button><button type="button" data-stitch-action="delete" class="p-2 text-slate-500 border border-slate-200 rounded">删除</button></div></div>';
     placeholder.before(card);
+    const empty = document.getElementById('experience-empty');
+    if (empty) {
+      empty.remove();
+    }
+    card.querySelectorAll('button[data-stitch-action]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        runAction(button.dataset.stitchAction, button);
+      });
+    });
     toast('已添加工作经历');
   }
 
@@ -339,6 +717,7 @@
     if (/首页/.test(label)) return 'home';
     if (/招聘信息|职位/.test(label)) return 'recruitments';
     if (/发布职位/.test(label)) return 'new-recruitment';
+    if (/添加经历/.test(label)) return 'add-experience';
     if (/基础信息|基本信息/.test(label)) return 'personal-center';
     if (/工作经历/.test(label)) return 'work-experience';
     if (/企业中心/.test(label)) return 'enterprise-center';
@@ -346,9 +725,20 @@
     if (/人才\b/.test(label)) return 'personal-center';
     if (/控制台|仪表盘/.test(label)) return 'home';
     if (/查看详情|立即申请|更多机会/.test(label)) return 'recruitments';
-    if (/查看所有报告|数据分析|AI 匹配|高管猎寻/.test(label)) return 'enterprise-center';
-    if (/帮助|隐私|服务条款|系统状态|安全信息|Cookie|关于我们|联系我们|加入我们/.test(label)) return 'info';
-    return 'feedback';
+    if (/筛选|filter_list/.test(label)) return 'filter-panel';
+    if (/排序|sort/.test(label)) return 'sort-panel';
+    if (/bookmark|收藏/.test(label)) return 'bookmark';
+    if (/通知|notifications/.test(label)) return 'notifications';
+    if (/设置|settings/.test(label)) return 'settings';
+    if (/忘记密码/.test(label)) return 'forgot-password';
+    if (/查看所有报告|数据分析/.test(label)) return 'analytics';
+    if (/AI 匹配/.test(label)) return 'ai-match';
+    if (/高管猎寻/.test(label)) return 'executive-search';
+    if (/帮助|帮助支持|帮助中心/.test(label)) return 'help';
+    if (/隐私|服务条款|系统状态|安全信息|Cookie|关于我们|联系我们|加入我们/.test(label)) return 'policy-info';
+    if (/swap_horiz|负责人/.test(label)) return 'assign-owner';
+    if (/contact_support/.test(label)) return 'support';
+    return 'details-panel';
   }
 
   function runAction(action, element) {
@@ -407,31 +797,92 @@
         toast('已进入编辑状态');
         break;
       case 'save':
-        toast('保存成功');
+        saveCurrentPageDraft();
         break;
       case 'cancel':
         toast('已取消本次修改');
         break;
       case 'upload':
-        toast('已打开素材上传入口');
+        openPanel('素材上传', '请选择企业或个人资料的品牌素材。当前演示环境会记录打开动作，正式环境可接入文件上传服务。', [
+          { label: '返回资料维护', action: 'personal-center' }
+        ]);
+        break;
+      case 'notifications':
+        openPanel('通知中心', '暂无新的系统通知。后续通知会展示审核结果、招聘进度、资料补全提醒和企业反馈。');
+        break;
+      case 'settings':
+        openPanel('账号设置', '可在此维护账号安全、消息偏好和隐私设置。当前演示版本已接入入口面板，避免无效点击。');
+        break;
+      case 'forgot-password':
+        openPanel('找回密码', '请输入注册手机号后通过短信验证码重置密码。演示环境验证码为 123456。');
+        break;
+      case 'filter-panel':
+        openPanel('筛选条件', '可按城市、薪资、CSPM 优先、岗位状态筛选首页岗位预览。完整筛选能力在招聘信息列表中提供。', [
+          { label: '进入招聘列表', action: 'recruitments' }
+        ]);
+        break;
+      case 'sort-panel':
+        openPanel('排序方式', '默认按最新发布或最近更新优先。也可按薪资、需求人数、到岗时间排序。');
+        break;
+      case 'bookmark':
+        toast('已收藏该岗位，可在个人中心查看收藏记录');
+        break;
+      case 'analytics':
+        openPanel('数据分析', '数据分析将展示岗位热度、行业趋势、城市分布和人才匹配情况。该入口已预留为独立分析模块。');
+        break;
+      case 'ai-match':
+        openPanel('AI 匹配', 'AI 匹配会基于岗位要求、项目经历、资格证书和求职意向生成候选人推荐。');
+        break;
+      case 'executive-search':
+        openPanel('高管猎寻', '高管猎寻用于重点岗位的人才寻访、意向跟进与顾问协作。');
+        break;
+      case 'assign-owner':
+        openPanel('负责人维护', '请选择或调整维护负责人。演示环境展示入口，正式环境将接入人员选择器。');
+        break;
+      case 'support':
+        openPanel('在线支持', '请描述遇到的问题，平台顾问会在工作时间内跟进。');
+        break;
+      case 'captcha-refresh':
+        toast('拼图已刷新，请重新拖动滑块');
+        break;
+      case 'close-panel':
+        document.getElementById('captcha-modal')?.classList.add('hidden');
+        break;
+      case 'help':
+        openPanel('帮助中心', '帮助中心包含账号注册、资料维护、招聘信息查看、企业资料维护和权限说明。');
+        break;
+      case 'policy-info':
+        openPanel('平台说明', '该入口用于查看服务条款、隐私政策、安全信息、系统状态或联系我们等平台说明内容。');
         break;
       case 'info':
-        toast('该内容为演示信息入口');
+      case 'details-panel':
+        openPanel('详情说明', '该入口已接入功能面板。涉及业务数据的页面会在登录后按角色展示，未登录时会进入登录提示页。');
         break;
       default:
-        toast('操作已触发');
+        openPanel('功能说明', '该入口已接入明确反馈，请根据页面引导继续操作。');
         break;
     }
   }
 
   function classifyButton(button) {
     const label = textOf(button);
-    const icon = label || button.querySelector('.material-symbols-outlined')?.textContent || '';
+    const iconText = Array.from(button.querySelectorAll('.material-symbols-outlined'))
+      .map((icon) => textOf(icon))
+      .join(' ');
+    const icon = `${label} ${iconText}`.trim();
     if (button.closest('#captcha-modal') && /chevron_right/.test(icon)) return 'captcha-complete';
+    if (/close/.test(icon)) return 'close-panel';
+    if (/refresh/.test(icon)) return 'captcha-refresh';
+    if (/notifications/.test(icon)) return 'notifications';
+    if (/settings/.test(icon)) return 'settings';
+    if (/photo_camera/.test(icon)) return 'upload';
+    if (/swap_horiz/.test(icon)) return 'assign-owner';
+    if (/contact_support/.test(icon)) return 'support';
     if (/发送验证码/.test(label)) return 'send-code';
     if (/创建账号/.test(label)) return 'register-submit';
     if (/个人注册|企业注册/.test(label)) return 'register-tab';
     if (/添加技能/.test(label)) return 'add-skill';
+    if (/添加经历/.test(label)) return 'add-experience';
     if (/点击此处添加职业生涯中的其他经历/.test(label)) return 'add-experience';
     if (/保存|保存修改|保存资料|发布更新/.test(label)) return 'save';
     if (/取消/.test(label)) return 'cancel';
@@ -443,6 +894,7 @@
 
   function bindControls() {
     renderSharedHeader();
+    renderBlankBusinessState();
 
     document.querySelectorAll('a').forEach((link) => {
       const label = textOf(link);
