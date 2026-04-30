@@ -25,6 +25,27 @@ async function frameByTitle(page: Page, title: string): Promise<Frame> {
   return frame!;
 }
 
+async function dragCaptchaToEnd(frame: Frame) {
+  const slider = frame.locator('#captcha-modal [data-stitch-action="captcha-slider"]');
+  const bar = slider.locator('xpath=..');
+  await expect(slider).toBeVisible();
+
+  const sliderBox = await slider.boundingBox();
+  const barBox = await bar.boundingBox();
+  expect(sliderBox, '找不到滑块位置').toBeTruthy();
+  expect(barBox, '找不到滑轨位置').toBeTruthy();
+
+  const startX = sliderBox!.x + sliderBox!.width / 2;
+  const startY = sliderBox!.y + sliderBox!.height / 2;
+  const endX = barBox!.x + barBox!.width - sliderBox!.width / 2 - 6;
+  const mouse = frame.page().mouse;
+
+  await mouse.move(startX, startY);
+  await mouse.down();
+  await mouse.move(endX, startY, { steps: 12 });
+  await mouse.up();
+}
+
 async function mockRecruitments(page: Page) {
   await page.route('**/api/recruitments**', async (route) => {
     await route.fulfill({
@@ -311,7 +332,9 @@ test.describe('流程间数据交互 - 角色与接口', () => {
     await frame.locator('#password').fill('Admin@2026');
     await frame.locator('main').getByRole('button', { name: '登录' }).click();
     await expect(frame.locator('#captcha-modal')).toBeVisible();
-    await frame.locator('#captcha-modal [data-stitch-action="captcha-complete"]').click();
+    await frame.locator('#captcha-modal [data-stitch-action="captcha-slider"]').click();
+    await expect(frame.locator('#stitch-toast')).toContainText('请按住滑块并拖动到最右侧');
+    await dragCaptchaToEnd(frame);
 
     await requestPromise;
     await expect(page).toHaveURL(/\/recruitments$/);
@@ -376,7 +399,7 @@ test.describe('E2E - 最新页面完整链路', () => {
     await frame.locator('#username').fill('admin');
     await frame.locator('#password').fill('Admin@2026');
     await frame.locator('main').getByRole('button', { name: '登录' }).click();
-    await frame.locator('#captcha-modal [data-stitch-action="captcha-complete"]').click();
+    await dragCaptchaToEnd(frame);
     await expect(page).toHaveURL(/\/recruitments$/);
 
     await page.getByRole('link', { name: '新增' }).click();

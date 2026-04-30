@@ -612,6 +612,169 @@
     }
   }
 
+  function captchaElements() {
+    const modal = document.getElementById('captcha-modal');
+    const slider = modal?.querySelector('.cursor-pointer');
+    const bar = slider?.parentElement;
+    const piece = modal?.querySelector('.z-10');
+    const label = bar?.querySelector('.select-none');
+    const puzzleArea = modal?.querySelector('.aspect-\\[4\\/3\\]');
+
+    return {
+      modal,
+      slider: slider instanceof HTMLElement ? slider : null,
+      bar: bar instanceof HTMLElement ? bar : null,
+      piece: piece instanceof HTMLElement ? piece : null,
+      label: label instanceof HTMLElement ? label : null,
+      puzzleArea: puzzleArea instanceof HTMLElement ? puzzleArea : null
+    };
+  }
+
+  function resetCaptchaSlider() {
+    const { slider, bar, piece, label } = captchaElements();
+    if (!slider || !bar) {
+      return;
+    }
+
+    slider.dataset.captchaPassed = 'false';
+    slider.style.transform = 'translateX(0px)';
+    slider.setAttribute('aria-valuenow', '0');
+    slider.classList.remove('bg-green-600');
+    slider.classList.add('bg-primary');
+    bar.dataset.captchaPassed = 'false';
+    if (piece) {
+      piece.style.transform = 'translateX(0px)';
+    }
+    if (label) {
+      label.textContent = '按住滑块拖动';
+      label.classList.remove('text-green-700');
+    }
+  }
+
+  function verifyCaptchaFromDrag(finalOffset, maxOffset) {
+    const { slider, bar, label } = captchaElements();
+    const passed = maxOffset > 0 && finalOffset >= maxOffset * 0.88;
+    if (!slider || !bar || !label) {
+      return;
+    }
+
+    if (!passed) {
+      resetCaptchaSlider();
+      toast('请拖动滑块完成拼图验证');
+      return;
+    }
+
+    slider.dataset.captchaPassed = 'true';
+    slider.style.transform = `translateX(${maxOffset}px)`;
+    slider.setAttribute('aria-valuenow', '100');
+    slider.classList.remove('bg-primary');
+    slider.classList.add('bg-green-600');
+    bar.dataset.captchaPassed = 'true';
+    label.textContent = '验证通过';
+    label.classList.add('text-green-700');
+    window.setTimeout(() => completeLogin(), 180);
+  }
+
+  function setupCaptchaSlider() {
+    const { slider, bar, piece, label, puzzleArea } = captchaElements();
+    if (!slider || !bar || slider.dataset.captchaBound === 'true') {
+      return;
+    }
+
+    mark(slider, 'captcha-slider');
+    slider.dataset.captchaBound = 'true';
+    slider.dataset.captchaPassed = 'false';
+    slider.setAttribute('role', 'slider');
+    slider.setAttribute('aria-label', '拖动滑块完成拼图验证');
+    slider.setAttribute('aria-valuemin', '0');
+    slider.setAttribute('aria-valuemax', '100');
+    slider.setAttribute('aria-valuenow', '0');
+    slider.setAttribute('tabindex', '0');
+    slider.style.touchAction = 'none';
+    slider.style.userSelect = 'none';
+
+    let dragging = false;
+    let startX = 0;
+    let currentOffset = 0;
+    let activePointerId = null;
+
+    const maxOffset = () => Math.max(0, bar.clientWidth - slider.offsetWidth - 8);
+    const pieceMaxOffset = () => {
+      if (!piece || !puzzleArea) {
+        return 0;
+      }
+      return Math.max(0, puzzleArea.clientWidth - piece.offsetWidth - 48);
+    };
+    const moveTo = (offset) => {
+      const max = maxOffset();
+      currentOffset = Math.max(0, Math.min(offset, max));
+      const progress = max > 0 ? currentOffset / max : 0;
+      slider.style.transform = `translateX(${currentOffset}px)`;
+      slider.setAttribute('aria-valuenow', String(Math.round(progress * 100)));
+      if (piece) {
+        piece.style.transform = `translateX(${Math.round(progress * pieceMaxOffset())}px)`;
+      }
+      if (label) {
+        label.textContent = progress > 0.72 ? '继续拖动完成验证' : '按住滑块拖动';
+      }
+    };
+
+    slider.addEventListener('pointerdown', (event) => {
+      if (slider.dataset.captchaPassed === 'true') {
+        return;
+      }
+      dragging = true;
+      startX = event.clientX - currentOffset;
+      activePointerId = event.pointerId;
+      slider.setPointerCapture(event.pointerId);
+      event.preventDefault();
+      event.stopPropagation();
+    });
+
+    slider.addEventListener('pointermove', (event) => {
+      if (!dragging || activePointerId !== event.pointerId) {
+        return;
+      }
+      moveTo(event.clientX - startX);
+      event.preventDefault();
+    });
+
+    const finishDrag = (event) => {
+      if (!dragging || activePointerId !== event.pointerId) {
+        return;
+      }
+      dragging = false;
+      activePointerId = null;
+      verifyCaptchaFromDrag(currentOffset, maxOffset());
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    slider.addEventListener('pointerup', finishDrag);
+    slider.addEventListener('pointercancel', finishDrag);
+    slider.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (slider.dataset.captchaPassed !== 'true') {
+        toast('请按住滑块并拖动到最右侧');
+      }
+    });
+    slider.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight') {
+        moveTo(currentOffset + 24);
+        event.preventDefault();
+      }
+      if (event.key === 'ArrowLeft') {
+        moveTo(currentOffset - 24);
+        event.preventDefault();
+      }
+      if (event.key === 'Enter' || event.key === ' ') {
+        verifyCaptchaFromDrag(currentOffset, maxOffset());
+        event.preventDefault();
+      }
+    });
+  }
+
   function sendCode(button) {
     button.textContent = '验证码已发送';
     button.disabled = true;
@@ -782,7 +945,11 @@
         activateRegisterTab(element);
         break;
       case 'captcha-complete':
-        completeLogin();
+        toast('请拖动滑块完成拼图验证');
+        resetCaptchaSlider();
+        break;
+      case 'captcha-slider':
+        toast('请按住滑块并拖动到最右侧');
         break;
       case 'add-skill':
         addSkill();
@@ -843,6 +1010,7 @@
         openPanel('在线支持', '请描述遇到的问题，平台顾问会在工作时间内跟进。');
         break;
       case 'captcha-refresh':
+        resetCaptchaSlider();
         toast('拼图已刷新，请重新拖动滑块');
         break;
       case 'close-panel':
@@ -941,14 +1109,7 @@
       }
     });
 
-    const captchaSlider = document.querySelector('#captcha-modal .cursor-pointer');
-    if (captchaSlider instanceof HTMLElement) {
-      mark(captchaSlider, 'captcha-complete');
-      captchaSlider.addEventListener('click', (event) => {
-        event.stopPropagation();
-        runAction('captcha-complete', captchaSlider);
-      });
-    }
+    setupCaptchaSlider();
 
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element
