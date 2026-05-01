@@ -25,19 +25,32 @@ async function frameByTitle(page: Page, title: string): Promise<Frame> {
   return frame!;
 }
 
-async function dragCaptchaToEnd(frame: Frame) {
+async function dragCaptchaToGap(frame: Frame) {
   const slider = frame.locator('#captcha-modal [data-stitch-action="captcha-slider"]');
   const bar = slider.locator('xpath=..');
+  const piece = frame.locator('#captcha-modal .z-10');
+  const slot = frame.locator('#captcha-modal .shadow-inner');
   await expect(slider).toBeVisible();
 
   const sliderBox = await slider.boundingBox();
   const barBox = await bar.boundingBox();
+  const pieceBox = await piece.boundingBox();
+  const slotBox = await slot.boundingBox();
   expect(sliderBox, '找不到滑块位置').toBeTruthy();
   expect(barBox, '找不到滑轨位置').toBeTruthy();
+  expect(pieceBox, '找不到拼图块位置').toBeTruthy();
+  expect(slotBox, '找不到拼图缺口位置').toBeTruthy();
 
   const startX = sliderBox!.x + sliderBox!.width / 2;
   const startY = sliderBox!.y + sliderBox!.height / 2;
-  const endX = barBox!.x + barBox!.width - sliderBox!.width / 2 - 6;
+  const sliderMaxOffset = barBox!.width - sliderBox!.width - 8;
+  const pieceMaxOffset = frame.locator('#captcha-modal .aspect-\\[4\\/3\\]');
+  const puzzleBox = await pieceMaxOffset.boundingBox();
+  expect(puzzleBox, '找不到拼图区域位置').toBeTruthy();
+  const maxPieceTravel = puzzleBox!.width - pieceBox!.width - 48;
+  const targetPieceTravel = slotBox!.x - pieceBox!.x;
+  const targetSliderTravel = Math.round((targetPieceTravel / maxPieceTravel) * sliderMaxOffset);
+  const endX = startX + targetSliderTravel;
   const mouse = frame.page().mouse;
 
   await mouse.move(startX, startY);
@@ -136,6 +149,18 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     }
   });
 
+  test('注册页保留 code.html 原始设计结构', async ({ page }) => {
+    await page.goto('/register', { waitUntil: 'domcontentloaded' });
+    const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 注册');
+
+    await expect(frame.locator('.stitch-global-header')).toBeVisible();
+    await expect(frame.locator('body')).not.toHaveClass(/stitch-page /);
+    await expect(frame.getByRole('heading', { name: '释放企业潜能' })).toBeVisible();
+    await expect(frame.getByRole('heading', { name: '创建账号' })).toBeVisible();
+    await expect(frame.locator('main > div.grid')).toHaveClass(/lg:grid-cols-12/);
+    await expect(frame.locator('main form')).toHaveClass(/space-y-lg/);
+  });
+
   test('注册页个人注册和企业注册标签可以切换', async ({ page }) => {
     await page.goto('/register');
     const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 注册');
@@ -156,6 +181,20 @@ test.describe('单点功能 - Stitch 页面控件', () => {
 
     await expect(frame.getByRole('button', { name: '验证码已发送' })).toBeDisabled();
     await expect(frame.locator('#stitch-toast')).toContainText('短信验证码已发送');
+  });
+
+  test('登录页记住设备可以点击选中和取消', async ({ page }) => {
+    await page.goto('/login');
+    const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 登录');
+    const remember = frame.locator('#remember');
+
+    await expect(remember).not.toBeChecked();
+    await frame.getByText('记住设备（30天内）').click();
+    await expect(remember).toBeChecked();
+    await expect.poll(() => frame.evaluate(() => localStorage.getItem('REMEMBER_DEVICE'))).toBe('true');
+    await remember.click();
+    await expect(remember).not.toBeChecked();
+    await expect.poll(() => frame.evaluate(() => localStorage.getItem('REMEMBER_DEVICE'))).toBe('false');
   });
 
   test('常见工具入口打开明确功能面板，不再显示兜底提示', async ({ page }) => {
@@ -333,8 +372,8 @@ test.describe('流程间数据交互 - 角色与接口', () => {
     await frame.locator('main').getByRole('button', { name: '登录' }).click();
     await expect(frame.locator('#captcha-modal')).toBeVisible();
     await frame.locator('#captcha-modal [data-stitch-action="captcha-slider"]').click();
-    await expect(frame.locator('#stitch-toast')).toContainText('请按住滑块并拖动到最右侧');
-    await dragCaptchaToEnd(frame);
+    await expect(frame.locator('#stitch-toast')).toContainText('请按住滑块拖到图片缺口位置');
+    await dragCaptchaToGap(frame);
 
     await requestPromise;
     await expect(page).toHaveURL(/\/recruitments$/);
@@ -399,7 +438,7 @@ test.describe('E2E - 最新页面完整链路', () => {
     await frame.locator('#username').fill('admin');
     await frame.locator('#password').fill('Admin@2026');
     await frame.locator('main').getByRole('button', { name: '登录' }).click();
-    await dragCaptchaToEnd(frame);
+    await dragCaptchaToGap(frame);
     await expect(page).toHaveURL(/\/recruitments$/);
 
     await page.getByRole('link', { name: '新增' }).click();

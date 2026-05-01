@@ -32,6 +32,17 @@
     document.cookie = roleKey + '=' + role + '; path=/';
   }
 
+  function currentPageName() {
+    const path = window.parent.location.pathname;
+    if (path === '/') return 'home';
+    if (path.includes('/login')) return 'login';
+    if (path.includes('/register')) return 'register';
+    if (path.includes('/enterprise-center')) return 'enterprise';
+    if (path.includes('/personal-center/work-experience')) return 'work';
+    if (path.includes('/personal-center')) return 'personal';
+    return 'default';
+  }
+
   function clearFormValues(root = document) {
     root.querySelectorAll('input').forEach((input) => {
       if (!(input instanceof HTMLInputElement)) {
@@ -96,20 +107,12 @@
     }
 
     const path = window.parent.location.pathname;
-    const pageName = path === '/'
-      ? 'home'
-      : path.includes('/login')
-        ? 'login'
-        : path.includes('/register')
-          ? 'register'
-          : path.includes('/enterprise-center')
-            ? 'enterprise'
-            : path.includes('/personal-center/work-experience')
-              ? 'work'
-              : path.includes('/personal-center')
-                ? 'personal'
-                : 'default';
-    document.body.classList.add('stitch-page', `stitch-page-${pageName}`);
+    const pageName = currentPageName();
+    if (pageName === 'register') {
+      document.body.classList.add('stitch-page-register-original');
+    } else {
+      document.body.classList.add('stitch-page', `stitch-page-${pageName}`);
+    }
 
     if (!document.getElementById('stitch-global-header-style')) {
       const style = document.createElement('style');
@@ -617,6 +620,7 @@
     const slider = modal?.querySelector('.cursor-pointer');
     const bar = slider?.parentElement;
     const piece = modal?.querySelector('.z-10');
+    const slot = modal?.querySelector('.shadow-inner');
     const label = bar?.querySelector('.select-none');
     const puzzleArea = modal?.querySelector('.aspect-\\[4\\/3\\]');
 
@@ -625,6 +629,7 @@
       slider: slider instanceof HTMLElement ? slider : null,
       bar: bar instanceof HTMLElement ? bar : null,
       piece: piece instanceof HTMLElement ? piece : null,
+      slot: slot instanceof HTMLElement ? slot : null,
       label: label instanceof HTMLElement ? label : null,
       puzzleArea: puzzleArea instanceof HTMLElement ? puzzleArea : null
     };
@@ -651,32 +656,36 @@
     }
   }
 
-  function verifyCaptchaFromDrag(finalOffset, maxOffset) {
-    const { slider, bar, label } = captchaElements();
-    const passed = maxOffset > 0 && finalOffset >= maxOffset * 0.88;
+  function verifyCaptchaFromDrag(finalOffset, maxOffset, targetOffset) {
+    const { slider, bar, piece, label } = captchaElements();
+    const tolerance = Math.max(14, maxOffset * 0.08);
+    const passed = maxOffset > 0 && Math.abs(finalOffset - targetOffset) <= tolerance;
     if (!slider || !bar || !label) {
       return;
     }
 
     if (!passed) {
       resetCaptchaSlider();
-      toast('请拖动滑块完成拼图验证');
+      toast('请将拼图块拖到图片缺口位置');
       return;
     }
 
     slider.dataset.captchaPassed = 'true';
-    slider.style.transform = `translateX(${maxOffset}px)`;
+    slider.style.transform = `translateX(${targetOffset}px)`;
     slider.setAttribute('aria-valuenow', '100');
     slider.classList.remove('bg-primary');
     slider.classList.add('bg-green-600');
     bar.dataset.captchaPassed = 'true';
+    if (piece) {
+      piece.style.transform = `translateX(${piece.dataset.captchaTargetOffset || '0'}px)`;
+    }
     label.textContent = '验证通过';
     label.classList.add('text-green-700');
     window.setTimeout(() => completeLogin(), 180);
   }
 
   function setupCaptchaSlider() {
-    const { slider, bar, piece, label, puzzleArea } = captchaElements();
+    const { slider, bar, piece, slot, label, puzzleArea } = captchaElements();
     if (!slider || !bar || slider.dataset.captchaBound === 'true') {
       return;
     }
@@ -705,6 +714,20 @@
       }
       return Math.max(0, puzzleArea.clientWidth - piece.offsetWidth - 48);
     };
+    const pieceTargetOffset = () => {
+      if (!piece || !slot) {
+        return 0;
+      }
+      return Math.max(0, slot.offsetLeft - piece.offsetLeft);
+    };
+    const sliderTargetOffset = () => {
+      const pieceMax = pieceMaxOffset();
+      const sliderMax = maxOffset();
+      if (!pieceMax || !sliderMax) {
+        return sliderMax;
+      }
+      return Math.min(sliderMax, Math.round((pieceTargetOffset() / pieceMax) * sliderMax));
+    };
     const moveTo = (offset) => {
       const max = maxOffset();
       currentOffset = Math.max(0, Math.min(offset, max));
@@ -713,9 +736,11 @@
       slider.setAttribute('aria-valuenow', String(Math.round(progress * 100)));
       if (piece) {
         piece.style.transform = `translateX(${Math.round(progress * pieceMaxOffset())}px)`;
+        piece.dataset.captchaTargetOffset = String(pieceTargetOffset());
       }
       if (label) {
-        label.textContent = progress > 0.72 ? '继续拖动完成验证' : '按住滑块拖动';
+        const nearTarget = Math.abs(currentOffset - sliderTargetOffset()) <= Math.max(14, max * 0.08);
+        label.textContent = nearTarget ? '松开完成验证' : '拖到图片缺口位置';
       }
     };
 
@@ -745,7 +770,7 @@
       }
       dragging = false;
       activePointerId = null;
-      verifyCaptchaFromDrag(currentOffset, maxOffset());
+      verifyCaptchaFromDrag(currentOffset, maxOffset(), sliderTargetOffset());
       event.preventDefault();
       event.stopPropagation();
     };
@@ -756,7 +781,7 @@
       event.preventDefault();
       event.stopPropagation();
       if (slider.dataset.captchaPassed !== 'true') {
-        toast('请按住滑块并拖动到最右侧');
+        toast('请按住滑块拖到图片缺口位置');
       }
     });
     slider.addEventListener('keydown', (event) => {
@@ -769,10 +794,32 @@
         event.preventDefault();
       }
       if (event.key === 'Enter' || event.key === ' ') {
-        verifyCaptchaFromDrag(currentOffset, maxOffset());
+        verifyCaptchaFromDrag(currentOffset, maxOffset(), sliderTargetOffset());
         event.preventDefault();
       }
     });
+  }
+
+  function setupRememberDevice() {
+    const checkbox = document.getElementById('remember');
+    if (!(checkbox instanceof HTMLInputElement) || checkbox.dataset.rememberBound === 'true') {
+      return;
+    }
+
+    checkbox.dataset.rememberBound = 'true';
+    checkbox.checked = localStorage.getItem('REMEMBER_DEVICE') === 'true';
+    checkbox.addEventListener('change', () => {
+      localStorage.setItem('REMEMBER_DEVICE', checkbox.checked ? 'true' : 'false');
+    });
+
+    const label = document.querySelector('label[for="remember"]');
+    if (label instanceof HTMLLabelElement) {
+      label.addEventListener('click', (event) => {
+        event.preventDefault();
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+    }
   }
 
   function sendCode(button) {
@@ -945,11 +992,11 @@
         activateRegisterTab(element);
         break;
       case 'captcha-complete':
-        toast('请拖动滑块完成拼图验证');
+        toast('请将拼图块拖到图片缺口位置');
         resetCaptchaSlider();
         break;
       case 'captcha-slider':
-        toast('请按住滑块并拖动到最右侧');
+        toast('请按住滑块拖到图片缺口位置');
         break;
       case 'add-skill':
         addSkill();
@@ -1110,6 +1157,7 @@
     });
 
     setupCaptchaSlider();
+    setupRememberDevice();
 
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element
