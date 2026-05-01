@@ -187,20 +187,32 @@
   }
 
   async function postJson(url, body) {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify(body)
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(payload.message || '请求失败，请稍后重试。');
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        signal: controller.signal,
+        body: JSON.stringify(body)
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.message || '请求失败，请稍后重试。');
+      }
+      return payload;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new Error('登录请求超时，请刷新验证码后重试。');
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timer);
     }
-    return payload;
   }
 
   function renderSharedHeader() {
@@ -673,26 +685,61 @@
   }
 
   async function completeLogin() {
+    if (window.__stitchLoginInFlight) {
+      return;
+    }
     const username = readInputValue('#username');
     const password = readInputValue('#password');
 
     if (!username) {
+      resetCaptchaSlider();
       toast('请输入用户名');
       return;
     }
     if (!password) {
+      resetCaptchaSlider();
       toast('请输入密码');
       return;
     }
 
+    window.__stitchLoginInFlight = true;
+    const { label } = captchaElements();
+    if (label) {
+      label.textContent = '登录中...';
+    }
     try {
       const result = await postJson('/api/auth/login', { username, password });
       storeRole(result.role);
       toast('验证通过，正在进入' + accountLabel(result.role));
       window.setTimeout(() => go(result.role === 'ADMIN' ? '/recruitments' : result.role === 'COMPANY' ? '/enterprise-center' : '/personal-center'), 260);
     } catch (error) {
+      resetCaptchaSlider();
       toast(error instanceof Error ? error.message : '登录失败，请稍后重试。');
+    } finally {
+      window.__stitchLoginInFlight = false;
     }
+  }
+
+  function startLoginFlow() {
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const username = usernameInput instanceof HTMLInputElement ? usernameInput.value.trim() : '';
+    const password = passwordInput instanceof HTMLInputElement ? passwordInput.value.trim() : '';
+
+    if (!username) {
+      toast('请输入用户名');
+      usernameInput?.focus();
+      return;
+    }
+    if (!password) {
+      toast('请输入密码');
+      passwordInput?.focus();
+      return;
+    }
+
+    const { modal } = captchaElements();
+    modal?.classList.remove('hidden');
+    resetCaptchaSlider();
   }
 
   function captchaElements() {
@@ -713,6 +760,25 @@
       label: label instanceof HTMLElement ? label : null,
       puzzleArea: puzzleArea instanceof HTMLElement ? puzzleArea : null
     };
+  }
+
+  function refreshCaptchaChallenge() {
+    const { modal, slot, label } = captchaElements();
+    resetCaptchaSlider();
+    if (slot) {
+      const leftPercent = 28 + Math.floor(Math.random() * 34);
+      slot.classList.remove('left-1/4');
+      slot.style.left = `${leftPercent}%`;
+    }
+    if (label) {
+      label.textContent = '按住滑块拖动';
+    }
+    const reference = Array.from(modal?.querySelectorAll('span') || []).find((item) => textOf(item).startsWith('参考 ID'));
+    if (reference) {
+      const random = Math.random().toString(36).slice(2, 8).toUpperCase();
+      reference.textContent = `参考 ID: ${random.slice(0, 2)}-${random.slice(2, 5)}-${random.slice(5) || '0'}`;
+    }
+    toast('拼图已刷新，请重新拖动滑块');
   }
 
   function resetCaptchaSlider() {
@@ -1388,6 +1454,9 @@
       case 'register-tab':
         activateRegisterTab(element);
         break;
+      case 'start-login':
+        startLoginFlow();
+        break;
       case 'captcha-complete':
         toast('请将拼图块拖到图片缺口位置');
         resetCaptchaSlider();
@@ -1454,8 +1523,7 @@
         openPanel('在线支持', '请描述遇到的问题，平台顾问会在工作时间内跟进。');
         break;
       case 'captcha-refresh':
-        resetCaptchaSlider();
-        toast('拼图已刷新，请重新拖动滑块');
+        refreshCaptchaChallenge();
         break;
       case 'close-panel':
         document.getElementById('captcha-modal')?.classList.add('hidden');
@@ -1484,6 +1552,7 @@
     const icon = `${label} ${iconText}`.trim();
     if (button.dataset.modulePageManage) return 'manage-module';
     if (button.dataset.modulePageDelete) return 'delete-module-record';
+    if (currentPageName() === 'login' && button.closest('main') && /^登录$/.test(label)) return 'start-login';
     if (button.closest('#captcha-modal') && /chevron_right/.test(icon)) return 'captcha-complete';
     if (/close/.test(icon)) return 'close-panel';
     if (/refresh/.test(icon)) return 'captcha-refresh';
@@ -1529,6 +1598,10 @@
     document.querySelectorAll('button').forEach((button) => {
       const action = classifyButton(button);
       mark(button, action);
+      if (action === 'start-login') {
+        button.removeAttribute('onclick');
+        button.onclick = null;
+      }
       if (button.type === 'submit') {
         button.type = 'button';
       }
@@ -1544,7 +1617,11 @@
     document.querySelectorAll('form').forEach((form) => {
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        submitRegistration();
+        if (currentPageName() === 'login') {
+          startLoginFlow();
+        } else {
+          submitRegistration();
+        }
       });
     });
 
@@ -1552,6 +1629,18 @@
       if (textOf(item).includes('点击此处添加职业生涯中的其他经历')) {
         mark(item, 'add-experience');
         item.addEventListener('click', () => runAction('add-experience', item));
+      }
+      if (item.classList.contains('cursor-pointer') && textOf(item).includes('刷新验证码')) {
+        mark(item, 'captcha-refresh');
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.addEventListener('click', () => runAction('captcha-refresh', item));
+        item.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            runAction('captcha-refresh', item);
+          }
+        });
       }
     });
 

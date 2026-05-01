@@ -204,10 +204,84 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect.poll(() => frame.evaluate(() => localStorage.getItem('REMEMBER_DEVICE'))).toBe('false');
   });
 
+  test('登录页未填写用户名或密码时不会打开滑动验证', async ({ page }) => {
+    await page.goto('/login');
+    const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 登录');
+
+    await frame.locator('main').getByRole('button', { name: '登录' }).click();
+    await expect(frame.locator('#captcha-modal')).toBeHidden();
+    await expect(frame.locator('#stitch-toast')).toContainText('请输入用户名');
+
+    await frame.locator('#username').fill('admin');
+    await frame.locator('main').getByRole('button', { name: '登录' }).click();
+    await expect(frame.locator('#captcha-modal')).toBeHidden();
+    await expect(frame.locator('#stitch-toast')).toContainText('请输入密码');
+  });
+
+  test('刷新验证码会重置滑块并刷新缺口参考信息', async ({ page }) => {
+    await page.goto('/login');
+    const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 登录');
+
+    await frame.locator('#username').fill('admin');
+    await frame.locator('#password').fill('Admin@2026');
+    await frame.locator('main').getByRole('button', { name: '登录' }).click();
+    await expect(frame.locator('#captcha-modal')).toBeVisible();
+
+    const slider = frame.locator('#captcha-modal [data-stitch-action="captcha-slider"]');
+    await slider.focus();
+    await page.keyboard.press('ArrowRight');
+
+    const before = await frame.evaluate(() => {
+      const ref = Array.from(document.querySelectorAll('#captcha-modal span')).find((item) => item.textContent?.includes('参考 ID'));
+      const slot = document.querySelector('#captcha-modal .shadow-inner') as HTMLElement | null;
+      return {
+        ref: ref?.textContent || '',
+        slotLeft: slot?.style.left || '',
+        transform: (document.querySelector('#captcha-modal [data-stitch-action="captcha-slider"]') as HTMLElement | null)?.style.transform || ''
+      };
+    });
+    expect(before.transform).not.toBe('translateX(0px)');
+
+    await frame.getByText('刷新验证码').click();
+    await expect(frame.locator('#stitch-toast')).toContainText('拼图已刷新，请重新拖动滑块');
+    await expect.poll(() => slider.evaluate((element) => (element as HTMLElement).style.transform)).toBe('translateX(0px)');
+    await expect(frame.locator('#captcha-modal .select-none')).toContainText('按住滑块拖动');
+    await expect.poll(() => frame.evaluate(() => {
+      const ref = Array.from(document.querySelectorAll('#captcha-modal span')).find((item) => item.textContent?.includes('参考 ID'));
+      const slot = document.querySelector('#captcha-modal .shadow-inner') as HTMLElement | null;
+      return {
+        ref: ref?.textContent || '',
+        slotLeft: slot?.style.left || ''
+      };
+    })).not.toEqual({ ref: before.ref, slotLeft: before.slotLeft });
+  });
+
+  test('滑动验证通过但账号密码错误时不会卡住，可以重新验证', async ({ page }) => {
+    await page.goto('/login');
+    const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 登录');
+
+    await frame.locator('#username').fill('admin');
+    await frame.locator('#password').fill('Wrong@2026');
+    await frame.locator('main').getByRole('button', { name: '登录' }).click();
+    await expect(frame.locator('#captcha-modal')).toBeVisible();
+
+    await dragCaptchaToGap(frame);
+
+    await expect(frame.locator('#stitch-toast')).toContainText('用户名或密码错误');
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(frame.locator('#captcha-modal')).toBeVisible();
+    await expect(frame.locator('#captcha-modal .select-none')).toContainText('按住滑块拖动');
+    await expect.poll(() => frame.locator('#captcha-modal [data-stitch-action="captcha-slider"]').evaluate((element) => {
+      return (element as HTMLElement).style.transform;
+    })).toBe('translateX(0px)');
+  });
+
   test('安全验证失败重置后再次轻拖不会跳到最右侧', async ({ page }) => {
     await page.goto('/login');
     const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 登录');
 
+    await frame.locator('#username').fill('admin');
+    await frame.locator('#password').fill('Admin@2026');
     await frame.locator('main').getByRole('button', { name: '登录' }).click();
     await expect(frame.locator('#captcha-modal')).toBeVisible();
 
