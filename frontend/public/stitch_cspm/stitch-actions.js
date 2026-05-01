@@ -166,6 +166,49 @@
     }
   }
 
+  function uploadDataKey(target) {
+    const role = localStorage.getItem(roleKey) || 'GUEST';
+    const path = window.parent.location.pathname;
+    return `UPLOAD_IMAGE:${role}:${path}:${target}`;
+  }
+
+  function uploadTargetFromElement(element) {
+    const label = textOf(element);
+    const icon = textOf(element.querySelector?.('.material-symbols-outlined') || element);
+    if (/photo_camera/.test(icon)) return 'avatar';
+    if (/更新品牌素材|add_a_photo/.test(`${label} ${icon}`)) return 'brand-asset';
+    return 'image';
+  }
+
+  function findUploadImage(target, element = document.body) {
+    if (target === 'avatar') {
+      return element.closest?.('.relative')?.querySelector('img') || document.querySelector('main img[alt="Avatar"]');
+    }
+    if (target === 'brand-asset') {
+      return element.closest?.('.bg-surface-container-lowest')?.querySelector('img') || document.querySelector('main img[data-alt*="corporate"], main img[data-alt*="interior"], main img');
+    }
+    return element.closest?.('section, article, .bg-surface-container-lowest, .relative')?.querySelector('img') || document.querySelector('main img');
+  }
+
+  function applyUploadedImage(target, dataUrl, element = document.body) {
+    const image = findUploadImage(target, element);
+    if (image instanceof HTMLImageElement) {
+      image.src = dataUrl;
+      image.removeAttribute('srcset');
+      return true;
+    }
+    return false;
+  }
+
+  function restoreUploadedImages() {
+    ['avatar', 'brand-asset', 'image'].forEach((target) => {
+      const dataUrl = localStorage.getItem(uploadDataKey(target));
+      if (dataUrl) {
+        applyUploadedImage(target, dataUrl);
+      }
+    });
+  }
+
   function setText(selector, text) {
     const element = document.querySelector(selector);
     if (element) {
@@ -674,6 +717,83 @@
         runAction(button.getAttribute('data-panel-action'), button);
         panel.remove();
       });
+    });
+  }
+
+  function openImageUpload(element) {
+    const target = uploadTargetFromElement(element);
+    let selectedDataUrl = '';
+    let panel = document.getElementById('stitch-action-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'stitch-action-panel';
+      panel.className = 'fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/30 px-4';
+      document.body.appendChild(panel);
+    }
+
+    panel.innerHTML = `
+      <div class="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-[#135f83]">图片上传</p>
+            <h2 class="mt-2 text-xl font-bold text-[#12263d]">上传图片</h2>
+          </div>
+          <button type="button" class="rounded border border-slate-200 px-3 py-1 text-sm font-bold text-slate-500" data-panel-close>关闭</button>
+        </div>
+        <div class="mt-5 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-5">
+          <label class="block text-sm font-bold text-slate-700" for="stitch-upload-input">选择图片文件</label>
+          <input id="stitch-upload-input" class="mt-3 block w-full text-sm text-slate-600" data-upload-input accept="image/*" type="file" />
+          <p class="mt-2 text-xs text-slate-500">支持 PNG、JPG、JPEG、WEBP 等图片格式。</p>
+        </div>
+        <div class="mt-5 hidden rounded-lg border border-slate-200 p-3" data-upload-preview-wrap>
+          <img alt="上传预览" class="h-40 w-full rounded object-contain bg-slate-50" data-upload-preview />
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+          <button type="button" class="rounded border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" data-panel-close>取消</button>
+          <button type="button" class="rounded bg-[#135f83] px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50" data-upload-save disabled>保存图片</button>
+        </div>
+      </div>
+    `;
+
+    panel.querySelectorAll('[data-panel-close]').forEach((button) => {
+      button.addEventListener('click', () => panel.remove());
+    });
+    panel.querySelector('[data-upload-input]')?.addEventListener('change', (event) => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || !input.files?.length) {
+        toast('请选择图片文件');
+        return;
+      }
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        input.value = '';
+        selectedDataUrl = '';
+        toast('仅支持上传图片文件');
+        return;
+      }
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        selectedDataUrl = String(reader.result || '');
+        const preview = panel.querySelector('[data-upload-preview]');
+        const previewWrap = panel.querySelector('[data-upload-preview-wrap]');
+        const saveButton = panel.querySelector('[data-upload-save]');
+        if (preview instanceof HTMLImageElement) {
+          preview.src = selectedDataUrl;
+        }
+        previewWrap?.classList.remove('hidden');
+        saveButton?.removeAttribute('disabled');
+      });
+      reader.readAsDataURL(file);
+    });
+    panel.querySelector('[data-upload-save]')?.addEventListener('click', () => {
+      if (!selectedDataUrl) {
+        toast('请先选择图片文件');
+        return;
+      }
+      localStorage.setItem(uploadDataKey(target), selectedDataUrl);
+      const applied = applyUploadedImage(target, selectedDataUrl, element);
+      panel.remove();
+      toast(applied ? '图片上传成功' : '图片已保存，请刷新页面查看');
     });
   }
 
@@ -1483,9 +1603,7 @@
         toast('已取消本次修改');
         break;
       case 'upload':
-        openPanel('素材上传', '请选择企业或个人资料的品牌素材。当前演示环境会记录打开动作，正式环境可接入文件上传服务。', [
-          { label: '返回资料维护', action: 'personal-center' }
-        ]);
+        openImageUpload(element);
         break;
       case 'notifications':
         openPanel('通知中心', '暂无新的系统通知。后续通知会展示审核结果、招聘进度、资料补全提醒和企业反馈。');
@@ -1494,7 +1612,7 @@
         openPanel('账号设置', '可在此维护账号安全、消息偏好和隐私设置。当前演示版本已接入入口面板，避免无效点击。');
         break;
       case 'forgot-password':
-        openPanel('找回密码', '请输入注册手机号后通过短信验证码重置密码。演示环境验证码为 123456。');
+        openPanel('找回密码', '请输入注册手机号后通过短信验证码重置密码。验证码为 123456。');
         break;
       case 'filter-panel':
         openPanel('筛选条件', '可按城市、薪资、CSPM 优先、岗位状态筛选首页岗位预览。完整筛选能力在招聘信息列表中提供。', [
@@ -1517,7 +1635,7 @@
         openPanel('高管猎寻', '高管猎寻用于重点岗位的人才寻访、意向跟进与顾问协作。');
         break;
       case 'assign-owner':
-        openPanel('负责人维护', '请选择或调整维护负责人。演示环境展示入口，正式环境将接入人员选择器。');
+        openPanel('负责人维护', '请选择或调整维护负责人。');
         break;
       case 'support':
         openPanel('在线支持', '请描述遇到的问题，平台顾问会在工作时间内跟进。');
@@ -1646,6 +1764,7 @@
 
     setupCaptchaSlider();
     setupRememberDevice();
+    restoreUploadedImages();
 
     document.addEventListener('click', (event) => {
       const target = event.target instanceof Element

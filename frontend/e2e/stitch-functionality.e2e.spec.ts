@@ -151,6 +151,29 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     }
   });
 
+  test('固定顶部栏在宽屏下铺满视口右侧不留缺口', async ({ page }) => {
+    await page.setViewportSize({ width: 1680, height: 900 });
+    const fixedHeaderPages = stitchPages.filter((item) => item.path !== '/login');
+
+    for (const item of fixedHeaderPages) {
+      await gotoStitchPage(page, item.path);
+      const frame = await frameByTitle(page, item.title);
+      const metrics = await frame.locator('body > header, body > nav').first().evaluate((header) => {
+        const rect = header.getBoundingClientRect();
+        return {
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+          viewport: window.innerWidth
+        };
+      });
+
+      expect(metrics.left).toBe(0);
+      expect(metrics.right).toBeGreaterThanOrEqual(metrics.viewport - 1);
+      expect(metrics.width).toBeGreaterThanOrEqual(metrics.viewport - 1);
+    }
+  });
+
   test('注册页保留 code.html 原始设计结构', async ({ page }) => {
     await page.goto('/register', { waitUntil: 'domcontentloaded' });
     const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 注册');
@@ -366,7 +389,62 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.locator('#stitch-toast')).toContainText('已取消本次修改');
 
     await frame.getByRole('button', { name: '更新品牌素材' }).click();
-    await expect(frame.locator('#stitch-action-panel')).toContainText('素材上传');
+    await expect(frame.locator('#stitch-action-panel')).toContainText('上传图片');
+  });
+
+  test('企业中心品牌图片可以真实上传、预览、保存并刷新保留', async ({ page }) => {
+    await loginAs(page, 'COMPANY');
+    await page.goto('/enterprise-center');
+    let frame = await frameByTitle(page, '企业中心 - 资料维护');
+
+    await frame.getByRole('button', { name: '更新品牌素材' }).click();
+    await expect(frame.locator('#stitch-action-panel')).toContainText('选择图片文件');
+    await frame.locator('[data-upload-input]').setInputFiles('public/assets/logo.png');
+    await expect(frame.locator('[data-upload-preview]')).toHaveAttribute('src', /^data:image\//);
+    await frame.locator('[data-upload-save]').click();
+    await expect(frame.locator('#stitch-toast')).toContainText('图片上传成功');
+    await expect.poll(() => frame.locator('main img').evaluateAll((images) => {
+      return images.some((image) => (image as HTMLImageElement).src.startsWith('data:image/'));
+    })).toBe(true);
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    frame = await frameByTitle(page, '企业中心 - 资料维护');
+    await expect.poll(() => frame.locator('main img').evaluateAll((images) => {
+      return images.some((image) => (image as HTMLImageElement).src.startsWith('data:image/'));
+    })).toBe(true);
+  });
+
+  test('上传非图片文件会被拒绝且不会显示占位提示', async ({ page }) => {
+    await loginAs(page, 'COMPANY');
+    await page.goto('/enterprise-center');
+    const frame = await frameByTitle(page, '企业中心 - 资料维护');
+
+    await frame.getByRole('button', { name: '更新品牌素材' }).click();
+    await frame.locator('[data-upload-input]').setInputFiles('package.json');
+
+    await expect(frame.locator('#stitch-toast')).toContainText('仅支持上传图片文件');
+    await expect(frame.locator('#stitch-action-panel')).not.toContainText(/演示环境|正式环境|占位/);
+  });
+
+  test('个人中心头像图片可以上传并刷新保留', async ({ page }) => {
+    await loginAs(page, 'USER');
+    await page.goto('/personal-center');
+    let frame = await frameByTitle(page, '个人中心 - 基础信息');
+
+    await frame.locator('button[data-stitch-action="upload"]').first().click();
+    await expect(frame.locator('#stitch-action-panel')).toContainText('上传图片');
+    await frame.locator('[data-upload-input]').setInputFiles('public/assets/logo.png');
+    await frame.locator('[data-upload-save]').click();
+    await expect(frame.locator('#stitch-toast')).toContainText('图片上传成功');
+    await expect.poll(() => frame.locator('main img[alt="Avatar"]').evaluate((image) => {
+      return (image as HTMLImageElement).src.startsWith('data:image/');
+    })).toBe(true);
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    frame = await frameByTitle(page, '个人中心 - 基础信息');
+    await expect.poll(() => frame.locator('main img[alt="Avatar"]').evaluate((image) => {
+      return (image as HTMLImageElement).src.startsWith('data:image/');
+    })).toBe(true);
   });
 
   test('个人中心添加技能、保存资料、取消更改都有反馈', async ({ page }) => {
