@@ -269,11 +269,16 @@
         }
         body.stitch-page-home main {
           position: relative;
-          z-index: 2;
+          z-index: 1;
         }
         body.stitch-page-home aside.fixed.right-6 {
-          z-index: 1 !important;
-          pointer-events: none;
+          z-index: 4 !important;
+          pointer-events: auto;
+        }
+        @media (min-width: 1280px) {
+          body.stitch-page-home main {
+            padding-right: 320px !important;
+          }
         }
         body.stitch-page-enterprise aside,
         body.stitch-page-personal aside,
@@ -928,8 +933,13 @@
     if (/招聘信息|职位/.test(label)) return 'recruitments';
     if (/发布职位/.test(label)) return 'new-recruitment';
     if (/添加经历/.test(label)) return 'add-experience';
-    if (/基础信息|基本信息/.test(label)) return 'personal-center';
+    if (/基础信息|基本信息|基本资料/.test(label)) return 'personal-center';
     if (/工作经历/.test(label)) return 'work-experience';
+    if (/项目经历|项目历史/.test(label)) return 'project-experience';
+    if (/获得荣誉|荣誉奖励/.test(label)) return 'honors';
+    if (/教育经历|教育背景/.test(label)) return 'education-experience';
+    if (/专业技能/.test(label)) return 'professional-skills';
+    if (/资格证书|资质证书|证书奖励/.test(label)) return 'certificates';
     if (/企业中心/.test(label)) return 'enterprise-center';
     if (/人才信息|人才画像/.test(label)) return 'personal-center';
     if (/人才\b/.test(label)) return 'personal-center';
@@ -946,6 +956,8 @@
     if (/高管猎寻/.test(label)) return 'executive-search';
     if (/帮助|帮助支持|帮助中心/.test(label)) return 'help';
     if (/隐私|服务条款|系统状态|安全信息|Cookie|关于我们|联系我们|加入我们/.test(label)) return 'policy-info';
+    if (/Google/.test(label)) return 'sso-google';
+    if (/Microsoft/.test(label)) return 'sso-microsoft';
     if (/swap_horiz|负责人/.test(label)) return 'assign-owner';
     if (/contact_support/.test(label)) return 'support';
     return 'details-panel';
@@ -970,6 +982,21 @@
         break;
       case 'work-experience':
         go('/personal-center/work-experience');
+        break;
+      case 'project-experience':
+        openPanel('项目经历', '这里用于维护项目起止时间、项目内容、承担职责和项目成果。正式版本会支持新增、编辑、删除多段项目经历。');
+        break;
+      case 'honors':
+        openPanel('获得荣誉', '这里用于维护荣誉起止时间、荣誉内容和证明材料。正式版本会支持多条荣誉记录管理。');
+        break;
+      case 'education-experience':
+        openPanel('教育经历', '这里用于维护毕业院校、所学专业、学历、学位、入学时间和毕业时间。正式版本会支持多段教育经历。');
+        break;
+      case 'professional-skills':
+        openPanel('专业技能', '这里用于维护个人优势、专业技能标签和能力说明，并会与人才匹配和招聘推荐联动。');
+        break;
+      case 'certificates':
+        openPanel('资格证书', '这里用于维护是否具备 CSPM 认证及其他资格证书。正式版本会支持证书新增、编辑、删除和附件上传。');
         break;
       case 'enterprise-center':
         go('/enterprise-center');
@@ -1029,6 +1056,12 @@
         break;
       case 'forgot-password':
         openPanel('找回密码', '请输入注册手机号后通过短信验证码重置密码。演示环境验证码为 123456。');
+        break;
+      case 'sso-google':
+        openPanel('Google SSO 登录', '将跳转到 Google 企业身份认证。演示环境暂不连接外部身份源，因此仅展示接入入口。');
+        break;
+      case 'sso-microsoft':
+        openPanel('Microsoft SSO 登录', '将跳转到 Microsoft Entra ID 企业身份认证。演示环境暂不连接外部身份源，因此仅展示接入入口。');
         break;
       case 'filter-panel':
         openPanel('筛选条件', '可按城市、薪资、CSPM 优先、岗位状态筛选首页岗位预览。完整筛选能力在招聘信息列表中提供。', [
