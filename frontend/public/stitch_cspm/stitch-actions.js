@@ -39,8 +39,22 @@
     if (path.includes('/register')) return 'register';
     if (path.includes('/enterprise-center')) return 'enterprise';
     if (path.includes('/personal-center/work-experience')) return 'work';
+    if (path.includes('/personal-center/')) return 'work';
     if (path.includes('/personal-center')) return 'personal';
     return 'default';
+  }
+
+  function moduleActionFromPath(path = window.parent.location.pathname) {
+    if (path.endsWith('/project-experience')) return 'project-experience';
+    if (path.endsWith('/honors')) return 'honors';
+    if (path.endsWith('/education-experience')) return 'education-experience';
+    if (path.endsWith('/professional-skills')) return 'professional-skills';
+    if (path.endsWith('/certificates')) return 'certificates';
+    return '';
+  }
+
+  function modulePath(action) {
+    return `/personal-center/${action}`;
   }
 
   function clearFormValues(root = document) {
@@ -61,6 +75,95 @@
     root.querySelectorAll('select').forEach((select) => {
       select.selectedIndex = -1;
     });
+  }
+
+  function fieldKey(field, index) {
+    const directKey = field.id || field.name || field.getAttribute('aria-label') || field.getAttribute('placeholder');
+    if (directKey) {
+      return directKey.trim();
+    }
+
+    const groupLabel = field.closest('.space-y-2, .space-y-base, label')?.querySelector('label');
+    if (groupLabel) {
+      return textOf(groupLabel);
+    }
+
+    const allFields = Array.from(document.querySelectorAll('input, textarea, select'));
+    return `field-${Number.isInteger(index) ? index : allFields.indexOf(field)}`;
+  }
+
+  function pageDataKey() {
+    const role = localStorage.getItem(roleKey) || 'GUEST';
+    const path = window.parent.location.pathname;
+    return `PROFILE_DATA:${role}:${path}`;
+  }
+
+  function collectPageFields() {
+    const fields = {};
+    document.querySelectorAll('input, textarea, select').forEach((field, index) => {
+      if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement)) {
+        return;
+      }
+      const key = fieldKey(field, index);
+      if (field instanceof HTMLInputElement && (field.type === 'checkbox' || field.type === 'radio')) {
+        fields[key] = field.checked;
+      } else {
+        fields[key] = field.value;
+      }
+    });
+    return fields;
+  }
+
+  function applyPageFields(fields) {
+    if (!fields || typeof fields !== 'object') {
+      return;
+    }
+    document.querySelectorAll('input, textarea, select').forEach((field, index) => {
+      if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement)) {
+        return;
+      }
+      const key = fieldKey(field, index);
+      if (!(key in fields)) {
+        return;
+      }
+      if (field instanceof HTMLInputElement && (field.type === 'checkbox' || field.type === 'radio')) {
+        field.checked = Boolean(fields[key]);
+      } else {
+        field.value = String(fields[key] ?? '');
+      }
+    });
+  }
+
+  function syncPersonalSummary(fields) {
+    const path = window.parent.location.pathname;
+    if (path !== '/personal-center' || !fields || typeof fields !== 'object') {
+      return;
+    }
+
+    const name = String(fields['姓名'] || '').trim();
+    const city = String(fields['所在城市'] || '').trim();
+    const intent = String(fields['求职意向'] || '').trim();
+    if (name) {
+      setText('main h2.text-h2, main h2.font-h2', name);
+    }
+    const profileSummary = Array.from(document.querySelectorAll('main p')).find((item) => textOf(item).includes('请补充所在城市'));
+    if (profileSummary && (city || intent)) {
+      profileSummary.textContent = [city, intent].filter(Boolean).join(' • ');
+    }
+  }
+
+  function restoreSavedPageData() {
+    const saved = localStorage.getItem(pageDataKey());
+    if (!saved) {
+      return;
+    }
+    try {
+      const fields = JSON.parse(saved);
+      applyPageFields(fields);
+      syncPersonalSummary(fields);
+    } catch {
+      localStorage.removeItem(pageDataKey());
+    }
   }
 
   function setText(selector, text) {
@@ -418,50 +521,6 @@
       `;
       document.head.appendChild(style);
     }
-
-    const isLoggedIn = Boolean(localStorage.getItem(roleKey));
-    const navItems = [
-      { label: '首页', action: 'home', active: path === '/' },
-      { label: '招聘信息', action: 'recruitments', active: path.startsWith('/recruitments') },
-      { label: '人才信息', action: 'personal-center', active: path.startsWith('/personal-center') },
-      { label: '企业中心', action: 'enterprise-center', active: path.startsWith('/enterprise-center') }
-    ];
-    let actionItems = [{ label: '退出登录', action: 'logout', primary: false }];
-    if (!isLoggedIn && path === '/login') {
-      actionItems = [{ label: '注册', action: 'register', primary: true }];
-    } else if (!isLoggedIn && path === '/register') {
-      actionItems = [{ label: '立即登录', action: 'login', primary: true }];
-    } else if (!isLoggedIn) {
-      actionItems = [
-        { label: '注册', action: 'register', primary: false },
-        { label: '登录', action: 'login', primary: true }
-      ];
-    }
-
-    const header = document.createElement('header');
-    header.className = 'stitch-global-header';
-    header.innerHTML = `
-      <div class="stitch-global-brand">
-        <img alt="全国项目管理标准化技术委员会 - 人才库 Logo" src="/assets/logo.png" />
-        <span>全国项目管理标准化技术委员会 - 人才库</span>
-      </div>
-      <nav class="stitch-global-nav" aria-label="主要导航">
-        ${navItems.map((item) => `
-          <button type="button" class="${item.active ? 'is-active' : ''}" data-stitch-action="${item.action}">
-            ${item.label}
-          </button>
-        `).join('')}
-      </nav>
-      <div class="stitch-global-actions">
-        ${actionItems.map((item) => `
-          <button type="button" class="${item.primary ? 'is-primary' : ''}" data-stitch-action="${item.action}">
-            ${item.label}
-          </button>
-        `).join('')}
-      </div>
-    `;
-
-    originalHeader.replaceWith(header);
   }
 
   function renderBlankBusinessState() {
@@ -469,8 +528,9 @@
     const isPersonalPage = path === '/personal-center';
     const isEnterprisePage = path === '/enterprise-center';
     const isWorkPage = path === '/personal-center/work-experience';
+    const isModulePage = Boolean(moduleActionFromPath(path));
 
-    if (!isPersonalPage && !isEnterprisePage && !isWorkPage) {
+    if (!isPersonalPage && !isEnterprisePage && !isWorkPage && !isModulePage) {
       return;
     }
 
@@ -520,7 +580,7 @@
       replaceTextContent('加利福尼亚州 硅谷 创新大道101号', '');
     }
 
-    if (isWorkPage) {
+    if (isWorkPage || isModulePage) {
       setText('aside h2, aside h3', '个人资料');
       setText('aside p', '资料待完善');
       const grid = document.querySelector('main .grid.grid-cols-12');
@@ -546,6 +606,12 @@
       replaceTextContent('后端开发工程师', '');
       replaceTextContent('领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计。成功扩展基础设施以支持超过 200 万月度活跃用户，同时通过战略性云原生优化将延迟降低了 40%。', '');
     }
+
+    if (isModulePage) {
+      renderModuleRoutePage();
+    }
+
+    restoreSavedPageData();
   }
 
   function toast(message) {
@@ -600,21 +666,10 @@
   }
 
   function saveCurrentPageDraft() {
-    const path = window.parent.location.pathname;
-    const fields = {};
-    document.querySelectorAll('input, textarea, select').forEach((field) => {
-      if (!(field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement)) {
-        return;
-      }
-      const key = field.id || field.name || field.closest('label')?.textContent?.trim() || field.getAttribute('placeholder') || `field-${Object.keys(fields).length}`;
-      if (field instanceof HTMLInputElement && (field.type === 'checkbox' || field.type === 'radio')) {
-        fields[key] = field.checked;
-      } else {
-        fields[key] = field.value;
-      }
-    });
-    localStorage.setItem(`PROFILE_DRAFT:${path}`, JSON.stringify(fields));
-    toast('保存成功，资料已写入当前账号草稿');
+    const fields = collectPageFields();
+    localStorage.setItem(pageDataKey(), JSON.stringify(fields));
+    syncPersonalSummary(fields);
+    toast('保存成功，资料已保存到当前账号');
   }
 
   async function completeLogin() {
@@ -667,6 +722,7 @@
     }
 
     slider.dataset.captchaPassed = 'false';
+    slider.dataset.captchaOffset = '0';
     slider.style.transform = 'translateX(0px)';
     slider.setAttribute('aria-valuenow', '0');
     slider.classList.remove('bg-green-600');
@@ -696,6 +752,7 @@
     }
 
     slider.dataset.captchaPassed = 'true';
+    slider.dataset.captchaOffset = String(targetOffset);
     slider.style.transform = `translateX(${targetOffset}px)`;
     slider.setAttribute('aria-valuenow', '100');
     slider.classList.remove('bg-primary');
@@ -729,8 +786,10 @@
 
     let dragging = false;
     let startX = 0;
+    let pointerDownX = 0;
     let currentOffset = 0;
     let activePointerId = null;
+    let hasMoved = false;
 
     const maxOffset = () => Math.max(0, bar.clientWidth - slider.offsetWidth - 8);
     const pieceMaxOffset = () => {
@@ -756,6 +815,7 @@
     const moveTo = (offset) => {
       const max = maxOffset();
       currentOffset = Math.max(0, Math.min(offset, max));
+      slider.dataset.captchaOffset = String(currentOffset);
       const progress = max > 0 ? currentOffset / max : 0;
       slider.style.transform = `translateX(${currentOffset}px)`;
       slider.setAttribute('aria-valuenow', String(Math.round(progress * 100)));
@@ -773,7 +833,10 @@
       if (slider.dataset.captchaPassed === 'true') {
         return;
       }
+      currentOffset = Number(slider.dataset.captchaOffset || '0');
       dragging = true;
+      hasMoved = false;
+      pointerDownX = event.clientX;
       startX = event.clientX - currentOffset;
       activePointerId = event.pointerId;
       slider.setPointerCapture(event.pointerId);
@@ -785,6 +848,9 @@
       if (!dragging || activePointerId !== event.pointerId) {
         return;
       }
+      if (Math.abs(event.clientX - pointerDownX) > 2) {
+        hasMoved = true;
+      }
       moveTo(event.clientX - startX);
       event.preventDefault();
     });
@@ -795,6 +861,12 @@
       }
       dragging = false;
       activePointerId = null;
+      if (!hasMoved) {
+        toast('请按住滑块拖到图片缺口位置');
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
       verifyCaptchaFromDrag(currentOffset, maxOffset(), sliderTargetOffset());
       event.preventDefault();
       event.stopPropagation();
@@ -935,6 +1007,272 @@
     toast('已添加工作经历');
   }
 
+  const moduleConfigs = {
+    'project-experience': {
+      title: '项目经历',
+      empty: '暂无项目经历',
+      fields: [
+        { name: '起止时间', placeholder: '例如：2025.01 - 2025.12' },
+        { name: '项目内容', placeholder: '请填写项目内容、职责和成果' }
+      ]
+    },
+    honors: {
+      title: '获得荣誉',
+      empty: '暂无荣誉记录',
+      fields: [
+        { name: '起止时间', placeholder: '例如：2024.01' },
+        { name: '内容', placeholder: '请填写荣誉内容' }
+      ]
+    },
+    'education-experience': {
+      title: '教育经历',
+      empty: '暂无教育经历',
+      fields: [
+        { name: '毕业院校', placeholder: '请填写毕业院校' },
+        { name: '所学专业', placeholder: '请填写所学专业' },
+        { name: '学历', placeholder: '请填写学历' },
+        { name: '学位', placeholder: '请填写学位' },
+        { name: '入学时间', placeholder: '例如：2018.09' },
+        { name: '毕业时间', placeholder: '例如：2022.06' }
+      ]
+    },
+    'professional-skills': {
+      title: '专业技能',
+      empty: '暂无专业技能',
+      fields: [
+        { name: '技能名称', placeholder: '例如：项目管理' },
+        { name: '熟练程度', placeholder: '例如：熟练' },
+        { name: '说明', placeholder: '请填写能力说明' }
+      ]
+    },
+    certificates: {
+      title: '资格证书',
+      empty: '暂无资格证书',
+      fields: [
+        { name: '是否具备CSPM认证', placeholder: '是/否' },
+        { name: '其他资格证书', placeholder: '请填写其他资格证书' }
+      ]
+    }
+  };
+
+  function moduleStorageKey(action) {
+    const role = localStorage.getItem(roleKey) || 'GUEST';
+    return `PROFILE_MODULE:${role}:${action}`;
+  }
+
+  function loadModuleRecords(action) {
+    try {
+      return JSON.parse(localStorage.getItem(moduleStorageKey(action)) || '[]');
+    } catch {
+      localStorage.removeItem(moduleStorageKey(action));
+      return [];
+    }
+  }
+
+  function saveModuleRecords(action, records) {
+    localStorage.setItem(moduleStorageKey(action), JSON.stringify(records));
+  }
+
+  function recordSummary(record, config) {
+    return config.fields.map((field) => record[field.name]).filter(Boolean).join(' / ') || '待完善记录';
+  }
+
+  function setSidebarActive(labels) {
+    document.querySelectorAll('aside nav a').forEach((link) => {
+      const active = labels.some((label) => textOf(link).includes(label));
+      link.classList.remove('bg-blue-50', 'dark:bg-blue-900/20', 'text-blue-800', 'dark:text-blue-300', 'border-r-4', 'border-blue-800', 'dark:border-blue-400', 'translate-x-1');
+      link.classList.add('text-slate-500');
+      if (active) {
+        link.classList.add('bg-blue-50', 'text-blue-800', 'border-r-4', 'border-blue-800', 'translate-x-1');
+        link.classList.remove('text-slate-500');
+      }
+    });
+  }
+
+  function renderModuleRoutePage() {
+    const action = moduleActionFromPath();
+    const config = moduleConfigs[action];
+    const main = document.querySelector('main');
+    if (!config || !main) {
+      return;
+    }
+
+    const labelMap = {
+      'project-experience': ['项目经历', '项目历史'],
+      honors: ['获得荣誉', '荣誉奖励'],
+      'education-experience': ['教育经历', '教育背景'],
+      'professional-skills': ['专业技能'],
+      certificates: ['资格证书', '资质证书', '证书奖励']
+    };
+    setSidebarActive(labelMap[action] || [config.title]);
+
+    const records = loadModuleRecords(action);
+    const listHtml = records.length
+      ? records.map((record, index) => `
+        <article class="col-span-12 lg:col-span-6 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group" data-module-page-record="${index}">
+          <div class="flex justify-between items-start gap-4 mb-5">
+            <div>
+              <p class="text-xs uppercase tracking-widest text-primary font-bold">${config.title}</p>
+              <h3 class="font-body-lg font-bold text-on-background mt-2">${recordSummary(record, config)}</h3>
+            </div>
+            <div class="flex gap-1 opacity-100 transition-opacity">
+              <button class="p-1.5 text-slate-400 hover:text-primary transition-colors" data-module-page-manage="${action}" type="button"><span class="material-symbols-outlined text-xl">edit</span></button>
+              <button class="p-1.5 text-slate-400 hover:text-error transition-colors" data-module-page-delete="${action}:${index}" type="button"><span class="material-symbols-outlined text-xl">delete</span></button>
+            </div>
+          </div>
+          <dl class="grid grid-cols-1 gap-3 text-sm">
+            ${config.fields.map((field) => `
+              <div class="rounded bg-slate-50 border border-slate-100 p-3">
+                <dt class="text-xs font-bold text-slate-400">${field.name}</dt>
+                <dd class="mt-1 text-slate-700">${record[field.name] || '待完善'}</dd>
+              </div>
+            `).join('')}
+          </dl>
+        </article>
+      `).join('')
+      : `
+        <div class="col-span-12 bg-surface-container-lowest border border-dashed border-slate-200 rounded-xl p-10 text-center">
+          <span class="material-symbols-outlined text-4xl text-slate-300 mb-3">add_circle</span>
+          <p class="font-label-md text-label-md text-on-background">${config.empty}</p>
+          <p class="text-sm text-on-surface-variant mt-2">请点击右上角添加第一条${config.title}记录。</p>
+        </div>
+      `;
+
+    main.innerHTML = `
+      <div class="max-w-[1140px] mx-auto p-10">
+        <div class="flex justify-between items-end mb-8">
+          <div>
+            <h1 class="font-h1 text-h1 text-on-background mb-2">个人中心 - ${config.title}</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">维护${config.title}信息，保存后会绑定到当前登录账号并在刷新后保留。</p>
+          </div>
+          <button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded shadow-sm hover:opacity-90 transition-all font-label-md text-label-md" data-module-page-manage="${action}" type="button">
+            <span class="material-symbols-outlined">add</span>
+            <span>添加${config.title}</span>
+          </button>
+        </div>
+        <div class="grid grid-cols-12 gap-6">${listHtml}</div>
+      </div>
+    `;
+  }
+
+  function openRecordManager(action) {
+    const config = moduleConfigs[action];
+    if (!config) {
+      openPanel('功能说明', '该入口正在配置中，请稍后再试。');
+      return;
+    }
+
+    let records = loadModuleRecords(action);
+    let editingIndex = -1;
+    let panel = document.getElementById('stitch-action-panel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'stitch-action-panel';
+      panel.className = 'fixed inset-0 z-[9998] flex items-center justify-center bg-slate-900/30 px-4';
+      document.body.appendChild(panel);
+    }
+
+    const render = () => {
+      const fields = config.fields.map((field) => `
+        <label class="block">
+          <span class="text-xs font-bold text-slate-500">${field.name}</span>
+          <input class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" data-module-field="${field.name}" placeholder="${field.placeholder}" />
+        </label>
+      `).join('');
+      const recordItems = records.length
+        ? records.map((record, index) => `
+          <li class="rounded border border-slate-200 bg-slate-50 p-3" data-module-record="${index}">
+            <p class="text-sm font-bold text-slate-800">${recordSummary(record, config)}</p>
+            <div class="mt-3 flex gap-2">
+              <button type="button" class="rounded border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-slate-600" data-module-edit="${index}">编辑</button>
+              <button type="button" class="rounded border border-slate-200 bg-white px-3 py-1 text-xs font-bold text-red-600" data-module-delete="${index}">删除</button>
+            </div>
+          </li>
+        `).join('')
+        : `<li class="rounded border border-dashed border-slate-300 p-4 text-sm text-slate-500" data-module-empty>${config.empty}</li>`;
+
+      panel.innerHTML = `
+        <div class="w-full max-w-2xl rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-widest text-[#135f83]">资料维护</p>
+              <h2 class="mt-2 text-xl font-bold text-[#12263d]">${config.title}</h2>
+            </div>
+            <button type="button" class="rounded border border-slate-200 px-3 py-1 text-sm font-bold text-slate-500" data-panel-close>关闭</button>
+          </div>
+          <div class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2" data-module-form>${fields}</div>
+          <div class="mt-4 flex justify-end gap-2">
+            <button type="button" class="rounded border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" data-module-cancel>取消编辑</button>
+            <button type="button" class="rounded bg-[#135f83] px-4 py-2 text-sm font-bold text-white" data-module-save>添加记录</button>
+          </div>
+          <ul class="mt-5 space-y-3" data-module-list>${recordItems}</ul>
+        </div>
+      `;
+
+      const setForm = (record = {}) => {
+        panel.querySelectorAll('[data-module-field]').forEach((input) => {
+          if (input instanceof HTMLInputElement) {
+            input.value = record[input.dataset.moduleField] || '';
+          }
+        });
+      };
+      const clearForm = () => {
+        editingIndex = -1;
+        setForm();
+        const saveButton = panel.querySelector('[data-module-save]');
+        if (saveButton) {
+          saveButton.textContent = '添加记录';
+        }
+      };
+
+      panel.querySelector('[data-panel-close]')?.addEventListener('click', () => panel.remove());
+      panel.querySelector('[data-module-cancel]')?.addEventListener('click', clearForm);
+      panel.querySelector('[data-module-save]')?.addEventListener('click', () => {
+        const record = {};
+        panel.querySelectorAll('[data-module-field]').forEach((input) => {
+          if (input instanceof HTMLInputElement) {
+            record[input.dataset.moduleField] = input.value.trim();
+          }
+        });
+        if (!Object.values(record).some(Boolean)) {
+          toast(`请先填写${config.title}内容`);
+          return;
+        }
+        if (editingIndex >= 0) {
+          records[editingIndex] = record;
+        } else {
+          records.push(record);
+        }
+        saveModuleRecords(action, records);
+        toast(`${config.title}已保存`);
+        editingIndex = -1;
+        renderModuleRoutePage();
+        render();
+      });
+      panel.querySelectorAll('[data-module-edit]').forEach((button) => {
+        button.addEventListener('click', () => {
+          editingIndex = Number(button.getAttribute('data-module-edit'));
+          setForm(records[editingIndex]);
+          const saveButton = panel.querySelector('[data-module-save]');
+          if (saveButton) {
+            saveButton.textContent = '保存修改';
+          }
+        });
+      });
+      panel.querySelectorAll('[data-module-delete]').forEach((button) => {
+        button.addEventListener('click', () => {
+          records = records.filter((_, index) => index !== Number(button.getAttribute('data-module-delete')));
+          saveModuleRecords(action, records);
+          toast(`${config.title}已删除`);
+          renderModuleRoutePage();
+          render();
+        });
+      });
+    };
+
+    render();
+  }
+
   function deleteNearestCard(target) {
     const card = target.closest('.group, article, .bg-white.border, .col-span-12');
     if (card && !card.id) {
@@ -962,7 +1300,7 @@
     if (/资格证书|资质证书|证书奖励/.test(label)) return 'certificates';
     if (/企业中心/.test(label)) return 'enterprise-center';
     if (/人才信息|人才画像/.test(label)) return 'personal-center';
-    if (/人才\b/.test(label)) return 'personal-center';
+    if (/^人才$/.test(label)) return 'personal-center';
     if (/控制台|仪表盘/.test(label)) return 'home';
     if (/查看详情|立即申请|更多机会/.test(label)) return 'recruitments';
     if (/筛选|filter_list/.test(label)) return 'filter-panel';
@@ -1002,20 +1340,34 @@
         go('/personal-center/work-experience');
         break;
       case 'project-experience':
-        openPanel('项目经历', '这里用于维护项目起止时间、项目内容、承担职责和项目成果。正式版本会支持新增、编辑、删除多段项目经历。');
+        go(modulePath(action));
         break;
       case 'honors':
-        openPanel('获得荣誉', '这里用于维护荣誉起止时间、荣誉内容和证明材料。正式版本会支持多条荣誉记录管理。');
+        go(modulePath(action));
         break;
       case 'education-experience':
-        openPanel('教育经历', '这里用于维护毕业院校、所学专业、学历、学位、入学时间和毕业时间。正式版本会支持多段教育经历。');
+        go(modulePath(action));
         break;
       case 'professional-skills':
-        openPanel('专业技能', '这里用于维护个人优势、专业技能标签和能力说明，并会与人才匹配和招聘推荐联动。');
+        go(modulePath(action));
         break;
       case 'certificates':
-        openPanel('资格证书', '这里用于维护是否具备 CSPM 认证及其他资格证书。正式版本会支持证书新增、编辑、删除和附件上传。');
+        go(modulePath(action));
         break;
+      case 'manage-module':
+        openRecordManager(element?.dataset.modulePageManage || moduleActionFromPath());
+        break;
+      case 'delete-module-record': {
+        const [moduleAction, indexText] = String(element?.dataset.modulePageDelete || '').split(':');
+        const records = loadModuleRecords(moduleAction);
+        const index = Number(indexText);
+        if (moduleConfigs[moduleAction] && Number.isInteger(index)) {
+          saveModuleRecords(moduleAction, records.filter((_, recordIndex) => recordIndex !== index));
+          toast(`${moduleConfigs[moduleAction].title}已删除`);
+          renderModuleRoutePage();
+        }
+        break;
+      }
       case 'enterprise-center':
         go('/enterprise-center');
         break;
@@ -1130,6 +1482,8 @@
       .map((icon) => textOf(icon))
       .join(' ');
     const icon = `${label} ${iconText}`.trim();
+    if (button.dataset.modulePageManage) return 'manage-module';
+    if (button.dataset.modulePageDelete) return 'delete-module-record';
     if (button.closest('#captcha-modal') && /chevron_right/.test(icon)) return 'captcha-complete';
     if (/close/.test(icon)) return 'close-panel';
     if (/refresh/.test(icon)) return 'captcha-refresh';

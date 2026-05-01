@@ -12,7 +12,11 @@ const stitchPages = [
   { path: '/register', title: '全国项目管理标准化技术委员会 - 人才库 注册' },
   { path: '/enterprise-center', title: '企业中心 - 资料维护' },
   { path: '/personal-center', title: '个人中心 - 基础信息' },
-  { path: '/personal-center/work-experience', title: '个人中心 - 工作经历' }
+  { path: '/personal-center/work-experience', title: '个人中心 - 工作经历' },
+  { path: '/personal-center/project-experience', title: '个人中心 - 项目经历' },
+  { path: '/personal-center/education-experience', title: '个人中心 - 教育经历' },
+  { path: '/personal-center/professional-skills', title: '个人中心 - 专业技能' },
+  { path: '/personal-center/certificates', title: '个人中心 - 资格证书' }
 ];
 
 async function frameByTitle(page: Page, title: string): Promise<Frame> {
@@ -135,17 +139,15 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     }
   });
 
-  test('所有 Stitch 页面使用一致的系统表头', async ({ page }) => {
+  test('所有 Stitch 页面保留 code.html 原始头部', async ({ page }) => {
     for (const item of stitchPages) {
       await gotoStitchPage(page, item.path);
       const frame = await frameByTitle(page, item.title);
-      const header = frame.locator('.stitch-global-header');
+      const sourceHeader = frame.locator('body > header, body > nav').first();
 
-      await expect(header.getByText('全国项目管理标准化技术委员会 - 人才库')).toBeVisible();
-      await expect(header.getByRole('button', { name: '首页' })).toBeVisible();
-      await expect(header.getByRole('button', { name: '招聘信息' })).toBeVisible();
-      await expect(header.getByRole('button', { name: '人才信息' })).toBeVisible();
-      await expect(header.getByRole('button', { name: '企业中心' })).toBeVisible();
+      await expect(sourceHeader).toBeVisible();
+      await expect(frame.locator('.stitch-global-header')).toHaveCount(0);
+      await expect(sourceHeader).toContainText(/全国项目管理标准化技术委员会 - 人才库|仪表盘|控制台|Talent Pool/i);
     }
   });
 
@@ -153,7 +155,8 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await page.goto('/register', { waitUntil: 'domcontentloaded' });
     const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 注册');
 
-    await expect(frame.locator('.stitch-global-header')).toBeVisible();
+    await expect(frame.locator('body > header')).toBeVisible();
+    await expect(frame.locator('.stitch-global-header')).toHaveCount(0);
     await expect(frame.locator('body')).not.toHaveClass(/stitch-page /);
     await expect(frame.getByRole('heading', { name: '释放企业潜能' })).toBeVisible();
     await expect(frame.getByRole('heading', { name: '创建账号' })).toBeVisible();
@@ -199,6 +202,42 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await remember.click();
     await expect(remember).not.toBeChecked();
     await expect.poll(() => frame.evaluate(() => localStorage.getItem('REMEMBER_DEVICE'))).toBe('false');
+  });
+
+  test('安全验证失败重置后再次轻拖不会跳到最右侧', async ({ page }) => {
+    await page.goto('/login');
+    const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 登录');
+
+    await frame.locator('main').getByRole('button', { name: '登录' }).click();
+    await expect(frame.locator('#captcha-modal')).toBeVisible();
+
+    const slider = frame.locator('#captcha-modal [data-stitch-action="captcha-slider"]');
+    const bar = slider.locator('xpath=..');
+    const sliderBox = await slider.boundingBox();
+    const barBox = await bar.boundingBox();
+    expect(sliderBox, '找不到滑块位置').toBeTruthy();
+    expect(barBox, '找不到滑轨位置').toBeTruthy();
+
+    const startX = sliderBox!.x + sliderBox!.width / 2;
+    const startY = sliderBox!.y + sliderBox!.height / 2;
+    const wrongEndX = barBox!.x + barBox!.width - sliderBox!.width / 2 - 6;
+
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(wrongEndX, startY, { steps: 8 });
+    await page.mouse.up();
+    await expect(frame.locator('#stitch-toast')).toContainText(/请(将拼图块|按住滑块)拖到图片缺口位置/);
+
+    const resetBox = await slider.boundingBox();
+    expect(resetBox, '找不到重置后的滑块位置').toBeTruthy();
+    await page.mouse.move(resetBox!.x + resetBox!.width / 2, resetBox!.y + resetBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(resetBox!.x + resetBox!.width / 2 + 8, resetBox!.y + resetBox!.height / 2, { steps: 2 });
+
+    const secondDragBox = await slider.boundingBox();
+    expect(secondDragBox, '找不到二次轻拖后的滑块位置').toBeTruthy();
+    expect(secondDragBox!.x).toBeLessThan(resetBox!.x + 32);
+    await page.mouse.up();
   });
 
   test('常见工具入口打开明确功能面板，不再显示兜底提示', async ({ page }) => {
@@ -271,6 +310,43 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.locator('#stitch-toast')).toContainText('已取消本次修改');
   });
 
+  test('个人中心基础资料保存后刷新仍然保留', async ({ page }) => {
+    await loginAs(page, 'USER');
+    await page.goto('/personal-center');
+    let frame = await frameByTitle(page, '个人中心 - 基础信息');
+
+    await frame.evaluate(() => {
+      const fillByLabel = (labelText: string, value: string) => {
+        const group = Array.from(document.querySelectorAll('.space-y-2')).find((item) => {
+          return item.querySelector('label')?.textContent?.replace(/\s+/g, ' ').trim() === labelText;
+        });
+        const field = group?.querySelector('input, textarea, select') as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null;
+        if (field) {
+          field.value = value;
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      };
+      fillByLabel('姓名', '李明');
+      fillByLabel('求职意向', '项目经理');
+      fillByLabel('所在城市', '北京');
+      fillByLabel('电子邮箱', 'liming@example.com');
+      fillByLabel('核心竞争力与职业亮点', '具备标准化项目治理和跨部门交付经验。');
+    });
+
+    await frame.getByRole('button', { name: '保存资料' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('保存成功，资料已保存到当前账号');
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    frame = await frameByTitle(page, '个人中心 - 基础信息');
+    await expect.poll(() => frame.evaluate(() => {
+      return Array.from(document.querySelectorAll('input, textarea')).map((field) => {
+        return (field as HTMLInputElement | HTMLTextAreaElement).value;
+      });
+    })).toEqual(expect.arrayContaining(['李明', '项目经理', '北京', 'liming@example.com']));
+    await expect(frame.getByText('李明').first()).toBeVisible();
+  });
+
   test('工作经历页添加、编辑、删除工作经历都有反馈', async ({ page }) => {
     await loginAs(page, 'USER');
     await page.goto('/personal-center/work-experience');
@@ -335,6 +411,19 @@ test.describe('工作流程功能 - 页面跳转', () => {
     await expect(page).toHaveURL(/\/personal-center$/);
   });
 
+  test('个人中心项目经历菜单进入独立页面', async ({ page }) => {
+    await loginAs(page, 'USER');
+    await page.goto('/personal-center');
+    const frame = await frameByTitle(page, '个人中心 - 基础信息');
+
+    await frame.getByText('项目经历').click();
+
+    await expect(page).toHaveURL(/\/personal-center\/project-experience$/);
+    const projectFrame = await frameByTitle(page, '个人中心 - 项目经历');
+    await expect(projectFrame.getByRole('heading', { name: '个人中心 - 项目经历' })).toBeVisible();
+    await expect(projectFrame.getByRole('button', { name: '添加项目经历' })).toBeVisible();
+  });
+
   test('退出登录会清理角色并回到公开首页', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => {
@@ -344,7 +433,7 @@ test.describe('工作流程功能 - 页面跳转', () => {
     await page.goto('/personal-center');
     const frame = await frameByTitle(page, '个人中心 - 基础信息');
 
-    await frame.locator('.stitch-global-header button[data-stitch-action="logout"]').click();
+    await frame.getByText('退出登录').click();
 
     await expect(page).toHaveURL(/\/$/);
     await expect.poll(() => page.evaluate(() => window.localStorage.getItem('USER_ROLE'))).toBeNull();
@@ -354,7 +443,7 @@ test.describe('工作流程功能 - 页面跳转', () => {
     await page.goto('/');
     const frame = await frameByTitle(page, '全国项目管理标准化技术委员会 - 人才库 首页');
 
-    await frame.getByRole('button', { name: '人才信息' }).click();
+    await frame.getByText('人才信息').click();
 
     await expect(page).toHaveURL(/\/login-required$/);
     await expect(page.getByRole('heading', { name: '请先登录后查看招聘信息' })).toBeVisible();

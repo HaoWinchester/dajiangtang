@@ -107,6 +107,56 @@ const router = createRouter({
       }
     },
     {
+      path: '/personal-center/project-experience',
+      name: 'personal-project-experience',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_6/code.html',
+        title: '个人中心 - 项目经历'
+      }
+    },
+    {
+      path: '/personal-center/honors',
+      name: 'personal-honors',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_6/code.html',
+        title: '个人中心 - 获得荣誉'
+      }
+    },
+    {
+      path: '/personal-center/education-experience',
+      name: 'personal-education-experience',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_6/code.html',
+        title: '个人中心 - 教育经历'
+      }
+    },
+    {
+      path: '/personal-center/professional-skills',
+      name: 'personal-professional-skills',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_6/code.html',
+        title: '个人中心 - 专业技能'
+      }
+    },
+    {
+      path: '/personal-center/certificates',
+      name: 'personal-certificates',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_6/code.html',
+        title: '个人中心 - 资格证书'
+      }
+    },
+    {
       path: '/login-required',
       name: 'login-required',
       component: AuthRequiredView

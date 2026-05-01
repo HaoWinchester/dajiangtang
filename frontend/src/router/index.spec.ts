@@ -140,6 +140,17 @@ describe('recruitment route guard', () => {
     expect(router.resolve('/personal-center/work-experience').meta.requiresAuth).toBe(true);
   });
 
+  it('registers all personal-center module pages as protected Stitch pages', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/personal-center/project-experience').name).toBe('personal-project-experience');
+    expect(router.resolve('/personal-center/honors').name).toBe('personal-honors');
+    expect(router.resolve('/personal-center/education-experience').name).toBe('personal-education-experience');
+    expect(router.resolve('/personal-center/professional-skills').name).toBe('personal-professional-skills');
+    expect(router.resolve('/personal-center/certificates').name).toBe('personal-certificates');
+    expect(router.resolve('/personal-center/certificates').meta.requiresAuth).toBe(true);
+  });
+
   it('redirects unauthenticated visitors away from protected center pages', async () => {
     const { requireAuthGuard } = await import('./index');
 

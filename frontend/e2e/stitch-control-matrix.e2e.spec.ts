@@ -8,7 +8,11 @@ const stitchPages: Array<{ path: string; title: string; role?: Role }> = [
   { path: '/register', title: '全国项目管理标准化技术委员会 - 人才库 注册' },
   { path: '/enterprise-center', title: '企业中心 - 资料维护', role: 'COMPANY' },
   { path: '/personal-center', title: '个人中心 - 基础信息', role: 'USER' },
-  { path: '/personal-center/work-experience', title: '个人中心 - 工作经历', role: 'USER' }
+  { path: '/personal-center/work-experience', title: '个人中心 - 工作经历', role: 'USER' },
+  { path: '/personal-center/project-experience', title: '个人中心 - 项目经历', role: 'USER' },
+  { path: '/personal-center/education-experience', title: '个人中心 - 教育经历', role: 'USER' },
+  { path: '/personal-center/professional-skills', title: '个人中心 - 专业技能', role: 'USER' },
+  { path: '/personal-center/certificates', title: '个人中心 - 资格证书', role: 'USER' }
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -49,6 +53,25 @@ async function expectPanelAfterClick(frame: Frame, control: Locator, title: stri
   await closePanelIfOpen(frame);
   await control.click();
   await expect(frame.locator('#stitch-action-panel')).toContainText(title);
+  await closePanelIfOpen(frame);
+}
+
+async function expectModuleRecordManagerWorks(frame: Frame, title: string, fieldName: string, firstValue: string, editedValue: string) {
+  await frame.getByRole('button', { name: `添加${title}` }).click();
+  const panel = frame.locator('#stitch-action-panel');
+  await expect(panel).toContainText(title);
+
+  await panel.locator(`[data-module-field="${fieldName}"]`).fill(firstValue);
+  await panel.locator('[data-module-save]').click();
+  await expect(panel).toContainText(firstValue);
+
+  await panel.locator('[data-module-edit="0"]').click();
+  await panel.locator(`[data-module-field="${fieldName}"]`).fill(editedValue);
+  await panel.locator('[data-module-save]').click();
+  await expect(panel).toContainText(editedValue);
+
+  await panel.locator('[data-module-delete="0"]').click();
+  await expect(panel).toContainText(/暂无|暂无项目经历|暂无教育经历|暂无专业技能|暂无资格证书/);
   await closePanelIfOpen(frame);
 }
 
@@ -145,7 +168,7 @@ test.describe('控件矩阵 - 自动巡检', () => {
   });
 
   test('所有可点击控件点击后都有可观察结果', async ({ page }) => {
-    test.setTimeout(120_000);
+    test.setTimeout(360_000);
     const failures: string[] = [];
     const currentRouteActions: Record<string, string[]> = {
       '/': ['home'],
@@ -153,7 +176,11 @@ test.describe('控件矩阵 - 自动巡检', () => {
       '/register': ['register'],
       '/enterprise-center': ['enterprise-center', 'personal-center'],
       '/personal-center': ['personal-center'],
-      '/personal-center/work-experience': ['work-experience']
+      '/personal-center/work-experience': ['work-experience'],
+      '/personal-center/project-experience': ['project-experience'],
+      '/personal-center/education-experience': ['education-experience'],
+      '/personal-center/professional-skills': ['professional-skills'],
+      '/personal-center/certificates': ['certificates']
     };
 
     for (const item of stitchPages) {
@@ -241,6 +268,26 @@ test.describe('控件矩阵 - 自动巡检', () => {
       }
     }
   });
+
+  test('登录页和注册页底部保持一致', async ({ page }) => {
+    const footerSignature = async (frame: Frame) => {
+      return frame.locator('footer').evaluate((footer) => ({
+        className: footer.className,
+        text: footer.textContent?.replace(/\s+/g, ' ').trim(),
+        links: Array.from(footer.querySelectorAll('a')).map((link) => ({
+          text: link.textContent?.replace(/\s+/g, ' ').trim(),
+          className: link.className
+        }))
+      }));
+    };
+
+    const loginFrame = await openStitchPage(page, '/login', '全国项目管理标准化技术委员会 - 人才库 登录');
+    const loginFooter = await footerSignature(loginFrame);
+    const registerFrame = await openStitchPage(page, '/register', '全国项目管理标准化技术委员会 - 人才库 注册');
+    const registerFooter = await footerSignature(registerFrame);
+
+    expect(loginFooter).toEqual(registerFooter);
+  });
 });
 
 test.describe('控件矩阵 - 易漏入口点名验证', () => {
@@ -260,29 +307,64 @@ test.describe('控件矩阵 - 易漏入口点名验证', () => {
   });
 
   test('个人中心侧栏的每个业务页签都打开对应功能', async ({ page }) => {
-    const frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
+    let frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
 
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '项目经历' }), '项目经历');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '教育经历' }), '教育经历');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '专业技能' }), '专业技能');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '资格证书' }), '资格证书');
+    await frame.locator('a').filter({ hasText: '项目经历' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/project-experience$/);
+    frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
+    await frame.locator('a').filter({ hasText: '教育经历' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/education-experience$/);
+    frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
+    await frame.locator('a').filter({ hasText: '专业技能' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/professional-skills$/);
+    frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
+    await frame.locator('a').filter({ hasText: '资格证书' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/certificates$/);
   });
 
   test('企业中心侧栏的每个业务入口都打开对应功能', async ({ page }) => {
-    const frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+    let frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
 
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '项目历史' }), '项目经历');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '教育背景' }), '教育经历');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '专业技能' }), '专业技能');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '资质证书' }), '资格证书');
+    await frame.locator('a').filter({ hasText: '项目历史' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/project-experience$/);
+    frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+    await frame.locator('a').filter({ hasText: '教育背景' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/education-experience$/);
+    frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+    await frame.locator('a').filter({ hasText: '专业技能' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/professional-skills$/);
+    frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+    await frame.locator('a').filter({ hasText: '资质证书' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/certificates$/);
   });
 
   test('工作经历页侧栏的每个业务入口都打开对应功能', async ({ page }) => {
-    const frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
+    let frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
 
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '项目历史' }), '项目经历');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '教育背景' }), '教育经历');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '专业技能' }), '专业技能');
-    await expectPanelAfterClick(frame, frame.locator('a').filter({ hasText: '证书奖励' }), '资格证书');
+    await frame.locator('a').filter({ hasText: '项目历史' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/project-experience$/);
+    frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
+    await frame.locator('a').filter({ hasText: '教育背景' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/education-experience$/);
+    frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
+    await frame.locator('a').filter({ hasText: '专业技能' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/professional-skills$/);
+    frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
+    await frame.locator('a').filter({ hasText: '证书奖励' }).click();
+    await expect(page).toHaveURL(/\/personal-center\/certificates$/);
+  });
+
+  test('补充页面的添加、编辑、删除形成闭环', async ({ page }) => {
+    const projectFrame = await openStitchPage(page, '/personal-center/project-experience', '个人中心 - 项目经历', 'USER');
+    await expectModuleRecordManagerWorks(projectFrame, '项目经历', '项目内容', '标准化平台建设', '标准化平台升级');
+
+    const educationFrame = await openStitchPage(page, '/personal-center/education-experience', '个人中心 - 教育经历', 'USER');
+    await expectModuleRecordManagerWorks(educationFrame, '教育经历', '毕业院校', '北京大学', '清华大学');
+
+    const skillsFrame = await openStitchPage(page, '/personal-center/professional-skills', '个人中心 - 专业技能', 'USER');
+    await expectModuleRecordManagerWorks(skillsFrame, '专业技能', '技能名称', '项目治理', '项目群管理');
+
+    const certificatesFrame = await openStitchPage(page, '/personal-center/certificates', '个人中心 - 资格证书', 'USER');
+    await expectModuleRecordManagerWorks(certificatesFrame, '资格证书', '是否具备CSPM认证', '是', '否');
   });
 });
