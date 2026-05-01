@@ -1815,8 +1815,6 @@
   function actionFromText(label) {
     const pageName = currentPageName();
     if (/退出登录|Logout/.test(label)) return 'logout';
-    if (/指纹登录/.test(label)) return 'biometric-login';
-    if (/扫码登录/.test(label)) return 'qr-login';
     if (/Log In|登录|立即登录/.test(label)) return 'login';
     if (/Sign Up|注册|申请加入/.test(label)) return 'register';
     if (/首页|Dashboard|Overview|控制台|仪表盘/.test(label)) return 'home';
@@ -2006,12 +2004,6 @@
       case 'close-panel':
         document.getElementById('captcha-modal')?.classList.add('hidden');
         document.getElementById('stitch-action-panel')?.remove();
-        break;
-      case 'biometric-login':
-        openPanel('指纹登录', '请先完成用户名和密码登录，之后可在账号设置中开启本设备指纹登录。');
-        break;
-      case 'qr-login':
-        openPanel('扫码登录', '请使用已登录的移动端账号扫码确认。本入口会校验账号、设备和二维码有效期。');
         break;
       case 'help':
         openPanel('帮助中心', '帮助中心包含账号注册、资料维护、招聘信息查看、企业资料维护和权限说明。');

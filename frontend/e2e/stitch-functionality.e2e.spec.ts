@@ -224,6 +224,8 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     const frame = await frameByTitle(page, '项目管理人才库 登录');
     const remember = frame.locator('#remember');
 
+    await expect(frame.getByRole('button', { name: '指纹登录' })).toHaveCount(0);
+    await expect(frame.getByRole('button', { name: '扫码登录' })).toHaveCount(0);
     await expect(remember).not.toBeChecked();
     await frame.getByText('记住设备（30天内）').click();
     await expect(remember).toBeChecked();

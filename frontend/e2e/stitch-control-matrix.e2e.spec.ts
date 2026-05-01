@@ -319,6 +319,9 @@ test.describe('控件矩阵 - 易漏入口点名验证', () => {
     await expect(frame.getByText('或通过企业 SSO 登录')).toHaveCount(0);
     await expect(frame.getByRole('button', { name: 'Google' })).toHaveCount(0);
     await expect(frame.getByRole('button', { name: 'Microsoft' })).toHaveCount(0);
+    await expect(frame.getByRole('button', { name: '指纹登录' })).toHaveCount(0);
+    await expect(frame.getByRole('button', { name: '扫码登录' })).toHaveCount(0);
+    await expect(frame.getByText('或者')).toHaveCount(0);
     await expectPanelAfterClick(frame, frame.getByText('忘记密码？'), '找回密码');
     await expectPanelAfterClick(frame, frame.getByRole('link', { name: 'Cookie 政策' }), '平台说明');
 
