@@ -16,7 +16,8 @@ const stitchPages = [
   { path: '/personal-center/project-experience', title: '个人中心 - 项目经历' },
   { path: '/personal-center/education-experience', title: '个人中心 - 教育经历' },
   { path: '/personal-center/professional-skills', title: '个人中心 - 专业技能' },
-  { path: '/personal-center/certificates', title: '个人中心 - 资格证书' }
+  { path: '/personal-center/certificates', title: '个人中心 - 资格证书' },
+  { path: '/analytics', title: '数据分析' }
 ];
 
 async function frameByTitle(page: Page, title: string): Promise<Frame> {
@@ -90,6 +91,13 @@ async function mockRecruitments(page: Page) {
 }
 
 async function loginAs(page: Page, role: 'ADMIN' | 'USER' | 'COMPANY' = 'USER') {
+  await page.context().addCookies([
+    {
+      name: 'USER_ROLE',
+      value: role,
+      url: 'http://127.0.0.1:5173'
+    }
+  ]);
   await page.addInitScript((userRole) => {
     window.localStorage.setItem('USER_ROLE', userRole);
     document.cookie = `USER_ROLE=${userRole}; path=/`;
@@ -97,6 +105,10 @@ async function loginAs(page: Page, role: 'ADMIN' | 'USER' | 'COMPANY' = 'USER') 
 }
 
 async function authorizeProtectedStitchPage(page: Page, path: string) {
+  if (path.startsWith('/analytics')) {
+    await loginAs(page, 'ADMIN');
+    return;
+  }
   if (path.startsWith('/personal-center') || path.startsWith('/enterprise-center')) {
     await loginAs(page, path.startsWith('/enterprise-center') ? 'COMPANY' : 'USER');
   }
@@ -151,8 +163,27 @@ test.describe('单点功能 - Stitch 页面控件', () => {
       await expect(preservedHeader).toContainText('首页');
       await expect(preservedHeader).toContainText('招聘信息');
       await expect(preservedHeader).toContainText('人才信息');
+      if (item.path === '/analytics') {
+        await expect(preservedHeader).toContainText('数据分析');
+      }
       await expect(frame.locator('main')).toBeVisible();
     }
+  });
+
+  test('数据分析页承载新增 Stitch 设计并使用中文侧栏', async ({ page }) => {
+    await loginAs(page, 'ADMIN');
+    await page.goto('/analytics');
+    const frame = await frameByTitle(page, '数据分析');
+
+    await expect(frame.locator('header.stitch-preserved-header')).toContainText('数据分析');
+    await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('项目管理人才库');
+    await expect(frame.getByText('行业趋势对比')).toBeVisible();
+    await expect(frame.getByText('岗位热度排行榜')).toBeVisible();
+    await expect(frame.getByText('人才城市分布')).toBeVisible();
+
+    const asideText = await frame.locator('aside').first().innerText();
+    expect(asideText).toContain('数据分析');
+    expect(asideText).not.toMatch(/TalentArch|Enterprise Portal|Dashboard|Jobs|Talent Pool|Analytics|Privacy Policy|Terms of Service|Cookie Settings|Contact Admin/);
   });
 
   test('固定顶部栏在宽屏下铺满视口右侧不留缺口', async ({ page }) => {
@@ -631,7 +662,7 @@ test.describe('流程间数据交互 - 角色与接口', () => {
 
     await requestPromise;
     await expect(page).toHaveURL(/\/recruitments$/);
-    await expect(page.getByRole('link', { name: '新增' })).toBeVisible();
+    await expect(page.getByRole('link', { name: '新增', exact: true })).toBeVisible();
   });
 
   test('注册成功后写入 USER 角色并进入个人中心', async ({ page }) => {
@@ -729,7 +760,7 @@ test.describe('E2E - 最新页面完整链路', () => {
     await dragCaptchaToGap(frame);
     await expect(page).toHaveURL(/\/recruitments$/);
 
-    await page.getByRole('link', { name: '新增' }).click();
+    await page.getByRole('link', { name: '新增', exact: true }).click();
     await expect(page).toHaveURL(/\/recruitments\/new$/);
     await expect(page.getByRole('heading', { name: '招聘新增入口' })).toBeVisible();
   });

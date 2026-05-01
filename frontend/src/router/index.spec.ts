@@ -40,6 +40,25 @@ describe('recruitment route guard', () => {
     expect(requireAuthGuard({ meta: { requiresAuth: true } })).toBe(true);
   });
 
+  it('allows admins and company users to enter analytics routes', async () => {
+    const { requireAuthGuard } = await import('./index');
+
+    localStorage.setItem('USER_ROLE', 'ADMIN');
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['ADMIN', 'COMPANY'] } })).toBe(true);
+
+    localStorage.setItem('USER_ROLE', 'COMPANY');
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['ADMIN', 'COMPANY'] } })).toBe(true);
+  });
+
+  it('redirects regular users away from analytics routes to personal center', async () => {
+    localStorage.setItem('USER_ROLE', 'USER');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['ADMIN', 'COMPANY'] } })).toEqual({
+      name: 'personal-center'
+    });
+  });
+
   it('allows only regular users to enter personal center routes', async () => {
     localStorage.setItem('USER_ROLE', 'USER');
     const { requireAuthGuard } = await import('./index');
@@ -183,6 +202,14 @@ describe('recruitment route guard', () => {
     expect(router.resolve('/personal-center').name).toBe('personal-center');
     expect(router.resolve('/personal-center').meta.requiresAuth).toBe(true);
     expect(router.resolve('/personal-center').meta.allowedRoles).toEqual(['USER']);
+  });
+
+  it('maps analytics to the protected Stitch data analysis design', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/analytics').name).toBe('analytics');
+    expect(router.resolve('/analytics').meta.requiresAuth).toBe(true);
+    expect(router.resolve('/analytics').meta.allowedRoles).toEqual(['ADMIN', 'COMPANY']);
   });
 
   it('maps work experience to the stitch work experience design', async () => {

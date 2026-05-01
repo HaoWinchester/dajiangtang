@@ -35,6 +35,8 @@ body {
 
 .platform-page {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   padding-top: 64px;
 }
 
@@ -126,8 +128,57 @@ button:disabled {
 
 .app-shell {
   width: min(1180px, calc(100vw - 40px));
+  flex: 1 0 auto;
   margin: 0 auto;
   padding: 40px 0;
+}
+
+.platform-footer {
+  flex-shrink: 0;
+  border-top: 1px solid #d9e3ec;
+  background: rgba(255, 255, 255, 0.96);
+  color: #687789;
+}
+
+.platform-footer-inner {
+  width: min(1440px, 100%);
+  min-height: 82px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 auto;
+  padding: 22px 24px;
+}
+
+.platform-footer-brand {
+  color: #12263d;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.platform-footer p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.platform-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  white-space: nowrap;
+}
+
+.platform-footer-links a {
+  color: #687789;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.platform-footer-links a:hover {
+  color: #135f83;
 }
 
 .page-header {
@@ -603,6 +654,15 @@ tbody tr:last-child td {
     position: absolute;
     top: 12px;
     right: 16px;
+  }
+
+  .platform-footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .platform-footer-links {
+    flex-wrap: wrap;
   }
 
   .app-shell {

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#2d3449",
+                        "primary-container": "#1e40af",
+                        "on-tertiary-container": "#b4bbd5",
+                        "tertiary-container": "#434b60",
+                        "surface-container-highest": "#e3e1eb",
+                        "on-surface-variant": "#444653",
+                        "on-error": "#ffffff",
+                        "on-background": "#1a1b22",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-tertiary-fixed": "#131b2e",
+                        "surface-dim": "#dad9e3",
+                        "surface-tint": "#3755c3",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#eeedf7",
+                        "on-primary-fixed-variant": "#173bab",
+                        "surface-container-high": "#e8e7f1",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#2f3037",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "surface-bright": "#fbf8ff",
+                        "inverse-primary": "#b8c4ff",
+                        "on-surface": "#1a1b22",
+                        "outline": "#757684",
+                        "outline-variant": "#c4c5d5",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "on-primary-fixed": "#001453",
+                        "primary-fixed": "#dde1ff",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "surface-container-low": "#f4f2fc",
+                        "secondary-container": "#d5e3fc",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#f1f0fa",
+                        "error-container": "#ffdad6",
+                        "surface": "#fbf8ff",
+                        "secondary": "#515f74",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "background": "#fbf8ff",
+                        "surface-variant": "#e3e1eb",
+                        "primary": "#00288e",
+                        "on-primary-container": "#a8b8ff",
+                        "on-secondary-container": "#57657a",
+                        "error": "#ba1a1a",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d5e3fc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "2xl": "48px",
+                        "sm": "8px",
+                        "xl": "32px",
+                        "margin": "32px",
+                        "lg": "24px",
+                        "base": "4px",
+                        "md": "16px",
+                        "max_width": "1440px",
+                        "3xl": "64px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter", "sans-serif"],
+                        "code": ["Inter", "monospace"],
+                        "body-sm": ["Inter", "sans-serif"],
+                        "label-md": ["Inter", "sans-serif"],
+                        "h3": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "h2": ["Inter", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "h1": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-active {
+            background-color: #d5e3fc; /* secondary-container */
+            color: #00288e; /* primary */
+            border-right: 4px solid #00288e;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+    </style>
+</head>
+<body class="bg-[#F3F4F6] text-on-background">
+<!-- Header -->
+<header class="bg-white font-['Inter'] antialiased text-sm tracking-tight fixed w-full top-0 border-b border-slate-200 z-50">
+<div class="flex justify-between items-center w-full px-6 h-16 max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-blue-900 tracking-tight">TalentArch</span>
+<nav class="hidden md:flex items-center space-x-6">
+<a class="text-slate-600 hover:text-blue-700 transition-colors duration-200" href="#">Talent</a>
+<a class="text-slate-600 hover:text-blue-700 transition-colors duration-200" href="#">Jobs</a>
+<a class="text-blue-800 font-semibold border-b-2 border-blue-800 pb-1" href="#">Dashboard</a>
+<a class="text-slate-600 hover:text-blue-700 transition-colors duration-200" href="#">Messages</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-1.5 border border-slate-200 rounded-md bg-white text-body-sm focus:ring-2 focus:ring-primary/20 outline-none w-64" placeholder="搜索..." type="text"/>
+</div>
+<button class="text-blue-800 text-label-md px-4 py-2 border border-blue-800 rounded hover:bg-slate-50 transition-colors">Enterprise Portal</button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 cursor-pointer p-2 hover:bg-slate-100 rounded-full" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-slate-600 cursor-pointer p-2 hover:bg-slate-100 rounded-full" data-icon="settings">settings</span>
+<img alt="User profile" class="w-8 h-8 rounded-full border border-slate-200" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuLpBAUFBPFpSUrdReqyHTZhwmLszw5WbwGOcWLE-xKcQ3MNeT9oODzXHvIsOnOQsYCZmov8Zl-4qj9owxcz_dYS5AV07PwHu_48WlF5b82VqCz1yNbBKRg69ZRD1JEEv1YPi5PpNTrQ5SQeouuz3dwS2kb4KLQJw4BazPpsql6HT_o4PpbkWgc_SmS7NbQbtAgcZHBaCZbXl0EGAe38Qlh_hZcX1Qq6KzCs7s8Qu4kPiqjgjLZrtGmULret6tGhvjo6b3hhwyleJh"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex min-h-screen pt-16">
+<!-- Sidebar -->
+<aside class="w-64 bg-white border-r border-slate-200 fixed h-[calc(100vh-64px)] overflow-y-auto hidden md:block z-40">
+<nav class="mt-6 pr-4 space-y-1">
+<a class="flex items-center gap-3 px-6 py-3 text-body-md text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>概览</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-body-md text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="filter_alt">filter_alt</span>
+<span>招聘漏斗</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-body-md text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+<span>人才库</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-body-md text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="campaign">campaign</span>
+<span>职位发布</span>
+</a>
+<a class="flex items-center gap-3 px-6 py-3 text-body-md text-slate-600 hover:bg-slate-50 transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+<span>员工管理</span>
+</a>
+<a class="sidebar-active flex items-center gap-3 px-6 py-3 text-body-md transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-semibold">数据分析</span>
+</a>
+</nav>
+<div class="absolute bottom-8 px-6 w-full">
+<div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+<p class="text-label-sm text-primary font-bold mb-1">系统提示</p>
+<p class="text-[12px] text-slate-500 leading-relaxed">您的本月数据报告已生成，点击查看详情。</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow md:ml-64 p-8 transition-all duration-300">
+<div class="max-w-[1440px] mx-auto">
+<!-- 顶部指标卡 -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-white p-6 border border-slate-200 rounded-lg shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="text-slate-500 font-label-md text-label-md">岗位总数</span>
+<span class="material-symbols-outlined text-primary" data-icon="work">work</span>
+</div>
+<div class="text-h2 font-h2 text-primary">1,284</div>
+<div class="flex items-center gap-1 mt-2 text-green-600 text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+<span>较上月增长 12%</span>
+</div>
+</div>
+<div class="bg-white p-6 border border-slate-200 rounded-lg shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="text-slate-500 font-label-md text-label-md">活跃人才</span>
+<span class="material-symbols-outlined text-primary" data-icon="groups">groups</span>
+</div>
+<div class="text-h2 font-h2 text-primary">45,920</div>
+<div class="flex items-center gap-1 mt-2 text-green-600 text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="trending_up">trending_up</span>
+<span>较上月增长 8.4%</span>
+</div>
+</div>
+<div class="bg-white p-6 border border-slate-200 rounded-lg shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="text-slate-500 font-label-md text-label-md">平均匹配度</span>
+<span class="material-symbols-outlined text-primary" data-icon="verified">verified</span>
+</div>
+<div class="text-h2 font-h2 text-primary">82.5%</div>
+<div class="flex items-center gap-1 mt-2 text-primary text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="analytics">analytics</span>
+<span>高于行业基准 5%</span>
+</div>
+</div>
+<div class="bg-white p-6 border border-slate-200 rounded-lg shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="text-slate-500 font-label-md text-label-md">月度增长</span>
+<span class="material-symbols-outlined text-primary" data-icon="insights">insights</span>
+</div>
+<div class="text-h2 font-h2 text-primary">15.8%</div>
+<div class="flex items-center gap-1 mt-2 text-blue-500 text-label-sm">
+<span class="material-symbols-outlined text-[16px]" data-icon="calendar_month">calendar_month</span>
+<span>持续三个月增长</span>
+</div>
+</div>
+</div>
+<!-- 中间层 (两栏) -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+<!-- 左侧：行业趋势 -->
+<div class="lg:col-span-2 bg-white border border-slate-200 rounded-lg p-6 flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-h3 font-h3 text-on-background">行业趋势对比</h3>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-label-sm text-slate-600">本期需求量</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary-container"></span>
+<span class="text-label-sm text-slate-600">上期需求量</span>
+</div>
+</div>
+</div>
+<div class="flex-grow flex items-end gap-8 pt-4">
+<!-- IT -->
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex items-end justify-center gap-1 h-48">
+<div class="bg-primary w-1/3 rounded-t" style="height: 90%;"></div>
+<div class="bg-secondary-container w-1/3 rounded-t" style="height: 70%;"></div>
+</div>
+<span class="text-label-sm text-slate-600">IT科技</span>
+</div>
+<!-- 金融 -->
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex items-end justify-center gap-1 h-48">
+<div class="bg-primary w-1/3 rounded-t" style="height: 75%;"></div>
+<div class="bg-secondary-container w-1/3 rounded-t" style="height: 80%;"></div>
+</div>
+<span class="text-label-sm text-slate-600">金融保险</span>
+</div>
+<!-- 制造 -->
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex items-end justify-center gap-1 h-48">
+<div class="bg-primary w-1/3 rounded-t" style="height: 60%;"></div>
+<div class="bg-secondary-container w-1/3 rounded-t" style="height: 45%;"></div>
+</div>
+<span class="text-label-sm text-slate-600">智能制造</span>
+</div>
+<!-- 医疗 -->
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex items-end justify-center gap-1 h-48">
+<div class="bg-primary w-1/3 rounded-t" style="height: 50%;"></div>
+<div class="bg-secondary-container w-1/3 rounded-t" style="height: 40%;"></div>
+</div>
+<span class="text-label-sm text-slate-600">医疗健康</span>
+</div>
+<!-- 教育 -->
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex items-end justify-center gap-1 h-48">
+<div class="bg-primary w-1/3 rounded-t" style="height: 35%;"></div>
+<div class="bg-secondary-container w-1/3 rounded-t" style="height: 30%;"></div>
+</div>
+<span class="text-label-sm text-slate-600">教育科研</span>
+</div>
+<!-- 其它 -->
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full flex items-end justify-center gap-1 h-48">
+<div class="bg-primary w-1/3 rounded-t" style="height: 25%;"></div>
+<div class="bg-secondary-container w-1/3 rounded-t" style="height: 20%;"></div>
+</div>
+<span class="text-label-sm text-slate-600">其它</span>
+</div>
+</div>
+</div>
+<!-- 右侧：岗位热度排行榜 -->
+<div class="bg-white border border-slate-200 rounded-lg p-6">
+<h3 class="text-h3 font-h3 text-on-background mb-6">岗位热度排行榜</h3>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between text-label-md">
+<span class="text-on-background">高级Java工程师</span>
+<span class="text-primary font-bold">98.2</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 98.2%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-label-md">
+<span class="text-on-background">产品总监</span>
+<span class="text-primary font-bold">92.5</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 92.5%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-label-md">
+<span class="text-on-background">数据分析师</span>
+<span class="text-primary font-bold">88.7</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 88.7%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-label-md">
+<span class="text-on-background">UI/UX 设计师</span>
+<span class="text-primary font-bold">85.4</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 85.4%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-label-md">
+<span class="text-on-background">运营专家</span>
+<span class="text-primary font-bold">81.9</span>
+</div>
+<div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 81.9%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 底部层 (两栏) -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- 左侧：城市分布 -->
+<div class="bg-white border border-slate-200 rounded-lg p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-h3 font-h3 text-on-background">人才城市分布</h3>
+<div class="text-label-sm text-slate-500">核心城市分布占比</div>
+</div>
+<div class="flex items-center gap-12">
+<div class="relative w-48 h-48 flex-shrink-0">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#1e40af" stroke-dasharray="32 100" stroke-dashoffset="0" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#3755c3" stroke-dasharray="28 100" stroke-dashoffset="-32" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#b8c4ff" stroke-dasharray="22 100" stroke-dashoffset="-60" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="16" stroke="#eeedf7" stroke-dasharray="18 100" stroke-dashoffset="-82" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-h3 font-bold text-primary">100%</span>
+<span class="text-label-sm text-slate-500">覆盖总量</span>
+</div>
+</div>
+<div class="flex-grow space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-[#1e40af]"></span>
+<span class="text-body-md">北京</span>
+</div>
+<span class="font-bold">32%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-[#3755c3]"></span>
+<span class="text-body-md">上海</span>
+</div>
+<span class="font-bold">28%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-[#b8c4ff]"></span>
+<span class="text-body-md">深圳</span>
+</div>
+<span class="font-bold">22%</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-[#eeedf7]"></span>
+<span class="text-body-md">杭州</span>
+</div>
+<span class="font-bold">18%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 右侧：人才匹配情况 -->
+<div class="bg-white border border-slate-200 rounded-lg p-6 flex flex-col">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-h3 font-h3 text-on-background">人才质量匹配分析</h3>
+<span class="px-2 py-1 bg-primary-container text-white text-label-sm rounded">CSPM 覆盖率 74%</span>
+</div>
+<div class="flex-grow grid grid-cols-2 gap-4">
+<div class="bg-[#F8FAFC] p-4 rounded border border-slate-100 flex flex-col justify-center">
+<div class="text-label-sm text-slate-500 mb-1">卓越 (90-100)</div>
+<div class="flex items-baseline gap-2">
+<span class="text-h3 font-bold text-primary">15%</span>
+<span class="text-label-sm text-green-600">↑ 2.1%</span>
+</div>
+</div>
+<div class="bg-[#F8FAFC] p-4 rounded border border-slate-100 flex flex-col justify-center">
+<div class="text-label-sm text-slate-500 mb-1">良好 (80-89)</div>
+<div class="flex items-baseline gap-2">
+<span class="text-h3 font-bold text-primary">42%</span>
+<span class="text-label-sm text-slate-400">稳定</span>
+</div>
+</div>
+<div class="bg-[#F8FAFC] p-4 rounded border border-slate-100 flex flex-col justify-center">
+<div class="text-label-sm text-slate-500 mb-1">合格 (70-79)</div>
+<div class="flex items-baseline gap-2">
+<span class="text-h3 font-bold text-primary">33%</span>
+<span class="text-label-sm text-red-600">↓ 1.4%</span>
+</div>
+</div>
+<div class="bg-[#F8FAFC] p-4 rounded border border-slate-100 flex flex-col justify-center">
+<div class="text-label-sm text-slate-500 mb-1">待提升 (&lt;70)</div>
+<div class="flex items-baseline gap-2">
+<span class="text-h3 font-bold text-primary">10%</span>
+<span class="text-label-sm text-green-600">↓ 0.8%</span>
+</div>
+</div>
+</div>
+<div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-body-sm text-slate-600">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="info">info</span>
+<span>数据基于实时 AI 人岗匹配引擎分析</span>
+</div>
+<a class="text-primary font-semibold hover:underline" href="#">查看完整报告 →</a>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="text-xs text-slate-500 w-full py-8 mt-16 flex flex-col md:flex-row justify-between items-center">
+<p>© 2024 TalentArch Human Capital Management. All rights reserved.</p>
+<div class="flex gap-6 mt-4 md:mt-0">
+<a class="hover:text-blue-800 transition-colors duration-150 cursor-pointer" href="#">Privacy Policy</a>
+<a class="hover:text-blue-800 transition-colors duration-150 cursor-pointer" href="#">Terms of Service</a>
+<a class="hover:text-blue-800 transition-colors duration-150 cursor-pointer" href="#">Cookie Settings</a>
+<a class="hover:text-blue-800 transition-colors duration-150 cursor-pointer" href="#">Contact Admin</a>
+</div>
+</footer>
+</div>
+</main>
+</div>
+<script src="/stitch_cspm/stitch-actions.js"></script>
+</body></html>

@@ -75,6 +75,7 @@
     if (path.includes('/enterprise-center')) return 'enterprise';
     if (path === '/talents') return 'talent-list';
     if (path.startsWith('/talents/')) return 'talent-detail';
+    if (path === '/analytics') return 'analytics';
     if (path === '/recruitments') return 'recruitment-list';
     if (path === '/recruitments/new') return 'recruitment-create';
     if (path.startsWith('/recruitments/')) return 'recruitment-detail';
@@ -376,10 +377,98 @@
   function shellActiveAction(pageName) {
     if (pageName === 'home') return 'home';
     if (pageName === 'talent-list' || pageName === 'talent-detail') return 'talents';
+    if (pageName === 'analytics') return 'analytics';
     if (pageName === 'recruitment-list' || pageName === 'recruitment-create' || pageName === 'recruitment-detail') return 'recruitments';
     if (pageName === 'enterprise') return 'enterprise-center';
     if (pageName === 'personal' || pageName === 'work') return 'personal-center';
     return '';
+  }
+
+  function sidebarItemsForRole(role = currentRole()) {
+    if (role === 'COMPANY') {
+      return [
+        ['企业资料', 'enterprise-center'],
+        ['招聘信息', 'recruitments'],
+        ['人才信息', 'talents'],
+        ['数据分析', 'analytics'],
+        ['帮助支持', 'help']
+      ];
+    }
+
+    if (role === 'ADMIN') {
+      return [
+        ['招聘信息', 'recruitments'],
+        ['新增招聘', 'new-recruitment'],
+        ['人才信息', 'talents'],
+        ['数据分析', 'analytics'],
+        ['帮助支持', 'help']
+      ];
+    }
+
+    return [
+      ['基本信息', 'personal-center'],
+      ['工作经历', 'work-experience'],
+      ['项目经历', 'project-experience'],
+      ['获得荣誉', 'honors'],
+      ['教育经历', 'education-experience'],
+      ['专业技能', 'professional-skills'],
+      ['资格证书', 'certificates'],
+      ['招聘信息', 'recruitments'],
+      ['人才信息', 'talents']
+    ];
+  }
+
+  function sidebarRoleTitle(role = currentRole()) {
+    if (role === 'COMPANY') return ['企业资料', '企业用户'];
+    if (role === 'ADMIN') return ['招聘管理', '管理员'];
+    return ['个人资料', '普通用户'];
+  }
+
+  function activeSidebarAction(path = window.parent.location.pathname) {
+    if (path === '/enterprise-center') return 'enterprise-center';
+    if (path === '/analytics') return 'analytics';
+    if (path === '/recruitments/new') return 'new-recruitment';
+    if (path.startsWith('/recruitments')) return 'recruitments';
+    if (path.startsWith('/talents')) return 'talents';
+    if (path.endsWith('/work-experience')) return 'work-experience';
+    return moduleActionFromPath(path) || (path.startsWith('/personal-center') ? 'personal-center' : '');
+  }
+
+  function renderRoleSidebars() {
+    const path = window.parent.location.pathname;
+    if (path === '/') {
+      return;
+    }
+
+    const role = currentRole() || 'USER';
+    const [title, subtitle] = sidebarRoleTitle(role);
+    const activeAction = activeSidebarAction(path);
+    const items = sidebarItemsForRole(role);
+
+    document.querySelectorAll('aside').forEach((aside) => {
+      const htmlAside = aside instanceof HTMLElement ? aside : null;
+      if (!htmlAside) {
+        return;
+      }
+
+      htmlAside.classList.add('stitch-role-sidebar');
+      htmlAside.innerHTML = `
+        <div class="stitch-role-card">
+          <img alt="项目管理人才库 Logo" src="/assets/logo.png" />
+          <div>
+            <h2>${title}</h2>
+            <p>${subtitle}</p>
+          </div>
+        </div>
+        <nav class="stitch-role-nav" aria-label="角色导航">
+          ${items.map(([label, action]) => `
+            <a href="javascript:void(0)" data-stitch-action="${action}" class="${action === activeAction ? 'is-active' : ''}">
+              <span>${label}</span>
+            </a>
+          `).join('')}
+        </nav>
+      `;
+    });
   }
 
   function renderPreservedShell(pageName) {
@@ -400,11 +489,15 @@
     `;
 
     const nav = header.querySelector('nav');
-    [
+    const navItems = [
       ['首页', 'home'],
       ['招聘信息', 'recruitments'],
       ['人才信息', 'talents']
-    ].forEach(([label, action]) => {
+    ];
+    if (role === 'ADMIN' || role === 'COMPANY') {
+      navItems.push(['数据分析', 'analytics']);
+    }
+    navItems.forEach(([label, action]) => {
       const button = shellButton(label, action);
       if (action === activeAction) {
         button.classList.add('is-active');
@@ -643,6 +736,61 @@
           background: #ffffff !important;
           box-shadow: 0 18px 50px rgba(30, 52, 73, 0.10) !important;
         }
+        aside.stitch-role-sidebar {
+          width: 256px !important;
+          min-width: 256px !important;
+          border-right: 1px solid #d9e3ec !important;
+          background: #ffffff !important;
+          color: #263548 !important;
+          font-family: 'Inter', 'Noto Sans SC', sans-serif !important;
+        }
+        .stitch-role-card {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 8px 12px 20px;
+          border-bottom: 1px solid #eef2f6;
+          margin-bottom: 12px;
+        }
+        .stitch-role-card img {
+          width: 38px;
+          height: 38px;
+          object-fit: contain;
+        }
+        .stitch-role-card h2 {
+          margin: 0 !important;
+          color: #12355b !important;
+          font-size: 16px !important;
+          font-weight: 900 !important;
+          line-height: 1.2 !important;
+        }
+        .stitch-role-card p {
+          margin: 3px 0 0 !important;
+          color: #687789 !important;
+          font-size: 12px !important;
+          font-weight: 700 !important;
+        }
+        .stitch-role-nav {
+          display: grid;
+          gap: 4px;
+          padding: 0 8px;
+        }
+        .stitch-role-nav a {
+          display: flex;
+          align-items: center;
+          min-height: 40px;
+          border-radius: 6px;
+          padding: 0 14px;
+          color: #4b5e72 !important;
+          font-size: 14px;
+          font-weight: 800;
+          text-decoration: none;
+        }
+        .stitch-role-nav a:hover,
+        .stitch-role-nav a.is-active {
+          background: #e8f3f7 !important;
+          color: #135f83 !important;
+        }
         body.stitch-page-enterprise > .flex > aside,
         body.stitch-page-personal aside.fixed,
         body.stitch-page-work aside.fixed {
@@ -823,6 +971,8 @@
       return;
     }
 
+    renderRoleSidebars();
+
     clearFormValues();
 
     if (isPersonalPage) {
@@ -940,6 +1090,7 @@
       renderModuleRoutePage();
     }
 
+    renderRoleSidebars();
     restoreSavedPageData();
   }
 
@@ -1164,7 +1315,11 @@
     const { modal, slot, piece, label } = captchaElements();
     resetCaptchaSlider();
     if (slot) {
-      const leftPercent = 42 + Math.floor(Math.random() * 24);
+      const previousLeft = parseInt(slot.style.left || '56', 10);
+      let leftPercent = 42 + Math.floor(Math.random() * 24);
+      if (Math.abs(leftPercent - previousLeft) < 3) {
+        leftPercent = previousLeft > 53 ? 44 : 62;
+      }
       slot.classList.remove('left-1/4');
       slot.style.left = `${leftPercent}%`;
     }
@@ -1819,7 +1974,7 @@
     if (/Sign Up|注册|申请加入/.test(label)) return 'register';
     if (/首页|Dashboard|Overview|控制台|仪表盘/.test(label)) return 'home';
     if (/Opportunities|Jobs|Job Postings|招聘信息|招聘管理|职位/.test(label)) return 'recruitments';
-    if (/Post Job|发布职位/.test(label)) return 'new-recruitment';
+    if (/Post Job|发布职位|新增招聘/.test(label)) return 'new-recruitment';
     if (/Resources|Documentation|资源/.test(label)) return 'help';
     if (/About|关于/.test(label)) return 'policy-info';
     if (/添加经历|添加工作经历|继续添加上一份工作经历|保存经历|Add Experience/.test(label)) return 'add-experience';
@@ -1830,7 +1985,7 @@
     if (/教育经历|教育背景|Education/.test(label)) return 'education-experience';
     if (/专业技能|Skills/.test(label)) return 'professional-skills';
     if (/资格证书|资质证书|证书奖励|Certifications/.test(label)) return 'certificates';
-    if (/企业中心|Enterprise Portal/.test(label)) return 'enterprise-center';
+    if (/企业中心|企业资料|Enterprise Portal/.test(label)) return 'enterprise-center';
     if (/人才信息|人才画像|Talent/.test(label)) return 'talents';
     if (/^人才$/.test(label)) return 'talents';
     if (/Employee Management/.test(label)) return 'talents';
@@ -1842,7 +1997,7 @@
     if (/通知|notifications|Messages/.test(label)) return 'notifications';
     if (/设置|settings/.test(label)) return 'settings';
     if (/忘记密码/.test(label)) return 'forgot-password';
-    if (/查看所有报告|数据分析|Analytics|insert_chart/.test(label)) return 'analytics';
+    if (/查看所有报告|查看完整报告|数据分析|Analytics|insert_chart/.test(label)) return 'analytics';
     if (/AI 匹配/.test(label)) return 'ai-match';
     if (/高管猎寻/.test(label)) return 'executive-search';
     if (/帮助|帮助支持|帮助中心|Help Center|Support/.test(label)) return 'help';
@@ -1867,6 +2022,9 @@
         break;
       case 'talents':
         go('/talents');
+        break;
+      case 'analytics':
+        go('/analytics');
         break;
       case 'talent-detail':
         go('/talents/sample');
@@ -1983,9 +2141,6 @@
       case 'bookmark':
         toast('已收藏该岗位，可在个人中心查看收藏记录');
         break;
-      case 'analytics':
-        openPanel('数据分析', '数据分析将展示岗位热度、行业趋势、城市分布和人才匹配情况。该入口已预留为独立分析模块。');
-        break;
       case 'ai-match':
         openPanel('AI 匹配', 'AI 匹配会基于岗位要求、项目经历、资格证书和求职意向生成候选人推荐。');
         break;
@@ -2057,6 +2212,7 @@
     setupAuthFieldIds();
     setupRegisterTabs();
     renderBlankBusinessState();
+    renderRoleSidebars();
 
     document.querySelectorAll('a').forEach((link) => {
       const label = textOf(link);
@@ -2137,6 +2293,12 @@
         });
       }
     });
+
+    if (!['ADMIN', 'COMPANY'].includes(currentRole())) {
+      document.querySelectorAll('[data-stitch-action="analytics"]').forEach((item) => {
+        item.remove();
+      });
+    }
 
     setupCaptchaSlider();
     setupRememberDevice();

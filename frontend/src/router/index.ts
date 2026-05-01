@@ -209,6 +209,16 @@ const router = createRouter({
       }
     },
     {
+      path: '/analytics',
+      name: 'analytics',
+      component: StitchFrameView,
+      meta: { requiresAuth: true, allowedRoles: ['ADMIN', 'COMPANY'] },
+      props: {
+        src: '/stitch_cspm/_15/code.html',
+        title: '数据分析'
+      }
+    },
+    {
       path: '/login-required',
       name: 'login-required',
       component: AuthRequiredView

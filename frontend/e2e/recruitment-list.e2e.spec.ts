@@ -111,6 +111,9 @@ test('未登录访问招聘列表会进入登录提示页', async ({ page }) => 
   await expect(page.getByRole('heading', { name: '请先登录后查看招聘信息' })).toBeVisible();
   await expect(page.getByText('招聘信息、人才信息与企业资料属于平台内部业务数据')).toBeVisible();
   await expect(page.getByRole('banner').getByText('项目管理人才库')).toBeVisible();
+  await expect(page.getByRole('contentinfo').getByText('项目管理人才库', { exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('企业中心')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('个人中心')).toHaveCount(0);
 });
 
 test('未登录访问人才信息会进入登录提示页', async ({ page }) => {
@@ -180,6 +183,11 @@ test('管理员能看到招聘列表必需字段和新增按钮', async ({ page 
 
   await page.goto('/recruitments');
 
+  await expect(page.getByRole('banner').getByText('项目管理人才库')).toBeVisible();
+  await expect(page.getByRole('contentinfo').getByText('Cookie 政策')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('新增招聘')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('企业中心')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('个人中心')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '招聘信息列表' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: '岗位' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: '薪资' })).toBeVisible();
@@ -187,7 +195,7 @@ test('管理员能看到招聘列表必需字段和新增按钮', async ({ page 
   await expect(page.getByRole('columnheader', { name: '城市' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: '负责人' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: '需求人数' })).toBeVisible();
-  await expect(page.getByRole('link', { name: '新增' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '新增', exact: true })).toBeVisible();
 });
 
 test('前端接口请求会把本地角色标记透传给后端', async ({ page }) => {
@@ -210,6 +218,10 @@ test('普通用户能看列表但看不到新增按钮', async ({ page }) => {
 
   await page.goto('/recruitments');
 
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('个人中心')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('企业中心')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('新增招聘')).toHaveCount(0);
+  await expect(page.getByRole('contentinfo').getByText('帮助中心')).toBeVisible();
   await expect(page.getByText('项目经理')).toBeVisible();
   await expect(page.getByRole('link', { name: '新增' })).toHaveCount(0);
 });
@@ -220,6 +232,10 @@ test('企业用户能看列表但看不到新增按钮', async ({ page }) => {
 
   await page.goto('/recruitments');
 
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('企业中心')).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('个人中心')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: '主要导航' }).getByText('新增招聘')).toHaveCount(0);
+  await expect(page.getByRole('contentinfo').getByText('系统状态')).toBeVisible();
   await expect(page.getByText('项目经理')).toBeVisible();
   await expect(page.getByRole('link', { name: '新增' })).toHaveCount(0);
 });
@@ -229,7 +245,7 @@ test('管理员点击新增按钮能进入新增入口', async ({ page }) => {
   await mockRecruitments(page);
 
   await page.goto('/recruitments');
-  await page.getByRole('link', { name: '新增' }).click();
+  await page.getByRole('link', { name: '新增', exact: true }).click();
 
   await expect(page).toHaveURL(/\/recruitments\/new$/);
   await expect(page.getByRole('heading', { name: '招聘新增入口' })).toBeVisible();

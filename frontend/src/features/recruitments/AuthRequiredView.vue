@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PlatformFooter from './PlatformFooter.vue';
 import PlatformHeader from './PlatformHeader.vue';
 </script>
 
@@ -33,5 +34,7 @@ import PlatformHeader from './PlatformHeader.vue';
         </div>
       </section>
     </main>
+
+    <PlatformFooter />
   </div>
 </template>

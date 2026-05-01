@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PlatformFooter from './PlatformFooter.vue';
 import PlatformHeader from './PlatformHeader.vue';
 </script>
 
@@ -14,5 +15,7 @@ import PlatformHeader from './PlatformHeader.vue';
         <RouterLink class="text-link" :to="{ name: 'recruitments' }">返回招聘列表</RouterLink>
       </section>
     </main>
+
+    <PlatformFooter />
   </div>
 </template>

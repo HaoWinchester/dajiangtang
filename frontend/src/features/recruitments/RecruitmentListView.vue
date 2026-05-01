@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 
 import { fetchRecruitments } from './api';
+import PlatformFooter from './PlatformFooter.vue';
 import PlatformHeader from './PlatformHeader.vue';
 import type { RecruitmentListQuery, RecruitmentListResponse } from './types';
 
@@ -198,5 +199,7 @@ onMounted(() => {
         </template>
       </section>
     </main>
+
+    <PlatformFooter />
   </div>
 </template>

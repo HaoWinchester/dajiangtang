@@ -1,6 +1,6 @@
 import { expect, test, type Frame, type Locator, type Page } from '@playwright/test';
 
-type Role = 'USER' | 'COMPANY';
+type Role = 'USER' | 'COMPANY' | 'ADMIN';
 
 const stitchPages: Array<{ path: string; title: string; role?: Role }> = [
   { path: '/', title: '项目管理人才库 首页' },
@@ -12,7 +12,8 @@ const stitchPages: Array<{ path: string; title: string; role?: Role }> = [
   { path: '/personal-center/project-experience', title: '个人中心 - 项目经历', role: 'USER' },
   { path: '/personal-center/education-experience', title: '个人中心 - 教育经历', role: 'USER' },
   { path: '/personal-center/professional-skills', title: '个人中心 - 专业技能', role: 'USER' },
-  { path: '/personal-center/certificates', title: '个人中心 - 资格证书', role: 'USER' }
+  { path: '/personal-center/certificates', title: '个人中心 - 资格证书', role: 'USER' },
+  { path: '/analytics', title: '数据分析', role: 'ADMIN' }
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -22,6 +23,13 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function loginAs(page: Page, role: Role) {
+  await page.context().addCookies([
+    {
+      name: 'USER_ROLE',
+      value: role,
+      url: 'http://127.0.0.1:5173'
+    }
+  ]);
   await page.addInitScript((userRole) => {
     window.localStorage.setItem('USER_ROLE', userRole);
     document.cookie = `USER_ROLE=${userRole}; path=/`;
@@ -29,17 +37,28 @@ async function loginAs(page: Page, role: Role) {
 }
 
 async function openStitchPage(page: Page, path: string, title: string, role?: Role): Promise<Frame> {
-  if (role) {
-    await loginAs(page, role);
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      if (role) {
+        await loginAs(page, role);
+      }
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      const iframe = page.locator(`iframe[title="${title}"]`);
+      await expect(iframe).toBeVisible();
+      const handle = await iframe.elementHandle();
+      const frame = await handle?.contentFrame();
+      expect(frame, `找不到 iframe: ${title}`).toBeTruthy();
+      await frame!.waitForLoadState('domcontentloaded');
+      return frame!;
+    } catch (error) {
+      lastError = error;
+      await page.waitForTimeout(150);
+    }
   }
-  await page.goto(path, { waitUntil: 'domcontentloaded' });
-  const iframe = page.locator(`iframe[title="${title}"]`);
-  await expect(iframe).toBeVisible();
-  const handle = await iframe.elementHandle();
-  const frame = await handle?.contentFrame();
-  expect(frame, `找不到 iframe: ${title}`).toBeTruthy();
-  await frame!.waitForLoadState('domcontentloaded');
-  return frame!;
+
+  throw lastError;
 }
 
 async function closePanelIfOpen(frame: Frame) {
@@ -187,7 +206,8 @@ test.describe('控件矩阵 - 自动巡检', () => {
       '/personal-center/project-experience': ['project-experience'],
       '/personal-center/education-experience': ['education-experience'],
       '/personal-center/professional-skills': ['professional-skills'],
-      '/personal-center/certificates': ['certificates']
+      '/personal-center/certificates': ['certificates'],
+      '/analytics': ['analytics']
     };
 
     for (const item of stitchPages) {
@@ -275,6 +295,12 @@ test.describe('控件矩阵 - 自动巡检', () => {
         await expect(frame.locator('aside')).toBeVisible();
         await expect(frame.getByText('核心身份')).toBeVisible();
       }
+
+      if (item.path === '/analytics') {
+        await expect(frame.locator('aside')).toBeVisible();
+        await expect(frame.getByText('行业趋势对比')).toBeVisible();
+        await expect(frame.getByText('岗位热度排行榜')).toBeVisible();
+      }
     }
   });
 
@@ -305,6 +331,11 @@ test.describe('控件矩阵 - 自动巡检', () => {
       await expect(frame.locator('header.stitch-preserved-header')).toContainText('首页');
       await expect(frame.locator('header.stitch-preserved-header')).toContainText('招聘信息');
       await expect(frame.locator('header.stitch-preserved-header')).toContainText('人才信息');
+      if (item.role === 'ADMIN' || item.role === 'COMPANY') {
+        await expect(frame.locator('header.stitch-preserved-header')).toContainText('数据分析');
+      } else {
+        await expect(frame.locator('header.stitch-preserved-header')).not.toContainText('数据分析');
+      }
       await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('帮助中心');
       await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('系统状态');
       await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('Cookie 政策');
@@ -356,6 +387,9 @@ test.describe('控件矩阵 - 易漏入口点名验证', () => {
     await frame.locator('[data-stitch-action="recruitments"]').first().click();
     await expect(page).toHaveURL(/\/recruitments$/);
     frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+    await frame.locator('[data-stitch-action="analytics"]').first().click();
+    await expect(page).toHaveURL(/\/analytics$/);
+    frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
     await frame.locator('[data-stitch-action="help"]').first().click();
     await expect(frame.locator('#stitch-action-panel')).toContainText('帮助中心');
   });
@@ -388,6 +422,66 @@ test.describe('控件矩阵 - 易漏入口点名验证', () => {
     }
 
     expect(failures).toEqual([]);
+  });
+
+  test('左侧导航根据角色显示中文入口且不泄露其他角色信息', async ({ page }) => {
+    let frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
+    let asideText = await frame.locator('aside').first().innerText();
+    expect(asideText).toContain('个人资料');
+    expect(asideText).toContain('基本信息');
+    expect(asideText).toContain('工作经历');
+    expect(asideText).toContain('资格证书');
+    expect(asideText).not.toMatch(/Global Tech|Enterprise|Partner|Dashboard|Overview|Talent Pool|Job Postings|Employee Management/);
+    expect(asideText).not.toContain('企业资料');
+
+    frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+    asideText = await frame.locator('aside').first().innerText();
+    expect(asideText).toContain('企业资料');
+    expect(asideText).toContain('招聘信息');
+    expect(asideText).toContain('人才信息');
+    expect(asideText).toContain('数据分析');
+    expect(asideText).not.toContain('工作经历');
+    expect(asideText).not.toContain('基本信息');
+    expect(asideText).not.toMatch(/Global Tech|Enterprise|Partner|Dashboard|Overview|Talent Pool|Job Postings|Employee Management|Analytics/);
+
+    frame = await openStitchPage(page, '/talents', '人才信息 - 列表', 'ADMIN');
+    asideText = await frame.locator('aside').first().innerText();
+    expect(asideText).toContain('招聘管理');
+    expect(asideText).toContain('新增招聘');
+    expect(asideText).toContain('人才信息');
+    expect(asideText).toContain('数据分析');
+    expect(asideText).not.toContain('个人资料');
+    expect(asideText).not.toContain('企业资料');
+    expect(asideText).not.toMatch(/Global Tech|Enterprise|Partner|Dashboard|Overview|Talent Pool|Job Postings|Employee Management|Analytics/);
+
+    frame = await openStitchPage(page, '/analytics', '数据分析', 'ADMIN');
+    asideText = await frame.locator('aside').first().innerText();
+    expect(asideText).toContain('招聘管理');
+    expect(asideText).toContain('数据分析');
+    expect(asideText).not.toContain('个人资料');
+    expect(asideText).not.toContain('企业资料');
+    expect(asideText).not.toMatch(/Global Tech|Enterprise|Partner|Dashboard|Overview|Talent Pool|Job Postings|Employee Management|Analytics/);
+  });
+
+  test('数据分析页按角色开放入口且普通用户不可见', async ({ page }) => {
+    let frame = await openStitchPage(page, '/', '项目管理人才库 首页', 'ADMIN');
+    await expect(frame.locator('header.stitch-preserved-header')).toContainText('数据分析');
+    await frame.locator('[data-stitch-action="analytics"]').first().click();
+    await expect(page).toHaveURL(/\/analytics$/);
+    await expect(page.frameLocator('iframe[title="数据分析"]').getByText('人才城市分布')).toBeVisible();
+
+    frame = await openStitchPage(page, '/', '项目管理人才库 首页', 'COMPANY');
+    await expect(frame.locator('header.stitch-preserved-header')).toContainText('数据分析');
+    await frame.locator('[data-stitch-action="analytics"]').first().click();
+    await expect(page).toHaveURL(/\/analytics$/);
+    await expect(page.frameLocator('iframe[title="数据分析"]').getByText('人才质量匹配分析')).toBeVisible();
+
+    frame = await openStitchPage(page, '/', '项目管理人才库 首页', 'USER');
+    await expect(frame.locator('header.stitch-preserved-header')).not.toContainText('数据分析');
+    await expect(frame.locator('[data-stitch-action="analytics"]')).toHaveCount(0);
+
+    await page.goto('/analytics', { waitUntil: 'domcontentloaded' });
+    await expect(page).toHaveURL(/\/personal-center$/);
   });
 
   test('工作经历页侧栏的每个业务入口都打开对应功能', async ({ page }) => {
