@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#f1f0fa",
+                        "on-primary-container": "#a8b8ff",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "on-tertiary-fixed": "#131b2e",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#b8c4ff",
+                        "on-primary-fixed-variant": "#173bab",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "on-secondary-container": "#57657a",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#444653",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface": "#fbf8ff",
+                        "on-tertiary-container": "#b4bbd5",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "surface-container-high": "#e8e7f1",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#d5e3fc",
+                        "primary-container": "#1e40af",
+                        "outline-variant": "#c4c5d5",
+                        "tertiary": "#2d3449",
+                        "surface-bright": "#fbf8ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e3e1eb",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2f3037",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f4f2fc",
+                        "surface-container": "#eeedf7",
+                        "secondary": "#515f74",
+                        "primary": "#00288e",
+                        "on-primary-fixed": "#001453",
+                        "secondary-container": "#d5e3fc",
+                        "surface-container-highest": "#e3e1eb",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1b22",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "outline": "#757684",
+                        "on-background": "#1a1b22",
+                        "tertiary-container": "#434b60",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "background": "#fbf8ff",
+                        "surface-tint": "#3755c3",
+                        "primary-fixed": "#dde1ff",
+                        "surface-dim": "#dad9e3",
+                        "on-secondary-fixed": "#0d1c2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "3xl": "64px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "max_width": "1440px",
+                        "2xl": "48px",
+                        "sm": "8px",
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "margin": "32px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "h2": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "h1": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "code": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen">
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 max-w-[1440px] mx-auto bg-white border-b border-slate-200">
+<div class="flex items-center gap-xl">
+<span class="text-xl font-bold text-blue-900">项目管理人才库</span>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-slate-600 font-sans text-sm font-medium tracking-tight hover:text-blue-700 transition-colors" href="#">Dashboard</a>
+<a class="text-blue-700 font-sans text-sm font-medium tracking-tight border-b-2 border-blue-700 pb-1" href="#">Jobs</a>
+<a class="text-slate-600 font-sans text-sm font-medium tracking-tight hover:text-blue-700 transition-colors" href="#">Talent</a>
+<a class="text-slate-600 font-sans text-sm font-medium tracking-tight hover:text-blue-700 transition-colors" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex gap-sm">
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-lg"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded-lg"><span class="material-symbols-outlined" data-icon="settings">settings</span></button>
+</div>
+<button class="bg-primary text-white px-md py-xs rounded-lg font-label-md hover:opacity-90 transition-opacity">Post Job</button>
+<div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden border border-outline-variant">
+<img alt="User profile" data-alt="A professional headshot of a corporate executive in a modern office setting. The lighting is soft and natural, emphasizing a high-end light-mode aesthetic. The color palette features clean whites and muted blue tones, reflecting the brand's authoritative and precise visual style. The person has a friendly yet serious expression, suitable for a talent management platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8JVJlUrkluYqy9ZJbNBP9yjJNS6CoZketQrIbjt62HNo9-IEhHXVomAjSiFH4WMvkgq0qCjHxDNMxolGGSjEcbDpJsDddn5yeFyphT65hH1rfbiU8vlfsf0AcJcV_mIMNN-rHbNRocohmxyefc5a-WuRFtAyzhlZDIEBFOET5oy1tmrHuKkomdNyF_jff79JvjSpkYDRnhyp7hSq9VR__PozcNL9821oAA14ibvC2Wdiy3f8sy0ZskcUhDIGI-EsX8q77QkNhVK8p"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-3xl px-gutter max-w-[1440px] mx-auto grid grid-cols-12 gap-gutter">
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-lg">
+<section class="bg-white border border-slate-100 p-xl rounded-lg">
+<div class="flex justify-between items-start mb-lg">
+<div>
+<div class="flex items-center gap-md mb-xs">
+<h1 class="font-h1 text-h1 text-primary">高级项目管理专家 (Senior PMO)</h1>
+<span class="bg-tertiary-fixed text-on-tertiary-fixed px-sm py-0.5 rounded text-label-sm font-semibold uppercase">CSPM优先</span>
+</div>
+<div class="flex flex-wrap gap-sm items-center text-secondary">
+<span class="font-label-md">Global Tech Corp</span>
+<span class="w-1 h-1 bg-outline rounded-full"></span>
+<span class="font-body-sm">数字化转型部</span>
+<span class="w-1 h-1 bg-outline rounded-full"></span>
+<span class="font-body-sm">招聘人数：2人</span>
+</div>
+</div>
+<div class="text-right">
+<div class="text-h2 font-h2 text-primary mb-xs">¥35k - 55k</div>
+<div class="text-body-sm text-secondary">15薪 · 绩效奖金</div>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl p-md bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<div class="flex flex-col">
+<span class="text-label-sm text-secondary uppercase">工作地点</span>
+<span class="text-body-sm font-semibold">北京 · 朝阳区</span>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="calendar_today">calendar_today</span>
+<div class="flex flex-col">
+<span class="text-label-sm text-secondary uppercase">到岗日期</span>
+<span class="text-body-sm font-semibold">2周内到岗</span>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="work">work</span>
+<div class="flex flex-col">
+<span class="text-label-sm text-secondary uppercase">经验要求</span>
+<span class="text-body-sm font-semibold">5-10年经验</span>
+</div>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary" data-icon="school">school</span>
+<div class="flex flex-col">
+<span class="text-label-sm text-secondary uppercase">学历要求</span>
+<span class="text-body-sm font-semibold">本科及以上</span>
+</div>
+</div>
+</div>
+<div class="flex gap-md">
+<button class="flex-1 bg-primary text-white py-md rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-sm">
+                        立即申请
+                    </button>
+<button class="px-xl py-md border border-outline text-secondary rounded-lg font-label-md hover:bg-slate-50 transition-all flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+                        收藏职位
+                    </button>
+</div>
+</section>
+<section class="bg-white border border-slate-100 p-xl rounded-lg space-y-xl">
+<div>
+<h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        职位说明
+                    </h3>
+<p class="text-body-md text-secondary leading-relaxed">
+                        作为高级项目管理专家，您将负责公司核心数字化转型项目的全生命周期管理。您将协调跨职能团队，确保项目在预算内按时交付，并达到高质量标准。我们需要一位具备深厚行业洞察力，并能通过科学的PMO体系驱动业务增长的领导者。
+                    </p>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        岗位要求
+                    </h3>
+<ul class="list-disc list-inside text-body-md text-secondary space-y-sm marker:text-primary">
+<li>精通项目管理知识体系，具备大型复杂软件开发或数字化转型项目管理经验。</li>
+<li>具备优秀的风险识别与管控能力，能够处理高压环境下的突发状况。</li>
+<li>出色的沟通协调能力，能有效对接高层领导与技术团队。</li>
+<li>熟悉敏捷开发（Agile）与瀑布流（Waterfall）混合管理模式。</li>
+</ul>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        技能标签
+                    </h3>
+<div class="flex flex-wrap gap-sm">
+<span class="px-md py-xs bg-secondary-container text-on-secondary-container rounded-full text-label-sm">Project Governance</span>
+<span class="px-md py-xs bg-secondary-container text-on-secondary-container rounded-full text-label-sm">Risk Management</span>
+<span class="px-md py-xs bg-secondary-container text-on-secondary-container rounded-full text-label-sm">Stakeholder Management</span>
+<span class="px-md py-xs bg-secondary-container text-on-secondary-container rounded-full text-label-sm">Agile/Scrum</span>
+<span class="px-md py-xs bg-secondary-container text-on-secondary-container rounded-full text-label-sm">Financial Analysis</span>
+</div>
+</div>
+<div class="bg-tertiary-fixed/30 p-md rounded-lg border border-tertiary-container/10">
+<div class="flex items-center gap-sm mb-xs">
+<span class="material-symbols-outlined text-primary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<h4 class="font-label-md text-primary">资质优先项 (Certification Priority)</h4>
+</div>
+<p class="text-body-sm text-tertiary">
+                        持有 **CSPM (中国标准项目管理专业人员)** 证书者将优先考虑，并作为定薪级的重要参考。
+                    </p>
+</div>
+<div>
+<h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm">
+<span class="w-1 h-6 bg-primary rounded-full"></span>
+                        员工福利
+                    </h3>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-md">
+<div class="flex items-center gap-sm p-sm border border-slate-100 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="medical_services">medical_services</span>
+<span class="text-body-sm">高端商业医疗险</span>
+</div>
+<div class="flex items-center gap-sm p-sm border border-slate-100 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="home_work">home_work</span>
+<span class="text-body-sm">公积金最高比例</span>
+</div>
+<div class="flex items-center gap-sm p-sm border border-slate-100 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="beach_access">beach_access</span>
+<span class="text-body-sm">带薪年假15天+</span>
+</div>
+<div class="flex items-center gap-sm p-sm border border-slate-100 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="fitness_center">fitness_center</span>
+<span class="text-body-sm">免费健身中心</span>
+</div>
+<div class="flex items-center gap-sm p-sm border border-slate-100 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="coffee">coffee</span>
+<span class="text-body-sm">无限下午茶供应</span>
+</div>
+<div class="flex items-center gap-sm p-sm border border-slate-100 rounded">
+<span class="material-symbols-outlined text-primary" data-icon="child_care">child_care</span>
+<span class="text-body-sm">年度家庭体检</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<aside class="col-span-12 lg:col-span-4 flex flex-col gap-lg">
+<section class="bg-white border border-slate-100 p-xl rounded-lg">
+<h3 class="font-h3 text-h3 text-primary mb-lg">公司简介</h3>
+<div class="flex items-center gap-md mb-lg">
+<div class="w-16 h-16 rounded-xl bg-surface-container flex items-center justify-center border border-outline-variant overflow-hidden">
+<img alt="Company Logo" data-alt="A minimalist logo for a global technology enterprise, featuring abstract geometric shapes in shades of navy blue and cool grey. The image is set against a clean, professional white background, maintaining a corporate and modern aesthetic. The lighting is crisp and uniform, representing precision and stability in the high-stakes talent recruitment sector." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqDgk1nHnLvXXd057sWi2G5ozfqUnrw8HgNbWvq4mgeyi4CdW9vR3mZiL_YZzkiWugejgmDDm1pzo6ze4e25Wq9G_rTQwkWVTVMCRRHYda0IK4IMC4k3MMbLvAWyTFS6HLeHmYtEHOKkStXxZ_qjigDfOwqL1Cr8SEzdFrN1z9NLOgQb1JLT_SXntStvJhVPApEQ4YWJWjcl1Suk2R9hjywi6iFIDVEEYC5A81bYTLFu16JqHbAvdYSSXLAKO2YVLQDnbr0GuNGfTX"/>
+</div>
+<div>
+<h4 class="font-h3 text-body-lg font-bold text-blue-900">Global Tech Corp</h4>
+<p class="text-body-sm text-secondary">互联网 · 软件开发 · 上市公司</p>
+</div>
+</div>
+<div class="space-y-md mb-xl">
+<div class="flex justify-between py-sm border-b border-slate-50">
+<span class="text-label-sm text-secondary uppercase">融资阶段</span>
+<span class="text-body-sm font-semibold">IPO / 已上市</span>
+</div>
+<div class="flex justify-between py-sm border-b border-slate-50">
+<span class="text-label-sm text-secondary uppercase">人员规模</span>
+<span class="text-body-sm font-semibold">10,000人以上</span>
+</div>
+<div class="flex justify-between py-sm border-b border-slate-50">
+<span class="text-label-sm text-secondary uppercase">成立日期</span>
+<span class="text-body-sm font-semibold">2008年</span>
+</div>
+</div>
+<p class="text-body-sm text-secondary leading-relaxed mb-xl">
+                    Global Tech Corp 是全球领先的数字化转型方案供应商，致力于利用人工智能与云计算技术驱动企业效能。我们在全球20个国家设有分支机构，服务超过500家世界五百强企业。
+                </p>
+<div class="relative h-40 rounded-lg overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="A modern architectural glass skyscraper reflecting a bright blue sky, signifying corporate power and technological progress. The visual style is high-key with strong vertical lines and a cool, professional color palette. This image represents the physical presence and established authority of a top-tier global enterprise within a modern urban context." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdcmO3Cl92DOfBJUriDKvjhpU6WJttIki1F5e8qnoHTeoSwgqSjwU_45g5W_Nlhh0zGm7nUSdtOYkXHmZ-2Me5mmddyPf8fwvLT7xl1x2rx_8dnIvbhtlECpgLDdObQQhV5DAtTPMBakKZgF6Mwmjs3N_9O4IVep9x5IPkNuyhMlicwB1zVZ1L86f_1xFDtefqtUWeVaExoNP5uHiz3h6Ad8mhKi7IHnRn7vyJeG8SbwjMKBld7zRerqYz1pU49VqoLwXwVy0nFF_J"/>
+<div class="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent flex items-end p-md">
+<button class="text-white text-label-sm font-bold flex items-center gap-xs">
+                            查看公司官网 <span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
+</button>
+</div>
+</div>
+</section>
+<section class="bg-white border border-slate-100 p-xl rounded-lg">
+<h3 class="font-h3 text-h3 text-primary mb-md">职位地点</h3>
+<div class="h-48 bg-surface-container rounded-lg relative overflow-hidden flex items-center justify-center" data-location="Beijing" style="">
+<div class="text-center">
+<span class="material-symbols-outlined text-3xl text-primary mb-sm" data-icon="map">map</span>
+<p class="text-label-sm text-secondary">加载地图中...</p>
+</div>
+<div class="absolute bottom-md left-md right-md bg-white p-sm rounded shadow-sm border border-slate-100">
+<p class="text-body-sm font-semibold">北京市朝阳区科技园路10号</p>
+<p class="text-label-sm text-secondary">近地铁15号线望京站</p>
+</div>
+</div>
+</section>
+<div class="bg-primary p-xl rounded-lg text-white">
+<h3 class="font-h3 text-h3 mb-sm">职场小贴士</h3>
+<p class="text-body-sm opacity-90 mb-md leading-relaxed">
+                    完善您的项目经验详情，特别是针对复杂项目的风控策略，能让您的面试成功率提升 40%。
+                </p>
+<button class="w-full py-sm bg-white text-primary rounded font-label-md hover:bg-opacity-90">更新简历</button>
+</div>
+</aside>
+</main>
+<footer class="bg-white border-t border-slate-100 py-2xl px-gutter mt-3xl">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-lg">
+<div class="flex items-center gap-md">
+<span class="text-lg font-black text-blue-900">项目管理人才库</span>
+<span class="text-body-sm text-secondary">© 2024 高端人才招聘专家</span>
+</div>
+<div class="flex gap-xl text-body-sm text-secondary">
+<a class="hover:text-primary" href="#">隐私政策</a>
+<a class="hover:text-primary" href="#">服务条款</a>
+<a class="hover:text-primary" href="#">关于我们</a>
+<a class="hover:text-primary" href="#">帮助中心</a>
+</div>
+</div>
+</footer>
+</body></html>

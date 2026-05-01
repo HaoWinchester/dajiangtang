@@ -110,7 +110,7 @@ test('未登录访问招聘列表会进入登录提示页', async ({ page }) => 
 
   await expect(page.getByRole('heading', { name: '请先登录后查看招聘信息' })).toBeVisible();
   await expect(page.getByText('招聘信息、人才信息与企业资料属于平台内部业务数据')).toBeVisible();
-  await expect(page.getByRole('banner').getByText('全国项目管理标准化技术委员会 - 人才库')).toBeVisible();
+  await expect(page.getByRole('banner').getByText('项目管理人才库')).toBeVisible();
 });
 
 test('未登录访问人才信息会进入登录提示页', async ({ page }) => {
@@ -122,7 +122,7 @@ test('未登录访问人才信息会进入登录提示页', async ({ page }) => 
 
 test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 首页"]');
+  const design = page.frameLocator('iframe[title="项目管理人才库 首页"]');
 
   await expect(design.getByText('发现战略性人才')).toBeVisible();
   await expect(design.getByText('招聘信息')).toBeVisible();
@@ -131,17 +131,17 @@ test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => 
 
 test('登录页会百分百承载 Stitch 登录设计', async ({ page }) => {
   await page.goto('/login');
-  const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 登录"]');
+  const design = page.frameLocator('iframe[title="项目管理人才库 登录"]');
 
   await expect(design.getByRole('heading', { name: '欢迎回来' })).toBeVisible();
-  await expect(design.locator('main').getByRole('button', { name: '登录' })).toBeVisible();
+  await expect(design.locator('main').getByRole('button', { name: '立即登录', exact: true })).toBeVisible();
 });
 
 test('注册页会百分百承载 Stitch 注册设计', async ({ page }) => {
   await page.goto('/register');
-  const design = page.frameLocator('iframe[title="全国项目管理标准化技术委员会 - 人才库 注册"]');
+  const design = page.frameLocator('iframe[title="项目管理人才库 注册"]');
 
-  await expect(design.getByRole('heading', { name: '创建账号' })).toBeVisible();
+  await expect(design.getByRole('heading', { name: '创建新账号' })).toBeVisible();
   await expect(design.getByText('个人注册')).toBeVisible();
   await expect(design.getByText('企业注册')).toBeVisible();
 });
@@ -151,8 +151,8 @@ test('企业中心会承载 Stitch 企业资料维护设计', async ({ page }) =
   await page.goto('/enterprise-center');
   const design = page.frameLocator('iframe[title="企业中心 - 资料维护"]');
 
-  await expect(design.getByRole('heading', { name: '企业中心 - 资料维护' })).toBeVisible();
-  await expect(design.getByText('核心标识')).toBeVisible();
+  await expect(design.getByRole('heading', { name: '企业中心 - 基础资料' })).toBeVisible();
+  await expect(design.getByText('核心身份')).toBeVisible();
 });
 
 test('个人中心会承载 Stitch 基础信息设计', async ({ page }) => {
@@ -160,7 +160,7 @@ test('个人中心会承载 Stitch 基础信息设计', async ({ page }) => {
   await page.goto('/personal-center');
   const design = page.frameLocator('iframe[title="个人中心 - 基础信息"]');
 
-  await expect(design.getByRole('heading', { name: '个人中心 - 基础信息' })).toBeVisible();
+  await expect(design.getByRole('heading', { name: '个人基本信息' })).toBeVisible();
   await expect(design.getByText('个人优势')).toBeVisible();
 });
 
@@ -169,9 +169,9 @@ test('工作经历页会承载 Stitch 工作经历设计', async ({ page }) => {
   await page.goto('/personal-center/work-experience');
   const design = page.frameLocator('iframe[title="个人中心 - 工作经历"]');
 
-  await expect(design.getByRole('heading', { name: '个人中心 - 工作经历' })).toBeVisible();
+  await expect(design.getByRole('heading', { name: '工作经历' })).toBeVisible();
   await expect(design.getByText('暂无工作经历')).toBeVisible();
-  await expect(design.getByText('领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计')).toHaveCount(0);
+  await expect(design.getByText('领导企业级 项目管理人才库招聘平台的架构设计')).toHaveCount(0);
 });
 
 test('管理员能看到招聘列表必需字段和新增按钮', async ({ page }) => {

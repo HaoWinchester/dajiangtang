@@ -1,314 +1,346 @@
 <!DOCTYPE html>
 
-<html class="light" lang="zh-CN"><head>
+<html lang="zh-CN"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "background": "#fbf8ff",
-                        "surface-container-low": "#f4f2fc",
-                        "on-surface-variant": "#444653",
-                        "primary-fixed-dim": "#b8c4ff",
-                        "on-primary-fixed": "#001453",
-                        "on-primary-container": "#a8b8ff",
-                        "on-tertiary": "#ffffff",
-                        "inverse-on-surface": "#f1f0fa",
-                        "primary": "#00288e",
-                        "on-error": "#ffffff",
-                        "outline": "#757684",
-                        "on-error-container": "#93000a",
-                        "on-secondary": "#ffffff",
-                        "surface-tint": "#3755c3",
-                        "tertiary-fixed": "#dae2fd",
-                        "secondary-container": "#d5e3fc",
-                        "primary-fixed": "#dde1ff",
-                        "secondary": "#515f74",
-                        "tertiary": "#2d3449",
-                        "inverse-surface": "#2f3037",
-                        "inverse-primary": "#b8c4ff",
-                        "on-tertiary-fixed": "#131b2e",
-                        "on-secondary-fixed": "#0d1c2e",
-                        "surface-container-high": "#e8e7f1",
-                        "surface-dim": "#dad9e3",
-                        "on-tertiary-container": "#b4bbd5",
-                        "primary-container": "#1e40af",
-                        "tertiary-container": "#434b60",
-                        "error": "#ba1a1a",
-                        "surface-bright": "#fbf8ff",
-                        "surface-container-lowest": "#ffffff",
-                        "secondary-fixed": "#d5e3fc",
-                        "error-container": "#ffdad6",
-                        "surface-variant": "#e3e1eb",
-                        "on-surface": "#1a1b22",
-                        "tertiary-fixed-dim": "#bec6e0",
-                        "on-background": "#1a1b22",
-                        "surface": "#fbf8ff",
-                        "outline-variant": "#c4c5d5",
-                        "on-secondary-container": "#57657a",
-                        "on-primary": "#ffffff",
-                        "on-secondary-fixed-variant": "#3a485b",
-                        "surface-container": "#eeedf7",
-                        "secondary-fixed-dim": "#b9c7df",
-                        "surface-container-highest": "#e3e1eb",
-                        "on-tertiary-fixed-variant": "#3f465c",
-                        "on-primary-fixed-variant": "#173bab"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "spacing": {
-                        "sm": "8px",
-                        "3xl": "64px",
-                        "2xl": "48px",
-                        "base": "4px",
-                        "md": "16px",
-                        "xs": "4px",
-                        "lg": "24px",
-                        "max_width": "1440px",
-                        "gutter": "24px",
-                        "xl": "32px",
-                        "margin": "32px"
-                    },
-                    "fontFamily": {
-                        "label-sm": ["Inter"],
-                        "h3": ["Inter"],
-                        "body-sm": ["Inter"],
-                        "body-lg": ["Inter"],
-                        "h2": ["Inter"],
-                        "label-md": ["Inter"],
-                        "h1": ["Inter"],
-                        "code": ["Inter"],
-                        "body-md": ["Inter"]
-                    },
-                    "fontSize": {
-                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
-                        "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
-                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
-                        "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
-                        "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                        "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
-                    }
-                },
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "inverse-on-surface": "#f1f0fa",
+                "on-primary-container": "#a8b8ff",
+                "secondary-fixed-dim": "#b9c7df",
+                "on-tertiary-fixed": "#131b2e",
+                "error": "#ba1a1a",
+                "inverse-primary": "#b8c4ff",
+                "on-primary-fixed-variant": "#173bab",
+                "on-secondary-fixed-variant": "#3a485b",
+                "on-secondary-container": "#57657a",
+                "on-primary": "#ffffff",
+                "on-surface-variant": "#444653",
+                "tertiary-fixed": "#dae2fd",
+                "surface": "#fbf8ff",
+                "on-tertiary-container": "#b4bbd5",
+                "primary-fixed-dim": "#b8c4ff",
+                "surface-container-high": "#e8e7f1",
+                "on-error-container": "#93000a",
+                "secondary-fixed": "#d5e3fc",
+                "primary-container": "#1e40af",
+                "outline-variant": "#c4c5d5",
+                "tertiary": "#2d3449",
+                "surface-bright": "#fbf8ff",
+                "on-error": "#ffffff",
+                "surface-variant": "#e3e1eb",
+                "on-secondary": "#ffffff",
+                "inverse-surface": "#2f3037",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-low": "#f4f2fc",
+                "surface-container": "#eeedf7",
+                "secondary": "#515f74",
+                "primary": "#00288e",
+                "on-primary-fixed": "#001453",
+                "secondary-container": "#d5e3fc",
+                "surface-container-highest": "#e3e1eb",
+                "error-container": "#ffdad6",
+                "on-surface": "#1a1b22",
+                "on-tertiary": "#ffffff",
+                "tertiary-fixed-dim": "#bec6e0",
+                "outline": "#757684",
+                "on-background": "#1a1b22",
+                "tertiary-container": "#434b60",
+                "on-tertiary-fixed-variant": "#3f465c",
+                "background": "#fbf8ff",
+                "surface-tint": "#3755c3",
+                "primary-fixed": "#dde1ff",
+                "surface-dim": "#dad9e3",
+                "on-secondary-fixed": "#0d1c2e"
             },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "3xl": "64px",
+                "lg": "24px",
+                "xl": "32px",
+                "md": "16px",
+                "max_width": "1440px",
+                "2xl": "48px",
+                "sm": "8px",
+                "gutter": "24px",
+                "xs": "4px",
+                "margin": "32px",
+                "base": "4px"
+            },
+            "fontFamily": {
+                "h2": ["Inter"], "h3": ["Inter"], "body-lg": ["Inter"], "label-sm": ["Inter"], "body-md": ["Inter"], "h1": ["Inter"], "body-sm": ["Inter"], "label-md": ["Inter"], "code": ["Inter"]
+            },
+            "fontSize": {
+                "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          }
         }
+      }
     </script>
 <style>
-        body { font-family: 'Inter', sans-serif; background-color: #fbf8ff; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { background-color: #f8fafc; }
     </style>
 </head>
-<body class="bg-background text-on-background">
-<!-- TopNavBar -->
-<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<body class="font-body-md text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-white border-b border-slate-200">
 <div class="flex items-center gap-8">
-<span class="text-xl font-bold text-blue-900 dark:text-blue-100">全国项目管理标准化技术委员会 - 人才库</span>
-<nav class="hidden md:flex gap-6">
-<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">仪表盘</a>
-<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">职位</a>
-<a class="font-sans text-sm font-medium tracking-tight text-blue-700 dark:text-blue-400 border-b-2 border-blue-700 dark:border-blue-400 pb-1" href="#">人才</a>
-<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">数据分析</a>
+<span class="text-xl font-bold text-blue-900">项目管理人才库</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 hover:text-blue-700 transition-colors" href="#">Dashboard</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 hover:text-blue-700 transition-colors" href="#">Jobs</a>
+<a class="font-sans text-sm font-medium tracking-tight text-blue-700 border-b-2 border-blue-700 pb-1" href="#">Talent</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 hover:text-blue-700 transition-colors" href="#">Analytics</a>
 </nav>
 </div>
 <div class="flex items-center gap-4">
-<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-slate-50 rounded-full transition-colors">notifications</button>
-<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-slate-50 rounded-full transition-colors">settings</button>
-<div class="h-8 w-8 rounded-full overflow-hidden border border-slate-200">
-<img alt="User profile" data-alt="A professional headshot of a corporate individual with a warm, confident expression. The lighting is soft and natural, emphasizing a high-end corporate aesthetic. The background is a blurred office interior with cool blue and grey tones, maintaining the project's professional navy and white color palette. The image quality is sharp and high-resolution, suitable for a professional user profile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhKoCFAnHYcCfEAl7NZhKyinN-OQyQvQyWhbUezmjUKeCbIlQ6D5cP_Qyssj_hGeRCLirXzG7QX6aQEMgBHmAVMGg50Dw6sGVfj3SgSiU6WIskyVf0POTe7QLPdK0WE1cneJrQLLREmYPFN9wtEdIFBDCweA-ajRzQiS3RpHyQ1alULOH31zbdCZelfYhqr7nhvGI0oxeaabtTV0U1J0KAd6YcZUxdi5aCFxYRCNH8aX-lYcfZCWT8QapyyTOMh6u9-bKQKRxpzm9i"/>
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="搜索资源..." type="text"/>
 </div>
-<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-opacity">发布职位</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 rounded transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="bg-primary text-white px-4 py-2 rounded text-sm font-medium hover:bg-primary-container transition-colors">Post Job</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200">
+<img alt="User profile" data-alt="A professional headshot of a recruitment specialist in a clean, modern office environment. The lighting is bright and airy, emphasizing a light-mode aesthetic. The individual has a friendly yet authoritative expression, suitable for a trusted advisor persona. The overall color palette is dominated by soft whites and professional blues, reflecting a corporate yet approachable atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO4aEqsxVFaLh41mympxK1N6-tt9-miXZDRWtmsE67F0eYgRQLpsjPXDX9svt4uobTqCZPGa2CguZEUAZ1EUIQ4a7RIjC2f968Vh4Y8hG58rUZ24jXeyaXy4VY9RNhX_a2-AFQvW9IbVgWhaPdDAhtKiH2j4GhUz0GsmZWkRmF6c3ecdA_1NGD9uc4E2eAUabBxLYdkTINMIGSB_DSDyIDwRgmkcC3lCdvILk6ZsGZ3Ly4oMXdoUNuJGGjEflZZ2X4pA2bZwl8RhDA"/>
+</div>
 </div>
 </header>
-<!-- SideNavBar -->
-<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col py-4 z-40 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
-<div class="px-6 mb-8 flex items-center gap-3">
-<div class="w-10 h-10 bg-primary-container rounded flex items-center justify-center text-on-primary-container">
-<span class="material-symbols-outlined">corporate_fare</span>
+<div class="flex pt-16 min-h-screen max-w-[1440px] mx-auto">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col py-4 z-40 bg-white border-r border-slate-100">
+<div class="px-6 py-4 border-b border-slate-50 mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-blue-50 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-800">business</span>
 </div>
 <div>
-<h2 class="text-lg font-black text-blue-900 dark:text-blue-50 leading-tight">Global Tech Corp</h2>
-<p class="text-[10px] text-slate-500 font-semibold tracking-widest uppercase">企业合作伙伴</p>
+<h3 class="text-sm font-black text-blue-900 uppercase">Global Tech Corp</h3>
+<p class="text-[10px] text-slate-500 font-semibold tracking-wide uppercase">Enterprise Partner</p>
 </div>
 </div>
-<nav class="flex-1 px-2 space-y-1">
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">person</span>
-<span>基本信息</span>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-6 py-3 text-slate-500 font-sans text-sm font-semibold tracking-wide uppercase hover:bg-slate-50 hover:pl-7 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span>Basic Info</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-r-4 border-blue-800 dark:border-blue-400 translate-x-1 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">work</span>
-<span>工作经历</span>
+<a class="flex items-center gap-3 px-6 py-3 bg-blue-50 text-blue-800 font-sans text-sm font-semibold tracking-wide uppercase border-r-4 border-blue-800 translate-x-1" href="#">
+<span class="material-symbols-outlined">work</span>
+<span>Work Experience</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">account_tree</span>
-<span>项目历史</span>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-500 font-sans text-sm font-semibold tracking-wide uppercase hover:bg-slate-50 hover:pl-7 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">account_tree</span>
+<span>Project History</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">school</span>
-<span>教育背景</span>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-500 font-sans text-sm font-semibold tracking-wide uppercase hover:bg-slate-50 hover:pl-7 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span>Education</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">psychology</span>
-<span>专业技能</span>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-500 font-sans text-sm font-semibold tracking-wide uppercase hover:bg-slate-50 hover:pl-7 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span>Skills</span>
 </a>
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-5 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">verified</span>
-<span>证书奖励</span>
+<a class="flex items-center gap-3 px-6 py-3 text-slate-500 font-sans text-sm font-semibold tracking-wide uppercase hover:bg-slate-50 hover:pl-7 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">verified</span>
+<span>Certifications</span>
 </a>
 </nav>
-<div class="px-4 mt-auto space-y-1">
-<button class="w-full bg-slate-100 text-slate-700 py-2.5 rounded font-label-md text-label-md mb-4 hover:bg-slate-200 transition-colors">编辑资料</button>
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-slate-500 hover:bg-slate-50 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">help</span>
-<span>帮助中心</span>
-</a>
-<a class="flex items-center gap-3 px-4 py-3 font-sans text-sm font-semibold tracking-wide uppercase text-error hover:bg-error-container/20 transition-all duration-200" href="#">
-<span class="material-symbols-outlined text-xl">logout</span>
-<span>退出登录</span>
-</a>
+<div class="px-6 mt-auto space-y-1">
+<button class="w-full text-left flex items-center gap-3 py-3 text-slate-500 font-sans text-sm font-semibold tracking-wide uppercase hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined">help</span>
+<span>Help Center</span>
+</button>
+<button class="w-full text-left flex items-center gap-3 py-3 text-slate-500 font-sans text-sm font-semibold tracking-wide uppercase hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</button>
 </div>
 </aside>
-<!-- Main Content Canvas -->
-<main class="pl-64 pt-16 min-h-screen bg-background">
-<div class="max-w-[1140px] mx-auto p-10">
-<!-- Header Section -->
-<div class="flex justify-between items-end mb-8">
+<!-- Main Content Area -->
+<main class="ml-64 flex-1 p-8 bg-[#F8FAFC]">
+<div class="max-w-4xl mx-auto">
+<div class="flex items-center justify-between mb-8">
 <div>
-<h1 class="font-h1 text-h1 text-on-background mb-2">个人中心 - 工作经历</h1>
-<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
-                        通过记录您的职业旅程和成就，构建您的专业叙事。详细的经历有助于我们的匹配引擎为您找到合适的角色。
-                    </p>
+<h1 class="font-h1 text-h1 text-on-surface">工作经历</h1>
+<p class="font-body-md text-body-md text-slate-500 mt-1">展示您的职业发展轨迹，让招聘方更了解您的背景。</p>
 </div>
-<button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded shadow-sm hover:opacity-90 transition-all font-label-md text-label-md">
-<span class="material-symbols-outlined">add</span>
-<span>添加经历</span>
-</button>
+<button class="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg text-label-md font-label-md hover:bg-blue-900 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        添加工作经历
+                    </button>
 </div>
-<!-- Bento Grid of Experiences -->
-<div class="grid grid-cols-12 gap-6">
-<!-- Entry 1: Featured/Recent (Larger) -->
-<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group">
-<div class="flex justify-between items-start mb-6">
-<div class="flex gap-6 items-start">
-<div class="w-16 h-16 rounded bg-slate-50 flex items-center justify-center border border-slate-100">
-<img alt="CSPM Logo" class="w-12 h-12 object-contain" src="/assets/logo.png"/>
+<!-- Experience List -->
+<div class="space-y-6">
+<!-- Experience Card 1 -->
+<div class="bg-white border border-slate-200 rounded-lg overflow-hidden transition-shadow hover:shadow-md">
+<div class="p-6">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 bg-slate-50 rounded border border-slate-100 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-slate-400">corporate_fare</span>
 </div>
 <div>
-<h3 class="font-h3 text-h3 text-on-background mb-1">高级产品架构师</h3>
-<div class="flex items-center gap-3 text-on-surface-variant font-label-md text-label-md">
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">corporate_fare</span>Global Tech Corp</span>
-<span class="w-1 h-1 bg-slate-300 rounded-full"></span>
-<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">calendar_today</span>2021年3月 - 至今</span>
+<div class="flex items-center gap-3">
+<h3 class="font-h3 text-h3 text-on-surface">高级软件工程师</h3>
+<span class="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-bold rounded">全职</span>
+</div>
+<div class="mt-1 flex items-center gap-4 text-slate-600">
+<span class="font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">business</span>
+                                                北京字节跳动科技有限公司
+                                            </span>
+<span class="font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                                2021.03 - 至今
+                                            </span>
 </div>
 </div>
 </div>
-<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-2 text-slate-400 hover:text-primary transition-colors hover:bg-slate-50 rounded">
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-all">
 <span class="material-symbols-outlined">edit</span>
 </button>
-<button class="p-2 text-slate-400 hover:text-error transition-colors hover:bg-slate-50 rounded">
+<button class="p-2 text-slate-400 hover:text-error hover:bg-red-50 rounded transition-all">
 <span class="material-symbols-outlined">delete</span>
 </button>
 </div>
 </div>
-<div class="space-y-4">
-<h4 class="font-label-md text-label-md text-primary uppercase tracking-wider">职责与成就</h4>
-<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
-                            领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计。成功扩展基础设施以支持超过 200 万月度活跃用户，同时通过战略性云原生优化将延迟降低了 40%。
-                        </p>
-<div class="flex flex-wrap gap-2 pt-2">
-<span class="px-3 py-1 bg-slate-50 text-slate-600 rounded text-xs font-medium border border-slate-100">系统架构</span>
-<span class="px-3 py-1 bg-slate-50 text-slate-600 rounded text-xs font-medium border border-slate-100">团队领导</span>
-<span class="px-3 py-1 bg-slate-50 text-slate-600 rounded text-xs font-medium border border-slate-100">云战略</span>
+<div class="mt-6 pl-16">
+<h4 class="font-label-md text-label-md text-on-surface mb-2">岗位/职责</h4>
+<ul class="list-disc list-inside text-body-sm text-slate-600 space-y-1.5 leading-relaxed">
+<li>负责核心业务系统的架构设计与开发，支撑日活千万级用户请求。</li>
+<li>主导微服务化改造，将原有单体应用拆分为高效协作的服务集群，提升扩展性 40%。</li>
+<li>指导初中级工程师，开展技术分享会，建立团队代码审查机制。</li>
+<li>优化系统性能瓶颈，利用缓存与异步队列技术使接口响应时间降低 200ms。</li>
+</ul>
 </div>
 </div>
 </div>
-<!-- Entry 2: Stats/Insight (Small) -->
-<div class="col-span-12 lg:col-span-4 bg-primary text-on-primary rounded-xl p-8 flex flex-col justify-center">
-<span class="material-symbols-outlined text-4xl mb-4" data-weight="fill">insights</span>
-<h3 class="font-h3 text-h3 mb-2">影响力统计</h3>
-<p class="font-body-sm text-body-sm opacity-80 mb-6">在您的职业生涯中，您参与的项目跨越了 3 个不同的行业。</p>
-<div class="grid grid-cols-2 gap-4">
-<div class="border-l-2 border-on-primary/30 pl-4">
-<p class="text-h2 font-h2">8+</p>
-<p class="text-xs uppercase tracking-widest opacity-70">工作年限</p>
-</div>
-<div class="border-l-2 border-on-primary/30 pl-4">
-<p class="text-h2 font-h2">12</p>
-<p class="text-xs uppercase tracking-widest opacity-70">重大项目</p>
-</div>
-</div>
-</div>
-<!-- Entry 3: Previous Experience (Standard) -->
-<div class="col-span-12 lg:col-span-6 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group">
-<div class="flex justify-between items-start mb-6">
-<div class="flex gap-4 items-start">
-<div class="w-12 h-12 rounded bg-slate-50 flex items-center justify-center border border-slate-100 text-slate-400">
-<span class="material-symbols-outlined text-2xl">domain</span>
+<!-- Experience Card 2 -->
+<div class="bg-white border border-slate-200 rounded-lg overflow-hidden transition-shadow hover:shadow-md">
+<div class="p-6">
+<div class="flex items-start justify-between">
+<div class="flex gap-4">
+<div class="w-12 h-12 bg-slate-50 rounded border border-slate-100 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-slate-400">corporate_fare</span>
 </div>
 <div>
-<h3 class="font-body-lg font-bold text-on-background mb-1">主导软件工程师</h3>
-<p class="text-sm text-on-surface-variant font-medium">Innovate Softwares</p>
-<p class="text-xs text-slate-400">2018年1月 - 2021年2月 (3年2个月)</p>
+<div class="flex items-center gap-3">
+<h3 class="font-h3 text-h3 text-on-surface">中级后端开发工程师</h3>
+</div>
+<div class="mt-1 flex items-center gap-4 text-slate-600">
+<span class="font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">business</span>
+                                                美团点评
+                                            </span>
+<span class="font-label-md text-label-md flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                                                2018.07 - 2021.02
+                                            </span>
 </div>
 </div>
-<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-1.5 text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
-<button class="p-1.5 text-slate-400 hover:text-error transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded transition-all">
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-error hover:bg-red-50 rounded transition-all">
+<span class="material-symbols-outlined">delete</span>
+</button>
 </div>
 </div>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">
-                        使用 React 和 Node.js 开发和维护全栈应用程序。指导初级开发人员，并实施 CI/CD 流水线，使部署频率提高了 60%。
-                    </p>
-</div>
-<!-- Entry 4: Previous Experience (Standard) -->
-<div class="col-span-12 lg:col-span-6 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group">
-<div class="flex justify-between items-start mb-6">
-<div class="flex gap-4 items-start">
-<div class="w-12 h-12 rounded bg-slate-50 flex items-center justify-center border border-slate-100 text-slate-400">
-<span class="material-symbols-outlined text-2xl">apartment</span>
-</div>
-<div>
-<h3 class="font-body-lg font-bold text-on-background mb-1">后端开发工程师</h3>
-<p class="text-sm text-on-surface-variant font-medium">DataStream Systems</p>
-<p class="text-xs text-slate-400">2015年6月 - 2017年12月 (2年7个月)</p>
+<div class="mt-6 pl-16">
+<h4 class="font-label-md text-label-md text-on-surface mb-2">岗位/职责</h4>
+<ul class="list-disc list-inside text-body-sm text-slate-600 space-y-1.5 leading-relaxed">
+<li>参与外卖配送系统的日常维护与功能迭代，负责计费模块开发。</li>
+<li>使用 Java Spring Boot 进行开发，保证代码质量与业务逻辑严密性。</li>
+<li>与产品经理紧密沟通，确保需求准确转化为高效的技术方案。</li>
+</ul>
 </div>
 </div>
-<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-1.5 text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit</span></button>
-<button class="p-1.5 text-slate-400 hover:text-error transition-colors"><span class="material-symbols-outlined text-xl">delete</span></button>
+</div>
+<!-- Placeholder / Empty State (Actionable) -->
+<button class="w-full border-2 border-dashed border-slate-200 rounded-lg p-8 flex flex-col items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-all group bg-slate-50/50">
+<span class="material-symbols-outlined text-3xl mb-2 group-hover:scale-110 transition-transform">add_circle</span>
+<span class="font-label-md text-label-md">继续添加上一份工作经历</span>
+</button>
+</div>
+<!-- Form Section (Simulated Interaction) -->
+<div class="mt-12 bg-white border border-slate-200 rounded-lg p-8">
+<div class="flex items-center gap-2 mb-6 border-b border-slate-50 pb-4">
+<span class="material-symbols-outlined text-primary">post_add</span>
+<h2 class="font-h2 text-h2 text-on-surface">添加新经历</h2>
+</div>
+<form class="grid grid-cols-2 gap-6">
+<div class="col-span-2 md:col-span-1 space-y-2">
+<label class="block font-label-md text-label-md text-slate-700">工作单位</label>
+<input class="w-full border border-slate-300 rounded px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="例如：腾讯科技" type="text"/>
+</div>
+<div class="col-span-2 md:col-span-1 space-y-2">
+<label class="block font-label-md text-label-md text-slate-700">职位名称</label>
+<input class="w-full border border-slate-300 rounded px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="例如：产品经理" type="text"/>
+</div>
+<div class="col-span-2 md:col-span-1 space-y-2">
+<label class="block font-label-md text-label-md text-slate-700">起始时间</label>
+<div class="grid grid-cols-2 gap-3">
+<input class="w-full border border-slate-300 rounded px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" type="month"/>
+<input class="w-full border border-slate-300 rounded px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" type="month"/>
 </div>
 </div>
-<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">
-                        专注于数据库优化和高并发 API 设计。通过高效的资源管理和查询调优，将服务器成本降低了 25%。
-                    </p>
+<div class="col-span-2 md:col-span-1 space-y-2">
+<label class="block font-label-md text-label-md text-slate-700">工作地点 (可选)</label>
+<input class="w-full border border-slate-300 rounded px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all" placeholder="例如：上海" type="text"/>
 </div>
-<!-- Placeholder / Add More -->
-<div class="col-span-12 border-2 border-dashed border-slate-200 rounded-xl p-10 flex flex-col items-center justify-center text-slate-400 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer">
-<span class="material-symbols-outlined text-4xl mb-3">add_circle</span>
-<span class="font-label-md text-label-md">点击此处添加职业生涯中的其他经历</span>
+<div class="col-span-2 space-y-2">
+<label class="block font-label-md text-label-md text-slate-700">岗位/职责描述</label>
+<textarea class="w-full border border-slate-300 rounded px-4 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none" placeholder="请详细描述您的工作内容、所取得的成就及核心技能..." rows="4"></textarea>
 </div>
+<div class="col-span-2 flex justify-end gap-3 mt-4">
+<button class="px-6 py-2 border border-slate-300 text-slate-600 rounded font-label-md hover:bg-slate-50 transition-all" type="button">取消</button>
+<button class="px-8 py-2 bg-primary text-white rounded font-label-md hover:bg-blue-900 shadow-sm transition-all" type="submit">保存经历</button>
+</div>
+</form>
 </div>
 </div>
 </main>
-<!-- Success Feedback Overlay (Visual only) -->
-<div class="fixed bottom-8 right-8 z-50 flex items-center gap-3 bg-white border border-slate-200 px-5 py-4 rounded shadow-lg border-l-4 border-l-primary">
-<span class="material-symbols-outlined text-primary" data-weight="fill">check_circle</span>
-<div>
-<p class="font-label-md text-label-md text-on-background">已自动保存</p>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-wider">最近更新于 2 分钟前</p>
+</div>
+<!-- Decorative Illustration Card -->
+<div class="fixed bottom-8 right-8 w-64 bg-white p-4 rounded-xl shadow-xl border border-slate-100 hidden xl:block">
+<div class="relative w-full h-32 rounded-lg overflow-hidden mb-4">
+<img class="w-full h-full object-cover" data-alt="An abstract, high-tech conceptual visualization of career progression and networking connections. Floating architectural nodes and light streaks represent data transfer and professional growth against a deep navy blue and soft white background. The style is modern corporate with a focus on precision and digital innovation, reflecting the authority and efficiency of a recruitment tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwRz5PnxSG164WTpQeP5iEPFle1BIEl6iD1RphAAAWPqOzgX5CHuukLFfpMTKHbeHdphsjfrDJ7d8XH2K3-3xT01xGjCS7xYjxxnNsxppnFl0gZblq4zlJD7uBq8CPLhojRmO3SzJYzI8ewXh8koTfMy_gStJc42YG6BCXQ67K7QbOUleuo_yLW8XZ4oLowE7CX5bi1KULz-XQyIAUpy8nCfTuKDxRoOk_bZw5YNasLCEljLseGYItF4neDFyy1QzwPgHB1DudRthM"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-3">
+<span class="text-white text-xs font-bold">简历分位数：前 5%</span>
+</div>
+</div>
+<p class="text-[12px] text-slate-500 leading-tight">完善 100% 的工作经历可以使您被猎头联系的概率提高 3 倍。</p>
+<div class="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary w-[85%] h-full"></div>
 </div>
 </div>
 <script src="/stitch_cspm/stitch-actions.js"></script>

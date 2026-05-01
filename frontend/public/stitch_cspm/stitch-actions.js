@@ -38,10 +38,72 @@
     if (path.includes('/login')) return 'login';
     if (path.includes('/register')) return 'register';
     if (path.includes('/enterprise-center')) return 'enterprise';
+    if (path === '/talents') return 'talent-list';
+    if (path.startsWith('/talents/')) return 'talent-detail';
+    if (path === '/recruitments') return 'recruitment-list';
+    if (path === '/recruitments/new') return 'recruitment-create';
+    if (path.startsWith('/recruitments/')) return 'recruitment-detail';
     if (path.includes('/personal-center/work-experience')) return 'work';
     if (path.includes('/personal-center/')) return 'work';
     if (path.includes('/personal-center')) return 'personal';
     return 'default';
+  }
+
+  function findInputByLabel(pattern) {
+    const labels = Array.from(document.querySelectorAll('label'));
+    const label = labels.find((item) => pattern.test(textOf(item)));
+    const scopedInput = label?.parentElement?.querySelector('input, textarea, select')
+      || label?.closest('.space-y-xs, .space-y-2, div')?.querySelector('input, textarea, select');
+    if (scopedInput instanceof HTMLInputElement || scopedInput instanceof HTMLTextAreaElement || scopedInput instanceof HTMLSelectElement) {
+      return scopedInput;
+    }
+    return null;
+  }
+
+  function ensureId(field, id) {
+    if (field && !document.getElementById(id)) {
+      field.id = id;
+    }
+  }
+
+  function setupAuthFieldIds() {
+    const pageName = currentPageName();
+    if (pageName === 'login') {
+      ensureId(findInputByLabel(/用户名|邮箱/) || document.querySelector('input[type="text"]'), 'username');
+      ensureId(findInputByLabel(/密码/) || document.querySelector('input[type="password"]'), 'password');
+      const remember = document.querySelector('input[type="checkbox"]');
+      if (remember instanceof HTMLInputElement) {
+        remember.id = 'remember';
+        const rememberLabel = Array.from(document.querySelectorAll('label')).find((item) => /记住/.test(textOf(item)));
+        rememberLabel?.setAttribute('for', 'remember');
+      }
+    }
+
+    if (pageName === 'register') {
+      const passwords = Array.from(document.querySelectorAll('input[type="password"]'));
+      ensureId(findInputByLabel(/用户名|账号/) || document.querySelector('input[type="text"]'), 'username');
+      ensureId(passwords[0], 'password');
+      ensureId(passwords[1], 'confirm-password');
+      ensureId(findInputByLabel(/手机/) || document.querySelector('input[type="tel"]'), 'phone');
+      ensureId(findInputByLabel(/短信|验证码/) || document.querySelector('input[placeholder*="验证码"]'), 'sms');
+    }
+  }
+
+  function setupRegisterTabs() {
+    if (currentPageName() !== 'register') {
+      return;
+    }
+
+    const personalTab = Array.from(document.querySelectorAll('button')).find((button) => textOf(button).includes('个人注册'));
+    const enterpriseTab = Array.from(document.querySelectorAll('button')).find((button) => textOf(button).includes('企业注册'));
+    ensureId(personalTab, 'personal-tab');
+    ensureId(enterpriseTab, 'enterprise-tab');
+    if (personalTab instanceof HTMLButtonElement && !personalTab.hasAttribute('aria-selected')) {
+      personalTab.setAttribute('aria-selected', 'true');
+    }
+    if (enterpriseTab instanceof HTMLButtonElement && !enterpriseTab.hasAttribute('aria-selected')) {
+      enterpriseTab.setAttribute('aria-selected', 'false');
+    }
   }
 
   function moduleActionFromPath(path = window.parent.location.pathname) {
@@ -610,6 +672,10 @@
       });
       replaceTextContent('Chen Wei (陈伟)', '待完善个人信息');
       replaceTextContent('Chen Wei', '');
+      replaceTextContent('张伟', '待完善个人信息');
+      replaceTextContent('高级产品经理', '');
+      replaceTextContent('上海市, 浦东新区', '资料待完善');
+      replaceTextContent('具备8年互联网产品经验，主导过3款千万级DAU产品的从0到1研发。擅长数据驱动决策，拥有极强的跨部门沟通与协调能力，能够快速响应市场变化并制定产品路线图。', '');
       replaceTextContent('高级产品设计师', '');
       replaceTextContent('拥有超过8年领导世界500强科技公司跨学科设计团队的经验。精通设计系统、用户研究和数据驱动的设计优化。曾为企业级SaaS产品实现转化率提升25%的优异战绩。具备出色的干系人管理和双语沟通能力。', '');
     }
@@ -633,6 +699,17 @@
       replaceTextContent('contact@globaltech.com', '');
       replaceTextContent('https://www.globaltech.com', '');
       replaceTextContent('加利福尼亚州 硅谷 创新大道101号', '');
+      replaceTextContent('智博未来科技有限公司', '企业资料待完善');
+      replaceTextContent('智博未来科技成立于2015年，是一家专注于政企数字化转型的领先服务商。我们在计算机视觉和自然语言处理领域拥有超过50项核心专利，致力于通过AI技术驱动产业升级。', '');
+      replaceTextContent('陈静', '');
+      replaceTextContent('张建国', '未分配负责人');
+      replaceTextContent('高级客户经理', '');
+      replaceTextContent('上次更新: 2024-05-20', '资料待完善');
+      replaceTextContent('021-88889999', '');
+      replaceTextContent('contact@zhibo_future.com', '');
+      replaceTextContent('www.zhibo_future.tech', '');
+      replaceTextContent('张江高科技园区张衡路1000号智博大厦12层', '');
+      replaceTextContent('该客户目前正在进行B轮融资，扩招需求明显。主要寻找P7级别以上的算法专家，简历反馈速度较快。维护人需每周跟进一次最新HC情况。', '');
     }
 
     if (isWorkPage || isModulePage) {
@@ -654,12 +731,37 @@
           grid.prepend(empty);
         }
       }
+      if (isWorkPage) {
+        const workCards = Array.from(document.querySelectorAll('main .space-y-md > .bg-surface-container-lowest, main .space-y-md > .border-2, main .space-y-6 > .bg-white.border, main .space-y-6 > button'));
+        workCards.forEach((card) => card.remove());
+        const list = document.querySelector('main .space-y-md, main .space-y-6');
+        if (list && !document.getElementById('experience-empty')) {
+          const empty = document.createElement('div');
+          empty.id = 'experience-empty';
+          empty.className = 'bg-white border border-dashed border-slate-200 rounded-xl p-8 text-slate-500';
+          empty.innerHTML = '<p class="font-label-md text-label-md text-on-background">暂无工作经历</p><p class="text-sm text-on-surface-variant mt-2">请点击“添加工作经历”维护第一段工作经历。</p>';
+          list.prepend(empty);
+        }
+      }
       document.querySelectorAll('body > div.fixed.bottom-8').forEach((item) => item.remove());
       replaceTextContent('Global Tech Corp', '个人资料');
       replaceTextContent('高级产品架构师', '');
       replaceTextContent('主导软件工程师', '');
       replaceTextContent('后端开发工程师', '');
-      replaceTextContent('领导企业级 全国项目管理标准化技术委员会 - 人才库招聘平台的架构设计。成功扩展基础设施以支持超过 200 万月度活跃用户，同时通过战略性云原生优化将延迟降低了 40%。', '');
+      replaceTextContent('领导企业级 项目管理人才库招聘平台的架构设计。成功扩展基础设施以支持超过 200 万月度活跃用户，同时通过战略性云原生优化将延迟降低了 40%。', '');
+      replaceTextContent('高级软件工程师', '');
+      replaceTextContent('中级后端开发工程师', '');
+      replaceTextContent('北京字节跳动科技有限公司', '');
+      replaceTextContent('美团点评', '');
+      replaceTextContent('中级', '');
+      replaceTextContent('全职', '');
+      replaceTextContent('负责核心业务系统的架构设计与开发，支撑日活千万级用户请求。', '');
+      replaceTextContent('主导微服务化改造，将原有单体应用拆分为高效协作的服务集群，提升扩展性 40%。', '');
+      replaceTextContent('指导初中级工程师，开展技术分享会，建立团队代码审查机制。', '');
+      replaceTextContent('优化系统性能瓶颈，利用缓存与异步队列技术使接口响应时间降低 200ms。', '');
+      replaceTextContent('参与外卖配送系统的日常维护与功能迭代，负责计费模块开发。', '');
+      replaceTextContent('使用 Java Spring Boot 进行开发，保证代码质量与业务逻辑严密性。', '');
+      replaceTextContent('与产品经理紧密沟通，确保需求准确转化为高效的技术方案。', '');
     }
 
     if (isModulePage) {
@@ -864,11 +966,15 @@
 
   function captchaElements() {
     const modal = document.getElementById('captcha-modal');
-    const slider = modal?.querySelector('.cursor-pointer');
+    const slider = modal?.querySelector('.cursor-pointer, .cursor-grab, .active\\:cursor-grabbing');
     const bar = slider?.parentElement;
-    const piece = modal?.querySelector('.z-10');
-    const slot = modal?.querySelector('.shadow-inner');
-    const label = bar?.querySelector('.select-none');
+    const absoluteItems = Array.from(modal?.querySelectorAll('.absolute') || []);
+    const piece = modal?.querySelector('.z-10')
+      || absoluteItems.find((item) => String(item.className).includes('bg-primary/40'));
+    const slot = modal?.querySelector('.shadow-inner')
+      || absoluteItems.find((item) => String(item.className).includes('bg-white/20'));
+    const label = bar?.querySelector('.select-none')
+      || Array.from(modal?.querySelectorAll('p, span') || []).find((item) => /拖动滑块|按住滑块|验证通过|图片缺口|登录中/.test(textOf(item)));
     const puzzleArea = modal?.querySelector('.aspect-\\[4\\/3\\]');
 
     return {
@@ -883,12 +989,16 @@
   }
 
   function refreshCaptchaChallenge() {
-    const { modal, slot, label } = captchaElements();
+    const { modal, slot, piece, label } = captchaElements();
     resetCaptchaSlider();
     if (slot) {
-      const leftPercent = 28 + Math.floor(Math.random() * 34);
+      const leftPercent = 42 + Math.floor(Math.random() * 24);
       slot.classList.remove('left-1/4');
       slot.style.left = `${leftPercent}%`;
+    }
+    if (piece) {
+      piece.style.left = '48px';
+      piece.style.transform = 'translateX(0px)';
     }
     if (label) {
       label.textContent = '按住滑块拖动';
@@ -909,12 +1019,14 @@
 
     slider.dataset.captchaPassed = 'false';
     slider.dataset.captchaOffset = '0';
+    slider.style.left = '0px';
     slider.style.transform = 'translateX(0px)';
     slider.setAttribute('aria-valuenow', '0');
     slider.classList.remove('bg-green-600');
     slider.classList.add('bg-primary');
     bar.dataset.captchaPassed = 'false';
     if (piece) {
+      piece.style.left = '48px';
       piece.style.transform = 'translateX(0px)';
     }
     if (label) {
@@ -969,6 +1081,16 @@
     slider.setAttribute('tabindex', '0');
     slider.style.touchAction = 'none';
     slider.style.userSelect = 'none';
+    slider.style.left = '0px';
+    if (piece) {
+      piece.classList.add('z-10');
+      piece.style.left = '48px';
+    }
+    if (slot && (!slot.style.left || piece && slot.offsetLeft <= piece.offsetLeft)) {
+      slot.classList.add('shadow-inner');
+      slot.classList.remove('left-1/4');
+      slot.style.left = '56%';
+    }
 
     let dragging = false;
     let startX = 0;
@@ -976,6 +1098,7 @@
     let currentOffset = 0;
     let activePointerId = null;
     let hasMoved = false;
+    let settleTimer = 0;
 
     const maxOffset = () => Math.max(0, bar.clientWidth - slider.offsetWidth - 8);
     const pieceMaxOffset = () => {
@@ -1012,6 +1135,24 @@
       if (label) {
         const nearTarget = Math.abs(currentOffset - sliderTargetOffset()) <= Math.max(14, max * 0.08);
         label.textContent = nearTarget ? '松开完成验证' : '拖到图片缺口位置';
+        window.clearTimeout(settleTimer);
+        if (dragging && nearTarget) {
+          dragging = false;
+          activePointerId = null;
+          slider.dataset.captchaPassed = 'true';
+          slider.dataset.captchaOffset = String(sliderTargetOffset());
+          slider.style.transform = `translateX(${sliderTargetOffset()}px)`;
+          slider.setAttribute('aria-valuenow', '100');
+          slider.classList.remove('bg-primary');
+          slider.classList.add('bg-green-600');
+          bar.dataset.captchaPassed = 'true';
+          if (piece) {
+            piece.style.transform = `translateX(${pieceTargetOffset()}px)`;
+          }
+          label.textContent = '验证通过';
+          label.classList.add('text-green-700');
+          window.setTimeout(() => completeLogin(), 180);
+        }
       }
     };
 
@@ -1041,12 +1182,13 @@
       event.preventDefault();
     });
 
-    const finishDrag = (event) => {
-      if (!dragging || activePointerId !== event.pointerId) {
+    const finishCurrentDrag = (event) => {
+      if (!dragging) {
         return;
       }
       dragging = false;
       activePointerId = null;
+      window.clearTimeout(settleTimer);
       if (!hasMoved) {
         toast('请按住滑块拖到图片缺口位置');
         event.preventDefault();
@@ -1058,12 +1200,34 @@
       event.stopPropagation();
     };
 
+    const finishDrag = (event) => {
+      if (!dragging || activePointerId !== event.pointerId) {
+        return;
+      }
+      finishCurrentDrag(event);
+    };
+
+    const finishMouseDrag = (event) => {
+      if (!dragging) {
+        return;
+      }
+      finishCurrentDrag(event);
+    };
+
     slider.addEventListener('pointerup', finishDrag);
     slider.addEventListener('pointercancel', finishDrag);
+    document.addEventListener('pointerup', finishDrag);
+    document.addEventListener('pointercancel', finishDrag);
+    document.addEventListener('mouseup', finishMouseDrag);
     slider.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
       if (slider.dataset.captchaPassed !== 'true') {
+        const offset = Number(slider.dataset.captchaOffset || '0');
+        if (Math.abs(offset - sliderTargetOffset()) <= Math.max(14, maxOffset() * 0.08)) {
+          verifyCaptchaFromDrag(offset, maxOffset(), sliderTargetOffset());
+          return;
+        }
         toast('请按住滑块拖到图片缺口位置');
       }
     });
@@ -1097,6 +1261,7 @@
 
     const label = document.querySelector('label[for="remember"]');
     if (label instanceof HTMLLabelElement) {
+      label.dataset.rememberLabelBound = 'true';
       label.addEventListener('click', (event) => {
         event.preventDefault();
         checkbox.checked = !checkbox.checked;
@@ -1170,8 +1335,10 @@
   }
 
   function addExperience() {
-    const placeholder = Array.from(document.querySelectorAll('div')).find((item) => textOf(item).includes('点击此处添加职业生涯中的其他经历'));
-    if (!placeholder || document.getElementById('experience-new')) {
+    const placeholder = Array.from(document.querySelectorAll('div, button')).find((item) => /点击此处添加职业生涯中的其他经历|继续添加上一份工作经历|添加工作经历/.test(textOf(item)));
+    const list = document.querySelector('main .space-y-md, main .space-y-6');
+    const target = placeholder || list;
+    if (!target || document.getElementById('experience-new')) {
       toast('经历已添加');
       return;
     }
@@ -1179,7 +1346,11 @@
     card.id = 'experience-new';
     card.className = 'col-span-12 bg-white border border-slate-200 rounded-xl p-6';
     card.innerHTML = '<div class="flex justify-between gap-4"><div><p class="font-label-md text-label-md text-on-background">新增工作经历</p><p class="text-sm text-on-surface-variant mt-2">已添加一条待完善的工作经历。</p></div><div class="flex gap-2"><button type="button" data-stitch-action="edit" class="p-2 text-slate-500 border border-slate-200 rounded">编辑</button><button type="button" data-stitch-action="delete" class="p-2 text-slate-500 border border-slate-200 rounded">删除</button></div></div>';
-    placeholder.before(card);
+    if (list) {
+      list.prepend(card);
+    } else {
+      target.before(card);
+    }
     const empty = document.getElementById('experience-empty');
     if (empty) {
       empty.remove();
@@ -1470,38 +1641,46 @@
   }
 
   function actionFromText(label) {
-    if (/退出登录/.test(label)) return 'logout';
-    if (/登录|立即登录/.test(label)) return 'login';
-    if (/注册|申请加入/.test(label)) return 'register';
-    if (/首页/.test(label)) return 'home';
-    if (/招聘信息|职位/.test(label)) return 'recruitments';
-    if (/发布职位/.test(label)) return 'new-recruitment';
-    if (/添加经历/.test(label)) return 'add-experience';
-    if (/基础信息|基本信息|基本资料/.test(label)) return 'personal-center';
-    if (/工作经历/.test(label)) return 'work-experience';
-    if (/项目经历|项目历史/.test(label)) return 'project-experience';
+    const pageName = currentPageName();
+    if (/退出登录|Logout/.test(label)) return 'logout';
+    if (/指纹登录/.test(label)) return 'biometric-login';
+    if (/扫码登录/.test(label)) return 'qr-login';
+    if (/Log In|登录|立即登录/.test(label)) return 'login';
+    if (/Sign Up|注册|申请加入/.test(label)) return 'register';
+    if (/首页|Dashboard|Overview|控制台|仪表盘/.test(label)) return 'home';
+    if (/Opportunities|Jobs|Job Postings|招聘信息|职位/.test(label)) return 'recruitments';
+    if (/Post Job|发布职位/.test(label)) return 'new-recruitment';
+    if (/Resources|Documentation|资源/.test(label)) return 'help';
+    if (/About|关于/.test(label)) return 'policy-info';
+    if (/添加经历|添加工作经历|继续添加上一份工作经历|保存经历|Add Experience/.test(label)) return 'add-experience';
+    if (/基础信息|基本信息|基本资料|Basic Info/.test(label)) return 'personal-center';
+    if (/工作经历|Work Experience/.test(label)) return 'work-experience';
+    if (/项目经历|项目历史|Project History/.test(label)) return 'project-experience';
     if (/获得荣誉|荣誉奖励/.test(label)) return 'honors';
-    if (/教育经历|教育背景/.test(label)) return 'education-experience';
-    if (/专业技能/.test(label)) return 'professional-skills';
-    if (/资格证书|资质证书|证书奖励/.test(label)) return 'certificates';
-    if (/企业中心/.test(label)) return 'enterprise-center';
-    if (/人才信息|人才画像/.test(label)) return 'personal-center';
-    if (/^人才$/.test(label)) return 'personal-center';
-    if (/控制台|仪表盘/.test(label)) return 'home';
-    if (/查看详情|立即申请|更多机会/.test(label)) return 'recruitments';
+    if (/教育经历|教育背景|Education/.test(label)) return 'education-experience';
+    if (/专业技能|Skills/.test(label)) return 'professional-skills';
+    if (/资格证书|资质证书|证书奖励|Certifications/.test(label)) return 'certificates';
+    if (/企业中心|Enterprise Portal/.test(label)) return 'enterprise-center';
+    if (/人才信息|人才画像|Talent/.test(label)) return 'talents';
+    if (/^人才$/.test(label)) return 'talents';
+    if (/Employee Management/.test(label)) return 'talents';
+    if (/查看详情/.test(label)) return pageName === 'talent-list' ? 'talent-detail' : 'recruitment-detail';
+    if (/立即申请|更多机会/.test(label)) return 'recruitments';
     if (/筛选|filter_list/.test(label)) return 'filter-panel';
     if (/排序|sort/.test(label)) return 'sort-panel';
     if (/bookmark|收藏/.test(label)) return 'bookmark';
-    if (/通知|notifications/.test(label)) return 'notifications';
+    if (/通知|notifications|Messages/.test(label)) return 'notifications';
     if (/设置|settings/.test(label)) return 'settings';
     if (/忘记密码/.test(label)) return 'forgot-password';
-    if (/查看所有报告|数据分析/.test(label)) return 'analytics';
+    if (/查看所有报告|数据分析|Analytics|insert_chart/.test(label)) return 'analytics';
     if (/AI 匹配/.test(label)) return 'ai-match';
     if (/高管猎寻/.test(label)) return 'executive-search';
-    if (/帮助|帮助支持|帮助中心/.test(label)) return 'help';
-    if (/隐私|服务条款|系统状态|安全信息|Cookie|关于我们|联系我们|加入我们/.test(label)) return 'policy-info';
+    if (/帮助|帮助支持|帮助中心|Help Center|Support/.test(label)) return 'help';
+    if (/隐私|服务条款|系统状态|安全信息|Cookie|关于我们|联系我们|加入我们|Privacy Policy|Terms of Service|Contact Support/.test(label)) return 'policy-info';
     if (/swap_horiz|负责人/.test(label)) return 'assign-owner';
-    if (/contact_support/.test(label)) return 'support';
+    if (/contact_support|Contact Admin/.test(label)) return 'support';
+    if (/Edit Profile/.test(label)) return 'personal-center';
+    if (/更换/.test(label)) return 'upload';
     return 'details-panel';
   }
 
@@ -1515,6 +1694,15 @@
         break;
       case 'recruitments':
         go('/recruitments');
+        break;
+      case 'talents':
+        go('/talents');
+        break;
+      case 'talent-detail':
+        go('/talents/sample');
+        break;
+      case 'recruitment-detail':
+        go('/recruitments/sample');
         break;
       case 'new-recruitment':
         go('/recruitments/new');
@@ -1609,7 +1797,7 @@
         openPanel('通知中心', '暂无新的系统通知。后续通知会展示审核结果、招聘进度、资料补全提醒和企业反馈。');
         break;
       case 'settings':
-        openPanel('账号设置', '可在此维护账号安全、消息偏好和隐私设置。当前演示版本已接入入口面板，避免无效点击。');
+        openPanel('账号设置', '可在此维护账号安全、消息偏好和隐私设置。');
         break;
       case 'forgot-password':
         openPanel('找回密码', '请输入注册手机号后通过短信验证码重置密码。验证码为 123456。');
@@ -1645,6 +1833,13 @@
         break;
       case 'close-panel':
         document.getElementById('captcha-modal')?.classList.add('hidden');
+        document.getElementById('stitch-action-panel')?.remove();
+        break;
+      case 'biometric-login':
+        openPanel('指纹登录', '请先完成用户名和密码登录，之后可在账号设置中开启本设备指纹登录。');
+        break;
+      case 'qr-login':
+        openPanel('扫码登录', '请使用已登录的移动端账号扫码确认。本入口会校验账号、设备和二维码有效期。');
         break;
       case 'help':
         openPanel('帮助中心', '帮助中心包含账号注册、资料维护、招聘信息查看、企业资料维护和权限说明。');
@@ -1670,7 +1865,7 @@
     const icon = `${label} ${iconText}`.trim();
     if (button.dataset.modulePageManage) return 'manage-module';
     if (button.dataset.modulePageDelete) return 'delete-module-record';
-    if (currentPageName() === 'login' && button.closest('main') && /^登录$/.test(label)) return 'start-login';
+    if (currentPageName() === 'login' && button.closest('main') && /^(登录|立即登录)$/.test(label)) return 'start-login';
     if (button.closest('#captcha-modal') && /chevron_right/.test(icon)) return 'captcha-complete';
     if (/close/.test(icon)) return 'close-panel';
     if (/refresh/.test(icon)) return 'captcha-refresh';
@@ -1679,13 +1874,13 @@
     if (/photo_camera/.test(icon)) return 'upload';
     if (/swap_horiz/.test(icon)) return 'assign-owner';
     if (/contact_support/.test(icon)) return 'support';
-    if (/发送验证码/.test(label)) return 'send-code';
-    if (/创建账号/.test(label)) return 'register-submit';
+    if (/发送验证码|获取验证码/.test(label)) return 'send-code';
+    if (/创建账号|立即注册/.test(label)) return 'register-submit';
     if (/个人注册|企业注册/.test(label)) return 'register-tab';
     if (/添加技能/.test(label)) return 'add-skill';
-    if (/添加经历/.test(label)) return 'add-experience';
+    if (/添加经历|添加工作经历|继续添加上一份工作经历|保存经历/.test(label)) return 'add-experience';
     if (/点击此处添加职业生涯中的其他经历/.test(label)) return 'add-experience';
-    if (/保存|保存修改|保存资料|发布更新/.test(label)) return 'save';
+    if (/保存|保存修改|保存资料|保存所有更改|保存变更|发布更新/.test(label)) return 'save';
     if (/取消/.test(label)) return 'cancel';
     if (/更新品牌素材|add_a_photo/.test(icon)) return 'upload';
     if (/delete/.test(icon)) return 'delete';
@@ -1695,6 +1890,8 @@
 
   function bindControls() {
     renderSharedHeader();
+    setupAuthFieldIds();
+    setupRegisterTabs();
     renderBlankBusinessState();
 
     document.querySelectorAll('a').forEach((link) => {
@@ -1733,6 +1930,8 @@
     });
 
     document.querySelectorAll('form').forEach((form) => {
+      form.removeAttribute('onsubmit');
+      form.onsubmit = null;
       form.addEventListener('submit', (event) => {
         event.preventDefault();
         if (currentPageName() === 'login') {
@@ -1758,6 +1957,19 @@
             event.preventDefault();
             runAction('captcha-refresh', item);
           }
+        });
+      }
+    });
+
+    document.querySelectorAll('[data-icon="refresh"], .material-symbols-outlined').forEach((item) => {
+      if (textOf(item) === 'refresh' && item instanceof HTMLElement) {
+        mark(item, 'captcha-refresh');
+        item.setAttribute('role', 'button');
+        item.setAttribute('tabindex', '0');
+        item.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          runAction('captcha-refresh', item);
         });
       }
     });

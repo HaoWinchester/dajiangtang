@@ -1,8 +1,8 @@
 <template>
   <header class="platform-header" aria-label="平台顶部导航">
     <RouterLink class="platform-brand" :to="{ name: 'home' }">
-      <img src="/assets/logo.png" alt="全国项目管理标准化技术委员会 - 人才库 Logo" />
-      <span>全国项目管理标准化技术委员会 - 人才库</span>
+      <img src="/assets/logo.png" alt="项目管理人才库 Logo" />
+      <span>项目管理人才库</span>
     </RouterLink>
 
     <nav class="platform-nav" aria-label="主要导航">

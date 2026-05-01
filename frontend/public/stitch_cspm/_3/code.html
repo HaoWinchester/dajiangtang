@@ -1,247 +1,260 @@
 <!DOCTYPE html>
 
-<html class="light" lang="zh-CN"><head>
+<html lang="zh-CN"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>注册 - 项目管理人才库</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                    "background": "#fbf8ff",
-                    "surface-container-low": "#f4f2fc",
-                    "on-surface-variant": "#444653",
-                    "primary-fixed-dim": "#b8c4ff",
-                    "on-primary-fixed": "#001453",
-                    "on-primary-container": "#a8b8ff",
-                    "on-tertiary": "#ffffff",
-                    "inverse-on-surface": "#f1f0fa",
-                    "primary": "#00288e",
-                    "on-error": "#ffffff",
-                    "outline": "#757684",
-                    "on-error-container": "#93000a",
-                    "on-secondary": "#ffffff",
-                    "surface-tint": "#3755c3",
-                    "tertiary-fixed": "#dae2fd",
-                    "secondary-container": "#d5e3fc",
-                    "primary-fixed": "#dde1ff",
-                    "secondary": "#515f74",
-                    "tertiary": "#2d3449",
-                    "inverse-surface": "#2f3037",
-                    "inverse-primary": "#b8c4ff",
-                    "on-tertiary-fixed": "#131b2e",
-                    "on-secondary-fixed": "#0d1c2e",
-                    "surface-container-high": "#e8e7f1",
-                    "surface-dim": "#dad9e3",
-                    "on-tertiary-container": "#b4bbd5",
-                    "primary-container": "#1e40af",
-                    "tertiary-container": "#434b60",
-                    "error": "#ba1a1a",
-                    "surface-bright": "#fbf8ff",
-                    "surface-container-lowest": "#ffffff",
-                    "secondary-fixed": "#d5e3fc",
-                    "error-container": "#ffdad6",
-                    "surface-variant": "#e3e1eb",
-                    "on-surface": "#1a1b22",
-                    "tertiary-fixed-dim": "#bec6e0",
-                    "on-background": "#1a1b22",
-                    "surface": "#fbf8ff",
-                    "outline-variant": "#c4c5d5",
-                    "on-secondary-container": "#57657a",
-                    "on-primary": "#ffffff",
-                    "on-secondary-fixed-variant": "#3a485b",
-                    "surface-container": "#eeedf7",
-                    "secondary-fixed-dim": "#b9c7df",
-                    "surface-container-highest": "#e3e1eb",
-                    "on-tertiary-fixed-variant": "#3f465c",
-                    "on-primary-fixed-variant": "#173bab"
-            },
-            "borderRadius": {
-                    "DEFAULT": "0.125rem",
-                    "lg": "0.25rem",
-                    "xl": "0.5rem",
-                    "full": "0.75rem"
-            },
-            "spacing": {
-                    "sm": "8px",
-                    "3xl": "64px",
-                    "2xl": "48px",
-                    "base": "4px",
-                    "md": "16px",
-                    "xs": "4px",
-                    "lg": "24px",
-                    "max_width": "1440px",
-                    "gutter": "24px",
-                    "xl": "32px",
-                    "margin": "32px"
-            },
-            "fontFamily": {
-                    "label-sm": ["Inter"],
-                    "h3": ["Inter"],
-                    "body-sm": ["Inter"],
-                    "body-lg": ["Inter"],
-                    "h2": ["Inter"],
-                    "label-md": ["Inter"],
-                    "h1": ["Inter"],
-                    "code": ["Inter"],
-                    "body-md": ["Inter"]
-            },
-            "fontSize": {
-                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
-                    "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
-                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
-                    "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
-                    "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                    "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#f1f0fa",
+                        "on-primary-container": "#a8b8ff",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "on-tertiary-fixed": "#131b2e",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#b8c4ff",
+                        "on-primary-fixed-variant": "#173bab",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "on-secondary-container": "#57657a",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#444653",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface": "#fbf8ff",
+                        "on-tertiary-container": "#b4bbd5",
+                        "primary-fixed-dim": "#b8c4ff",
+                        "surface-container-high": "#e8e7f1",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#d5e3fc",
+                        "primary-container": "#1e40af",
+                        "outline-variant": "#c4c5d5",
+                        "tertiary": "#2d3449",
+                        "surface-bright": "#fbf8ff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e3e1eb",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#2f3037",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f4f2fc",
+                        "surface-container": "#eeedf7",
+                        "secondary": "#515f74",
+                        "primary": "#00288e",
+                        "on-primary-fixed": "#001453",
+                        "secondary-container": "#d5e3fc",
+                        "surface-container-highest": "#e3e1eb",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#1a1b22",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "outline": "#757684",
+                        "on-background": "#1a1b22",
+                        "tertiary-container": "#434b60",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "background": "#fbf8ff",
+                        "surface-tint": "#3755c3",
+                        "primary-fixed": "#dde1ff",
+                        "surface-dim": "#dad9e3",
+                        "on-secondary-fixed": "#0d1c2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "3xl": "64px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "md": "16px",
+                        "max_width": "1440px",
+                        "2xl": "48px",
+                        "sm": "8px",
+                        "gutter": "24px",
+                        "xs": "4px",
+                        "margin": "32px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "h2": ["Inter"],
+                        "h3": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "h1": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "code": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
             }
-          },
-        },
-      }
+        }
     </script>
 <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             display: inline-block;
-            vertical-align: middle;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
         }
         body {
             font-family: 'Inter', sans-serif;
         }
     </style>
 </head>
-<body class="bg-background text-on-background min-h-screen flex flex-col">
-<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-white border-b border-slate-200">
-<div class="flex items-center gap-2">
-<img alt="全国项目管理标准化技术委员会 - 人才库 Logo" class="h-10 w-auto object-contain" src="/assets/logo.png"/>
-<span class="text-xl font-bold text-blue-900">全国项目管理标准化技术委员会 - 人才库</span>
-</div>
+<body class="bg-background text-on-background antialiased">
+<!-- TopAppBar -->
+<header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+<div class="flex justify-between items-center h-16 w-full px-6">
+<div class="text-xl font-bold text-blue-900 dark:text-white tracking-tight">项目管理人才库</div>
+<nav class="hidden md:flex gap-8">
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 font-label-md text-label-md" href="#">Opportunities</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 font-label-md text-label-md" href="#">Resources</a>
+<a class="text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 font-label-md text-label-md" href="#">About</a>
+</nav>
 <div class="flex items-center gap-4">
-<span class="text-slate-500 font-label-md text-label-md">已有账号？</span>
-<button class="px-md py-sm border border-outline text-primary font-label-md text-label-md rounded hover:bg-slate-50 transition-colors">立即登录</button>
+<button class="text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 rounded transition-colors font-label-md text-label-md">Log In</button>
+<button class="bg-primary text-white px-4 py-2 rounded hover:opacity-90 transition-opacity font-label-md text-label-md">Sign Up</button>
+</div>
 </div>
 </header>
-<main class="flex-grow flex items-center justify-center pt-2xl pb-xl px-md">
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl max-w-[1200px] w-full items-start">
-<div class="hidden lg:flex lg:col-span-5 flex-col justify-center h-full pr-xl">
-<div class="relative rounded-xl overflow-hidden shadow-xl mb-lg aspect-square">
-<img alt="Team collaborating" class="w-full h-full object-cover" data-alt="A group of professional recruiters in a high-tech office environment, sitting around a sleek white table with thin-bezel laptops. The lighting is crisp and natural, highlighting a clean corporate aesthetic with navy blue and slate grey tones. The mood is collaborative and focused, symbolizing human capital management and professional growth within a modern architectural workspace." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLDgLN_fWuXr6IqdhuTspOIoJ5CwbBq4_XLk3aWxpAbJQzGtRxFjSRwHkgid2hV3V7hYubNUIT30eyd3ZtftVN6P62uIQyVVpHHRmiZMNvImphG4Qq7D7FTTN7wdDIQBnq1RKjd2FybFXwEui2nwfL7qkKdAk7RWoS328JsbQX4BVVBfQhkyGCaQHfPL5NGvd3pDUqj32nUUt0SZ4wYoUJRPV22sevZcrx62st21xzHv3L1BJ60n59CojahmQAWS_8AX_6SQZ2By9b"/>
-<div class="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex items-end p-xl">
-<div class="text-white">
-<h2 class="font-h2 text-h2 mb-sm text-white">释放企业潜能</h2>
-<p class="font-body-md text-body-md text-blue-50">加入数千家领先企业的行列，利用 全国项目管理标准化技术委员会 - 人才库智能招聘引擎共筑未来。</p>
+<main class="min-h-[calc(100vh-160px)] flex flex-col md:flex-row">
+<!-- Visual Column -->
+<div class="hidden lg:flex lg:w-1/2 bg-surface-container relative overflow-hidden items-center justify-center p-24">
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_50%_50%,_#00288e_0%,_transparent_50%)]"></div>
+<div class="relative z-10 max-w-lg">
+<h1 class="font-h1 text-h1 text-primary mb-6">开启您的职业进阶之旅</h1>
+<p class="font-body-lg text-body-lg text-secondary mb-12">连接全球顶尖机遇，项目管理人才库 为您的专业成长提供全方位的智能支持与精准匹配。</p>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-6 bg-white border border-outline-variant rounded-lg">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="groups">groups</span>
+<div class="font-label-md text-label-md text-on-surface">500+</div>
+<div class="font-body-sm text-body-sm text-secondary">入驻名企</div>
+</div>
+<div class="p-6 bg-white border border-outline-variant rounded-lg">
+<span class="material-symbols-outlined text-primary mb-2" data-icon="verified_user">verified_user</span>
+<div class="font-label-md text-label-md text-on-surface">100%</div>
+<div class="font-body-sm text-body-sm text-secondary">隐私加密</div>
 </div>
 </div>
 </div>
-<div class="space-y-md">
-<div class="flex items-start gap-md">
-<span class="material-symbols-outlined text-primary p-sm bg-primary-fixed rounded-full" style="font-variation-settings: 'FILL' 1;">verified</span>
+<div class="absolute bottom-0 right-0 w-full h-1/2 bg-no-repeat bg-right-bottom bg-contain opacity-20 pointer-events-none" data-alt="A sophisticated corporate background featuring clean architectural lines and soft blue tones, evoking a sense of professionalism and modern technology. The scene is illuminated by natural light, creating a bright and airy atmosphere typical of a high-end corporate headquarters. The visual style is minimalist and elegant." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBbEd55DJSd3t34LrDyuhn0kJH5pjmtR6UWYAyqGS0wMx9bsJcohJXA4KQFDRIfTEnxqoHOZxIApsHzAr-zKwCBN_NPnWvscw5A5og_GnvRyZFIj0ziTZiEEROwgqhbYZ8Fj8Pgj2UJnI-ySsOvb8JB2jegAV_kOqbMkbkFgxrHQL1U8_3c3pHCfrU-jqjeYh2QbUT9_PywCRKIw7FYTw7E3jkmJHmehDgowVKMw0CNkrHl-V7UyFzaqgAnF3zdVOWjMGLyTC-MZUX-')"></div>
+</div>
+<!-- Registration Form Column -->
+<div class="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 lg:p-24 bg-white">
+<div class="w-full max-w-md">
+<div class="mb-8">
+<h2 class="font-h2 text-h2 text-on-surface mb-2">创建新账号</h2>
+<p class="font-body-md text-body-md text-secondary">欢迎加入 项目管理人才库 智库生态系统</p>
+</div>
+<!-- Tab Switcher -->
+<div class="flex w-full p-1 bg-surface-container rounded-lg mb-8">
+<button class="flex-1 py-2 font-label-md text-label-md rounded-md bg-white text-primary shadow-sm border border-outline-variant/10">个人注册</button>
+<button class="flex-1 py-2 font-label-md text-label-md rounded-md text-secondary hover:text-on-surface transition-colors">企业注册</button>
+</div>
+<!-- Form -->
+<form class="space-y-6">
 <div>
-<h4 class="font-label-md text-label-md text-on-background">经核实的候选人</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant">我们的审核流程确保技能匹配准确率达 99%。</p>
+<label class="block font-label-md text-label-md text-on-surface mb-2">用户名</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="person">person</span>
+<input class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-body-md" placeholder="输入您的用户名" type="text"/>
 </div>
 </div>
-<div class="flex items-start gap-md">
-<span class="material-symbols-outlined text-primary p-sm bg-primary-fixed rounded-full" style="font-variation-settings: 'FILL' 1;">security</span>
+<div class="grid grid-cols-2 gap-4">
 <div>
-<h4 class="font-label-md text-label-md text-on-background">企业级安全</h4>
-<p class="font-body-sm text-body-sm text-on-surface-variant">为您的所有人力资源数据和文档提供银行级加密保护。</p>
-</div>
-</div>
-</div>
-</div>
-<div class="lg:col-span-7 w-full max-w-[560px] mx-auto bg-white p-xl rounded-xl border border-slate-100 shadow-sm">
-<div class="mb-xl">
-<h1 class="font-h1 text-h1 text-primary mb-xs">创建账号</h1>
-<p class="font-body-md text-body-md text-on-surface-variant">开启全球领先的智能人才平台之旅。</p>
-</div>
-<div class="flex p-xs bg-surface-container rounded-lg mb-xl">
-<button class="flex-1 py-sm px-md text-label-md font-label-md rounded bg-white text-primary shadow-sm transition-all" id="personal-tab">
-                        个人注册
-                    </button>
-<button class="flex-1 py-sm px-md text-label-md font-label-md rounded text-on-surface-variant hover:text-primary transition-all" id="enterprise-tab">
-                        企业注册
-                    </button>
-</div>
-<form class="space-y-lg">
-<div class="space-y-sm">
-<label class="font-label-md text-label-md text-on-surface-variant" for="username">用户名</label>
+<label class="block font-label-md text-label-md text-on-surface mb-2">密码</label>
 <div class="relative">
-<span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">person</span>
-<input class="w-full pl-[44px] pr-md py-md border border-outline-variant rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-md text-body-md" id="username" placeholder="请选择唯一的用户名" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="lock">lock</span>
+<input class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-body-md" placeholder="••••••••" type="password"/>
 </div>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
-<div class="space-y-sm">
-<label class="font-label-md text-label-md text-on-surface-variant" for="password">密码</label>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2">确认密码</label>
 <div class="relative">
-<span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">lock</span>
-<input class="w-full pl-[44px] pr-md py-md border border-outline-variant rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-md text-body-md" id="password" placeholder="••••••••" type="password"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="shield">shield</span>
+<input class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-body-md" placeholder="••••••••" type="password"/>
 </div>
 </div>
-<div class="space-y-sm">
-<label class="font-label-md text-label-md text-on-surface-variant" for="confirm-password">确认密码</label>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2">手机号码</label>
 <div class="relative">
-<span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">lock_reset</span>
-<input class="w-full pl-[44px] pr-md py-md border border-outline-variant rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-md text-body-md" id="confirm-password" placeholder="••••••••" type="password"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="smartphone">smartphone</span>
+<input class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-body-md" placeholder="138 **** ****" type="tel"/>
 </div>
 </div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-2">短信验证码</label>
+<div class="flex gap-4">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="chat_bubble">chat_bubble</span>
+<input class="w-full pl-10 pr-4 py-3 rounded border border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-body-md text-body-md" placeholder="6位验证码" type="text"/>
 </div>
-<div class="space-y-sm">
-<label class="font-label-md text-label-md text-on-surface-variant" for="phone">手机号</label>
-<div class="flex gap-sm">
-<div class="relative flex-grow">
-<span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">smartphone</span>
-<input class="w-full pl-[44px] pr-md py-md border border-outline-variant rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-md text-body-md" id="phone" placeholder="请输入手机号码" type="tel"/>
-</div>
-</div>
-</div>
-<div class="space-y-sm">
-<label class="font-label-md text-label-md text-on-surface-variant" for="sms">短信验证码</label>
-<div class="flex gap-sm">
-<div class="relative flex-grow">
-<span class="absolute left-md top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">verified_user</span>
-<input class="w-full pl-[44px] pr-md py-md border border-outline-variant rounded focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-md text-body-md" id="sms" placeholder="6位验证码" type="text"/>
-</div>
-<button class="whitespace-nowrap px-md py-md bg-secondary-container text-on-secondary-container font-label-md text-label-md rounded hover:bg-slate-200 transition-colors" type="button">发送验证码</button>
+<button class="px-4 py-3 border border-primary text-primary font-label-md text-label-md rounded hover:bg-primary-fixed transition-colors whitespace-nowrap" type="button">获取验证码</button>
 </div>
 </div>
-<div class="pt-sm">
-<button class="w-full py-md bg-primary text-white font-label-md text-label-md rounded hover:opacity-90 shadow-md transition-all active:scale-[0.98]" type="submit">
-                            创建账号
+<div class="pt-4">
+<button class="w-full bg-primary text-white py-4 rounded font-label-md text-label-md hover:bg-primary-container transition-all active:scale-[0.99]" type="submit">
+                            立即注册
                         </button>
 </div>
-<div class="p-md bg-slate-50 border border-slate-100 rounded-lg">
-<p class="font-body-sm text-body-sm text-slate-500 leading-relaxed">
-<span class="font-bold text-slate-700">承诺:</span> 本人承诺所填写的信息真实有效，并对因信息虚假引发的法律后果承担全部责任。本平台严格遵守国家相关法律法规，采取多重加密与权限管控措施，全力保障用户个人信息的安全。
-                        </p>
+<!-- Legal Commitments -->
+<div class="mt-8 p-4 bg-surface-container-low rounded-lg space-y-3">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5" data-icon="verified">verified</span>
+<p class="font-body-sm text-body-sm text-secondary">
+<strong class="text-on-surface">真实性承诺：</strong> 本人承诺所填写的信息真实有效,如有不实,本人愿意承担相应的法律责任。
+                            </p>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary text-[18px] mt-0.5" data-icon="policy">policy</span>
+<p class="font-body-sm text-body-sm text-secondary">
+<strong class="text-on-surface">隐私保护：</strong> 对于收集到的信息,中国标准化协会(全国项目标准化技术委员会秘书处)不会向第三方公开、透露,另作他用,只用于人员能力评价工作,并对相关信息采取专业加密存储与传输方式,利用合理措施,保障用户个人信息的安全。点击注册即代表您同意我们的<a class="text-primary hover:underline" href="#">《隐私权政策》</a>。
+                            </p>
+</div>
 </div>
 </form>
-<div class="mt-xl text-center">
-<p class="font-body-sm text-body-sm text-on-surface-variant">
-                        点击注册即表示您同意我们的 
-                        <a class="text-primary hover:underline" href="#">服务条款</a> 和 
-                        <a class="text-primary hover:underline" href="#">隐私政策</a>。
-                    </p>
+<div class="mt-8 text-center">
+<p class="font-body-sm text-body-sm text-secondary">
+                        已有账号？ <a class="text-primary font-label-md hover:underline" href="#">立即登录</a>
+</p>
 </div>
 </div>
 </div>
 </main>
-<footer class="mt-auto py-lg px-6 border-t border-slate-100 bg-white">
-<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
-<div class="flex items-center gap-base">
-<span class="text-slate-400 font-label-sm text-label-sm">© 2024 TALENT POOL OF NATIONAL TECHNICAL COMMITTEE ON PROJECT MANAGEMENT STANDARDIZATION 版权所有。</span>
-</div>
-<div class="flex gap-xl">
-<a class="text-slate-400 hover:text-primary font-label-sm text-label-sm transition-colors" href="#">帮助中心</a>
-<a class="text-slate-400 hover:text-primary font-label-sm text-label-sm transition-colors" href="#">系统状态</a>
-<a class="text-slate-400 hover:text-primary font-label-sm text-label-sm transition-colors" href="#">Cookie 政策</a>
+<!-- Footer -->
+<footer class="bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+<div class="flex flex-col md:flex-row justify-between items-center py-8 px-6 max-w-[1440px] mx-auto">
+<div class="font-bold text-slate-900 dark:text-slate-100 mb-4 md:mb-0">项目管理人才库</div>
+<div class="font-['Inter'] text-sm text-slate-500 dark:text-slate-400 mb-4 md:mb-0">
+                © 2024 项目管理人才库 Human Capital Management. All rights reserved.
+            </div>
+<div class="flex space-x-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors text-sm font-['Inter']" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors text-sm font-['Inter']" href="#">Terms of Service</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-blue-800 dark:hover:text-blue-200 transition-colors text-sm font-['Inter']" href="#">Contact Support</a>
 </div>
 </div>
 </footer>

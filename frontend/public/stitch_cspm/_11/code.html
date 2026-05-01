@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "inverse-on-surface": "#f1f0fa",
+                "on-primary-container": "#a8b8ff",
+                "secondary-fixed-dim": "#b9c7df",
+                "on-tertiary-fixed": "#131b2e",
+                "error": "#ba1a1a",
+                "inverse-primary": "#b8c4ff",
+                "on-primary-fixed-variant": "#173bab",
+                "on-secondary-fixed-variant": "#3a485b",
+                "on-secondary-container": "#57657a",
+                "on-primary": "#ffffff",
+                "on-surface-variant": "#444653",
+                "tertiary-fixed": "#dae2fd",
+                "surface": "#fbf8ff",
+                "on-tertiary-container": "#b4bbd5",
+                "primary-fixed-dim": "#b8c4ff",
+                "surface-container-high": "#e8e7f1",
+                "on-error-container": "#93000a",
+                "secondary-fixed": "#d5e3fc",
+                "primary-container": "#1e40af",
+                "outline-variant": "#c4c5d5",
+                "tertiary": "#2d3449",
+                "surface-bright": "#fbf8ff",
+                "on-error": "#ffffff",
+                "surface-variant": "#e3e1eb",
+                "on-secondary": "#ffffff",
+                "inverse-surface": "#2f3037",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-low": "#f4f2fc",
+                "surface-container": "#eeedf7",
+                "secondary": "#515f74",
+                "primary": "#00288e",
+                "on-primary-fixed": "#001453",
+                "secondary-container": "#d5e3fc",
+                "surface-container-highest": "#e3e1eb",
+                "error-container": "#ffdad6",
+                "on-surface": "#1a1b22",
+                "on-tertiary": "#ffffff",
+                "tertiary-fixed-dim": "#bec6e0",
+                "outline": "#757684",
+                "on-background": "#1a1b22",
+                "tertiary-container": "#434b60",
+                "on-tertiary-fixed-variant": "#3f465c",
+                "background": "#fbf8ff",
+                "surface-tint": "#3755c3",
+                "primary-fixed": "#dde1ff",
+                "surface-dim": "#dad9e3",
+                "on-secondary-fixed": "#0d1c2e"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "3xl": "64px",
+                "lg": "24px",
+                "xl": "32px",
+                "md": "16px",
+                "max_width": "1440px",
+                "2xl": "48px",
+                "sm": "8px",
+                "gutter": "24px",
+                "xs": "4px",
+                "margin": "32px",
+                "base": "4px"
+            },
+            "fontFamily": {
+                "h2": ["Inter"],
+                "h3": ["Inter"],
+                "body-lg": ["Inter"],
+                "label-sm": ["Inter"],
+                "body-md": ["Inter"],
+                "h1": ["Inter"],
+                "body-sm": ["Inter"],
+                "label-md": ["Inter"],
+                "code": ["Inter"]
+            },
+            "fontSize": {
+                "h2": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "h3": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "h1": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                "code": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fbf8ff;
+            color: #1a1b22;
+            -webkit-font-smoothing: antialiased;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-6 h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-8">
+<span class="text-xl font-bold text-blue-900 dark:text-blue-100 font-h2">项目管理人才库</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">Dashboard</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">Jobs</a>
+<a class="font-sans text-sm font-medium tracking-tight text-blue-700 dark:text-blue-400 border-b-2 border-blue-700 dark:border-blue-400 pb-1" href="#">Talent</a>
+<a class="font-sans text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:bg-slate-50 p-2 rounded-full transition-colors">notifications</button>
+<button class="material-symbols-outlined text-slate-600 dark:text-slate-400 hover:bg-slate-50 p-2 rounded-full transition-colors">settings</button>
+<div class="h-8 w-8 rounded-full bg-primary-container overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5Su4NBi6tkD60ndhk1TPX5zSgc_XVNQ7OcIgDyys3utS4Tmpxlo9mrT2U_bJ-i5JEeboZNgR9QrPKTFMjhqbCmfrxRcdsF5Yg6dx_hYO7Wz75Kw0d6qM9JAmcd6rm6cP_KVVMzzIBLAO6bTIKeO5CDEXHbbF0AV6dRIJTTScXxnZI6fozTW0CxDtR4kbLuXJa0a4CykWQfhpChPgMgS3sDFHF-sPgN-oIPlYqpTCNq7t3Uyb0FNS587GnFUZxhMHzDubuGRr1TCUW"/>
+</div>
+<button class="bg-primary text-on-primary px-4 py-2 rounded text-label-md hover:opacity-90 transition-opacity">Post Job</button>
+</div>
+</header>
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 flex flex-col py-4 z-40 bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800">
+<div class="px-6 mb-6">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="corporate_fare">corporate_fare</span>
+</div>
+<div>
+<p class="text-blue-900 dark:text-blue-50 font-black text-lg">Global Tech Corp</p>
+<p class="text-xs text-slate-500 uppercase tracking-widest">Enterprise Partner</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 border-r-4 border-blue-800 dark:border-blue-400 transition-all translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Basic Info</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Work Experience</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Project History</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Education</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Skills</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:pl-1 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="verified">verified</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Certifications</span>
+</a>
+</nav>
+<div class="px-4 pt-4 border-t border-slate-100">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-50 rounded transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Help Center</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-error hover:bg-error-container/20 rounded transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-sans text-sm font-semibold tracking-wide uppercase">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 pt-16 min-h-screen">
+<div class="max-w-[1440px] mx-auto p-gutter grid grid-cols-12 gap-gutter">
+<!-- Left Content: Talent Profile -->
+<div class="col-span-12 lg:col-span-8 space-y-gutter">
+<!-- Hero Header Card -->
+<div class="bg-white border border-outline-variant p-xl rounded-lg relative overflow-hidden">
+<div class="flex flex-col md:flex-row gap-xl items-start md:items-center">
+<div class="relative">
+<img class="w-32 h-32 rounded-full object-cover border-4 border-surface-container shadow-sm" data-alt="A professional studio portrait of a high-level executive with a warm, confident expression. The lighting is soft and directional, typical of corporate photography, against a clean, neutral background. The subject is wearing a crisp white shirt and a tailored navy blue suit, embodying the professional and steady authority of a trusted advisor in the human capital industry." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4DCR6w1dp8nA7Pn_Z1MeXw4f6v6ODzfvtDXHVbs_KkOLNqzByftSGLVePYIqUq3f-cE7gBpW34Upr-gCdPA9d5DlHz3TjIgSjcdZyrMFjtHIDJhiIGDvcIwZD8zrcIWtrIKpwD6jjhta81Grd4wei1sJqcsJijWe2NTNtgGLK7KU4e7UtMEUTcXhflHzwu9tyWD8nlVHFkv1wabD6fMJQJ1uTEzZwfoStTib5EdHS454RZyEtvux5XG31wCp0VD646k1K86iRJBdQ"/>
+<div class="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full"></div>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-4 mb-2">
+<h1 class="font-h1 text-h1 text-primary">李思远</h1>
+<span class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-label-sm">在职 - 寻求机会</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 text-on-surface-variant font-body-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="business">business</span>
+<span>字节跳动 / 抖音电商</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="badge">badge</span>
+<span>高级产品专家</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="location_on">location_on</span>
+<span>上海</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="category">category</span>
+<span>互联网 / 电子商务</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Personal Advantages & Intro Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Personal Advantages -->
+<div class="bg-white border border-outline-variant p-lg rounded-lg">
+<div class="flex items-center gap-2 mb-4 border-b border-slate-50 pb-2">
+<span class="material-symbols-outlined text-primary" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<h2 class="font-h3 text-h3">个人优势</h2>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-container-high px-4 py-2 rounded-full text-body-sm font-medium border border-outline-variant/30">10年+电商产品经验</span>
+<span class="bg-surface-container-high px-4 py-2 rounded-full text-body-sm font-medium border border-outline-variant/30">主导过GMV千亿级项目</span>
+<span class="bg-surface-container-high px-4 py-2 rounded-full text-body-sm font-medium border border-outline-variant/30">卓越的数据驱动决策能力</span>
+<span class="bg-surface-container-high px-4 py-2 rounded-full text-body-sm font-medium border border-outline-variant/30">跨职能团队领导力</span>
+<span class="bg-surface-container-high px-4 py-2 rounded-full text-body-sm font-medium border border-outline-variant/30">极强的业务敏感度</span>
+</div>
+</div>
+<!-- Personal Introduction -->
+<div class="bg-white border border-outline-variant p-lg rounded-lg">
+<div class="flex items-center gap-2 mb-4 border-b border-slate-50 pb-2">
+<span class="material-symbols-outlined text-primary" data-icon="description">description</span>
+<h2 class="font-h3 text-h3">个人简介</h2>
+</div>
+<p class="font-body-md text-on-surface-variant leading-relaxed">
+                            深耕互联网电商领域十余载，曾先后就职于阿里、美团等头部企业。在字节跳动期间，主导了抖音电商直播间交易闭环的核心架构搭建，成功助力平台实现业务跨越式增长。擅长复杂业务场景下的产品抽象与架构设计，对行业发展趋势有独到见解。
+                        </p>
+</div>
+</div>
+<!-- Evaluators / Contacts -->
+<div class="bg-white border border-outline-variant p-lg rounded-lg">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="rate_review">rate_review</span>
+<h2 class="font-h3 text-h3">评价联系人</h2>
+</div>
+<span class="text-label-sm text-secondary">共 3 位背书人</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<!-- Contact 1 -->
+<div class="bg-surface-container-low p-4 rounded flex items-center gap-4 hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-outline-variant/50">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A professional headshot of a middle-aged male executive in a corporate setting. He has a friendly but authoritative presence, with soft natural light highlighting his facial features. The background is a slightly blurred modern office space with cool glass and steel tones, maintaining the corporate authority aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUgHRnwXEtDXN2HNM7qKozUm3expxkuF9JSyZHjvSYa4dbssFc9q2qDQcxNza-hw0iFSaY8VZup3yvj58eeet053kh2fDX01LUrHrhUpVVyX8-O7HppjrQMjeOg7vnX8aBlRGG4AI2Z8aplEX9BPRT0LEVb9EutATvx2rcHq8AiEvEYfDKNutpvpl4vPEsBJ_cSfgGY-0D7_EqnM1Sf-DxpJ--Dzj0NaqA0-k0SynqCZy4iW9GNDEylsqMzMm3WXqSnOcZS2o7iYj8"/>
+<div>
+<p class="font-label-md text-on-surface">赵义民</p>
+<p class="text-xs text-secondary">前任上级 / HRVP</p>
+</div>
+</div>
+<!-- Contact 2 -->
+<div class="bg-surface-container-low p-4 rounded flex items-center gap-4 hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-outline-variant/50">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A professional portrait of a senior business leader with a focused and intelligent expression. He is wearing a dark grey suit and a light blue tie. The lighting is crisp and clear, creating a high-end institutional feel that aligns with high-stakes recruitment and professional advisory services." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJcZlU7YXD6v9R7kIIO-qNEIJs6AXFPGqzL62jsxzzEWrKdxIY49pyz2OwQUljgl3dLlr3NDg2e51uSy1YLdI_vgzfAxloj5avBn85TN40D2jesum-EEfoaHomSPylioP2l8Y5_JAo08kWXJgxBas_988mGaNVtHjw8tQGnV4-InYR-TvVVmwtssIHE90A9Kd6Ad_1yyyH8kulOkTx1iyHw_46pRY1UWnxbR9edOfs-EPyECZ8ESWutCWIRboKdn-miO_VNYcl8GXd"/>
+<div>
+<p class="font-label-md text-on-surface">贺强</p>
+<p class="text-xs text-secondary">项目合作人 / CTO</p>
+</div>
+</div>
+<!-- Contact 3 -->
+<div class="bg-surface-container-low p-4 rounded flex items-center gap-4 hover:bg-surface-container transition-colors cursor-pointer border border-transparent hover:border-outline-variant/50">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A corporate portrait of a young, energetic professional male in a modern office environment. He is wearing a minimalist dark blazer over a black polo shirt. The lighting is vibrant and clean, reflecting a high-performance, precision-focused talent acquisition platform style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHp_dQDnDX_pr8hgWf9N3KBMRNfrwoAyZX_lDPddav03UwWWxRsud0jw21JrKJHHFMgNWrAB7zDx-hcS33WHd3sko7AaEa45k2TKkutVp9dC7IsLlHqoc5FOJQRNRE1Ue3GHwG4R2meHU6jZqy-Cuj5NdAkqmSgbxoIgiRS5oZgUeauhcybUcgIbtKbhLfq3RjD5RL51hQQVibR3fbdXyLKEBfaxooh-dc_NOFzbE8-3y_6hbt6U9Rn6lRkAdxbXZpkS9zfA3Uk8y4"/>
+<div>
+<p class="font-label-md text-on-surface">蔡钰炜</p>
+<p class="text-xs text-secondary">部门同事 / 资深架构师</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Content: Actions & Metrics -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Communication & Download Actions -->
+<div class="bg-white border border-outline-variant p-lg rounded-lg sticky top-24">
+<h3 class="font-label-md text-on-surface-variant mb-6 uppercase tracking-wider">人才动作</h3>
+<div class="space-y-4">
+<button class="w-full bg-primary text-on-primary py-4 rounded font-label-md flex items-center justify-center gap-3 hover:opacity-90 transition-all shadow-sm">
+<span class="material-symbols-outlined" data-icon="forum">forum</span>
+                            立即沟通
+                        </button>
+<button class="w-full bg-white border border-secondary text-secondary py-4 rounded font-label-md flex items-center justify-center gap-3 hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+                            下载简历 (PDF)
+                        </button>
+<button class="w-full flex items-center justify-center gap-2 py-3 text-secondary hover:text-primary transition-colors text-body-sm">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+                            收藏此人
+                        </button>
+</div>
+<div class="mt-8 pt-8 border-t border-slate-100">
+<h4 class="font-label-sm text-secondary mb-4 uppercase">匹配度分析</h4>
+<div class="space-y-4">
+<div class="space-y-2">
+<div class="flex justify-between text-body-sm">
+<span>行业契合度</span>
+<span class="font-bold text-primary">95%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 95%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-body-sm">
+<span>技能覆盖率</span>
+<span class="font-bold text-primary">88%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-1.5">
+<div class="bg-primary h-1.5 rounded-full" style="width: 88%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-8 bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<p class="text-body-sm text-on-secondary-container">
+                                该人才目前处于活跃状态，平均反馈时间小于 2 小时。
+                            </p>
+</div>
+</div>
+</div>
+<!-- Recent Activity / Timeline -->
+<div class="bg-white border border-outline-variant p-lg rounded-lg">
+<h3 class="font-label-md text-on-surface-variant mb-6 uppercase tracking-wider">更新动态</h3>
+<div class="space-y-6">
+<div class="flex gap-4 relative">
+<div class="absolute left-[11px] top-6 bottom-[-24px] w-0.5 bg-slate-100"></div>
+<div class="w-6 h-6 rounded-full bg-primary-container flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[14px] text-white" data-icon="update">update</span>
+</div>
+<div>
+<p class="text-body-sm font-bold text-on-surface">更新了个人简介</p>
+<p class="text-xs text-secondary">2023年10月12日</p>
+</div>
+</div>
+<div class="flex gap-4 relative">
+<div class="absolute left-[11px] top-6 bottom-[-24px] w-0.5 bg-slate-100"></div>
+<div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center z-10 border border-outline-variant">
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="verified">verified</span>
+</div>
+<div>
+<p class="text-body-sm text-on-surface">完成了职业技能认证</p>
+<p class="text-xs text-secondary">2023年09月28日</p>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center z-10 border border-outline-variant">
+<span class="material-symbols-outlined text-[14px] text-secondary" data-icon="login">login</span>
+</div>
+<div>
+<p class="text-body-sm text-on-surface">最近一次登录</p>
+<p class="text-xs text-secondary">2023年10月24日 (刚刚)</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script src="/stitch_cspm/stitch-actions.js"></script>
+</body></html>

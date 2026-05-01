@@ -55,7 +55,7 @@ const router = createRouter({
       component: StitchFrameView,
       props: {
         src: '/stitch_cspm/_1/code.html',
-        title: '全国项目管理标准化技术委员会 - 人才库 首页'
+        title: '项目管理人才库 首页'
       }
     },
     {
@@ -64,7 +64,7 @@ const router = createRouter({
       component: StitchFrameView,
       props: {
         src: '/stitch_cspm/_2/code.html',
-        title: '全国项目管理标准化技术委员会 - 人才库 登录'
+        title: '项目管理人才库 登录'
       }
     },
     {
@@ -73,7 +73,7 @@ const router = createRouter({
       component: StitchFrameView,
       props: {
         src: '/stitch_cspm/_3/code.html',
-        title: '全国项目管理标准化技术委员会 - 人才库 注册'
+        title: '项目管理人才库 注册'
       }
     },
     {
@@ -122,7 +122,7 @@ const router = createRouter({
       component: StitchFrameView,
       meta: { requiresAuth: true },
       props: {
-        src: '/stitch_cspm/_6/code.html',
+        src: '/stitch_cspm/_7/code.html',
         title: '个人中心 - 获得荣誉'
       }
     },
@@ -132,7 +132,7 @@ const router = createRouter({
       component: StitchFrameView,
       meta: { requiresAuth: true },
       props: {
-        src: '/stitch_cspm/_6/code.html',
+        src: '/stitch_cspm/_8/code.html',
         title: '个人中心 - 教育经历'
       }
     },
@@ -152,8 +152,28 @@ const router = createRouter({
       component: StitchFrameView,
       meta: { requiresAuth: true },
       props: {
-        src: '/stitch_cspm/_6/code.html',
+        src: '/stitch_cspm/_9/code.html',
         title: '个人中心 - 资格证书'
+      }
+    },
+    {
+      path: '/talents',
+      name: 'talents',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_10/code.html',
+        title: '人才信息 - 列表'
+      }
+    },
+    {
+      path: '/talents/:id',
+      name: 'talent-detail',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_11/code.html',
+        title: '人才信息 - 详情'
       }
     },
     {
@@ -172,6 +192,16 @@ const router = createRouter({
       name: 'recruitment-create',
       component: RecruitmentCreateEntryView,
       meta: { requiresAuth: true, requiresAdmin: true }
+    },
+    {
+      path: '/recruitments/:id',
+      name: 'recruitment-detail',
+      component: StitchFrameView,
+      meta: { requiresAuth: true },
+      props: {
+        src: '/stitch_cspm/_14/code.html',
+        title: '招聘信息 - 详情'
+      }
     }
   ]
 });

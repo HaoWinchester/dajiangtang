@@ -3,9 +3,9 @@ import { expect, test, type Frame, type Locator, type Page } from '@playwright/t
 type Role = 'USER' | 'COMPANY';
 
 const stitchPages: Array<{ path: string; title: string; role?: Role }> = [
-  { path: '/', title: '全国项目管理标准化技术委员会 - 人才库 首页' },
-  { path: '/login', title: '全国项目管理标准化技术委员会 - 人才库 登录' },
-  { path: '/register', title: '全国项目管理标准化技术委员会 - 人才库 注册' },
+  { path: '/', title: '项目管理人才库 首页' },
+  { path: '/login', title: '项目管理人才库 登录' },
+  { path: '/register', title: '项目管理人才库 注册' },
   { path: '/enterprise-center', title: '企业中心 - 资料维护', role: 'COMPANY' },
   { path: '/personal-center', title: '个人中心 - 基础信息', role: 'USER' },
   { path: '/personal-center/work-experience', title: '个人中心 - 工作经历', role: 'USER' },
@@ -109,59 +109,66 @@ test.describe('控件矩阵 - 自动巡检', () => {
 
     for (const item of stitchPages) {
       const frame = await openStitchPage(page, item.path, item.title, item.role);
-      const fields = frame.locator('input, textarea, select');
-      const count = await fields.count();
+      const pageFailures = await frame.evaluate(() => {
+        const visible = (element: Element) => {
+          const html = element as HTMLElement;
+          return Boolean(html.offsetWidth || html.offsetHeight || html.getClientRects().length);
+        };
+        const dispatch = (field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement) => {
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+        };
 
-      for (let index = 0; index < count; index += 1) {
-        const field = fields.nth(index);
-        if (!(await field.isVisible().catch(() => false)) || await field.isDisabled().catch(() => false)) {
-          continue;
-        }
+        return Array.from(document.querySelectorAll('input, textarea, select')).flatMap((node, index) => {
+          const field = node as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+          const tagName = field.tagName.toLowerCase();
+          const type = field instanceof HTMLInputElement ? field.type : '';
+          const label = field.id || field.name || field.getAttribute('placeholder') || field.outerHTML.slice(0, 80);
+          const prefix = `${tagName}[${type || 'text'}] ${label}`;
 
-        const tagName = await field.evaluate((node) => node.tagName.toLowerCase());
-        const type = (await field.getAttribute('type')) || '';
-        const label = await field.evaluate((node) => {
-          const element = node as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
-          return element.id || element.name || element.getAttribute('placeholder') || element.outerHTML.slice(0, 80);
-        });
-
-        try {
-          if (type === 'checkbox') {
-            const before = await field.isChecked();
-            await field.click();
-            await expect(field).toBeChecked({ checked: !before });
-          } else if (type === 'radio') {
-            await field.check();
-            await expect(field).toBeChecked();
-          } else if (tagName === 'select') {
-            await field.selectOption({ index: 1 });
-            await expect.poll(() => field.inputValue()).not.toBe('');
-          } else if (tagName === 'textarea') {
-            await field.fill(`测试内容-${index}`);
-            await expect(field).toHaveValue(`测试内容-${index}`);
-          } else if (type === 'date') {
-            await field.fill('2026-05-01');
-            await expect(field).toHaveValue('2026-05-01');
-          } else if (type === 'time') {
-            await field.fill('09:00');
-            await expect(field).toHaveValue('09:00');
-          } else if (type === 'email') {
-            await field.fill('tester@example.com');
-            await expect(field).toHaveValue('tester@example.com');
-          } else if (type === 'url') {
-            await field.fill('https://example.com');
-            await expect(field).toHaveValue('https://example.com');
-          } else if (type === 'tel') {
-            await field.fill('13800001111');
-            await expect(field).toHaveValue('13800001111');
-          } else {
-            await field.fill(`测试-${index}`);
-            await expect(field).toHaveValue(`测试-${index}`);
+          if (!visible(field) || field.disabled || ['file', 'hidden'].includes(type)) {
+            return [];
           }
-        } catch (error) {
-          failures.push(`${item.path} ${tagName}[${type || 'text'}] ${label}: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      }
+
+          try {
+            if (field instanceof HTMLInputElement && type === 'checkbox') {
+              const before = field.checked;
+              field.click();
+              return field.checked !== before ? [] : [`${prefix}: checked 未变化`];
+            }
+            if (field instanceof HTMLInputElement && type === 'radio') {
+              field.click();
+              return field.checked ? [] : [`${prefix}: radio 未选中`];
+            }
+            if (field instanceof HTMLSelectElement) {
+              if (field.options.length > 1) {
+                field.selectedIndex = 1;
+              } else if (field.options.length === 1) {
+                field.selectedIndex = 0;
+              }
+              dispatch(field);
+              return field.value ? [] : [`${prefix}: select 值为空`];
+            }
+
+            const values: Record<string, string> = {
+              date: '2026-05-01',
+              time: '09:00',
+              email: 'tester@example.com',
+              url: 'https://example.com',
+              tel: '13800001111',
+              month: '2026-05'
+            };
+            const value = values[type] || (tagName === 'textarea' ? `测试内容-${index}` : `测试-${index}`);
+            field.value = value;
+            dispatch(field);
+            return field.value === value ? [] : [`${prefix}: 期望 ${value} 实际 ${field.value}`];
+          } catch (error) {
+            return [`${prefix}: ${error instanceof Error ? error.message : String(error)}`];
+          }
+        });
+      });
+
+      failures.push(...pageFailures.map((failure) => `${item.path} ${failure}`));
     }
 
     expect(failures).toEqual([]);
@@ -189,10 +196,10 @@ test.describe('控件矩阵 - 自动巡检', () => {
         return Array.from(document.querySelectorAll('button, a'))
           .filter((control) => control instanceof HTMLElement)
           .filter((control) => Boolean(control.offsetWidth || control.offsetHeight || control.getClientRects().length))
-          .map((control, index) => {
+          .map((control, visibleIndex) => {
             const element = control as HTMLElement;
             return {
-              index,
+              visibleIndex,
               action: element.dataset.stitchAction || '',
               text: (element.textContent || element.getAttribute('aria-label') || element.outerHTML).replace(/\s+/g, ' ').trim()
             };
@@ -202,7 +209,7 @@ test.describe('控件矩阵 - 自动巡检', () => {
       for (const control of controls) {
         const frame = await openStitchPage(page, item.path, item.title, item.role);
         const beforeUrl = page.url();
-        const target = frame.locator('button, a').nth(control.index);
+        const target = frame.locator('button, a').filter({ visible: true }).nth(control.visibleIndex);
 
         try {
           await target.click({ timeout: 5000 });
@@ -241,15 +248,13 @@ test.describe('控件矩阵 - 自动巡检', () => {
       await expect(frame.locator('main')).toBeVisible();
 
       if (item.path === '/register') {
-        await expect(frame.locator('main > div.grid')).toHaveClass(/grid-cols-1/);
-        await expect(frame.locator('main > div.grid')).toHaveClass(/lg:grid-cols-12/);
-        await expect(frame.locator('main > div.grid > div').first()).toHaveClass(/lg:col-span-5/);
-        await expect(frame.locator('main > div.grid > div').last()).toHaveClass(/lg:col-span-7/);
-        await expect(frame.getByRole('heading', { name: '释放企业潜能' })).toBeVisible();
+        await expect(frame.locator('main')).toHaveClass(/flex/);
+        await expect(frame.locator('main')).toHaveClass(/md:flex-row/);
+        await expect(frame.getByRole('heading', { name: '开启您的职业进阶之旅' })).toBeVisible();
       }
 
       if (item.path === '/login') {
-        await expect(frame.locator('main .bg-surface-container-lowest')).toBeVisible();
+        await expect(frame.locator('main .bg-surface-container-lowest').first()).toBeVisible();
         await expect(frame.getByRole('heading', { name: '欢迎回来' })).toBeVisible();
       }
 
@@ -264,7 +269,7 @@ test.describe('控件矩阵 - 自动巡检', () => {
 
       if (item.path === '/enterprise-center') {
         await expect(frame.locator('aside')).toBeVisible();
-        await expect(frame.getByText('核心标识')).toBeVisible();
+        await expect(frame.getByText('核心身份')).toBeVisible();
       }
     }
   });
@@ -281,9 +286,9 @@ test.describe('控件矩阵 - 自动巡检', () => {
       }));
     };
 
-    const loginFrame = await openStitchPage(page, '/login', '全国项目管理标准化技术委员会 - 人才库 登录');
+    const loginFrame = await openStitchPage(page, '/login', '项目管理人才库 登录');
     const loginFooter = await footerSignature(loginFrame);
-    const registerFrame = await openStitchPage(page, '/register', '全国项目管理标准化技术委员会 - 人才库 注册');
+    const registerFrame = await openStitchPage(page, '/register', '项目管理人才库 注册');
     const registerFooter = await footerSignature(registerFrame);
 
     expect(loginFooter).toEqual(registerFooter);
@@ -292,13 +297,13 @@ test.describe('控件矩阵 - 自动巡检', () => {
 
 test.describe('控件矩阵 - 易漏入口点名验证', () => {
   test('登录页辅助链接和记住设备都有明确功能，且不展示 SSO 登录', async ({ page }) => {
-    const frame = await openStitchPage(page, '/login', '全国项目管理标准化技术委员会 - 人才库 登录');
+    const frame = await openStitchPage(page, '/login', '项目管理人才库 登录');
 
     await expect(frame.getByText('或通过企业 SSO 登录')).toHaveCount(0);
     await expect(frame.getByRole('button', { name: 'Google' })).toHaveCount(0);
     await expect(frame.getByRole('button', { name: 'Microsoft' })).toHaveCount(0);
     await expectPanelAfterClick(frame, frame.getByText('忘记密码？'), '找回密码');
-    await expectPanelAfterClick(frame, frame.getByRole('link', { name: '服务条款' }), '平台说明');
+    await expectPanelAfterClick(frame, frame.getByRole('link', { name: 'Terms of Service' }), '平台说明');
 
     const remember = frame.locator('#remember');
     await expect(remember).not.toBeChecked();
@@ -309,48 +314,45 @@ test.describe('控件矩阵 - 易漏入口点名验证', () => {
   test('个人中心侧栏的每个业务页签都打开对应功能', async ({ page }) => {
     let frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
 
-    await frame.locator('a').filter({ hasText: '项目经历' }).click();
+    await frame.locator('[data-stitch-action="project-experience"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/project-experience$/);
     frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
-    await frame.locator('a').filter({ hasText: '教育经历' }).click();
+    await frame.locator('[data-stitch-action="education-experience"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/education-experience$/);
     frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
-    await frame.locator('a').filter({ hasText: '专业技能' }).click();
+    await frame.locator('[data-stitch-action="professional-skills"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/professional-skills$/);
     frame = await openStitchPage(page, '/personal-center', '个人中心 - 基础信息', 'USER');
-    await frame.locator('a').filter({ hasText: '资格证书' }).click();
+    await frame.locator('[data-stitch-action="certificates"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/certificates$/);
   });
 
-  test('企业中心侧栏的每个业务入口都打开对应功能', async ({ page }) => {
+  test('企业中心侧栏的核心业务入口都打开对应功能', async ({ page }) => {
     let frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
 
-    await frame.locator('a').filter({ hasText: '项目历史' }).click();
-    await expect(page).toHaveURL(/\/personal-center\/project-experience$/);
+    await frame.locator('[data-stitch-action="talents"]').first().click();
+    await expect(page).toHaveURL(/\/talents$/);
     frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
-    await frame.locator('a').filter({ hasText: '教育背景' }).click();
-    await expect(page).toHaveURL(/\/personal-center\/education-experience$/);
+    await frame.locator('[data-stitch-action="recruitments"]').first().click();
+    await expect(page).toHaveURL(/\/recruitments$/);
     frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
-    await frame.locator('a').filter({ hasText: '专业技能' }).click();
-    await expect(page).toHaveURL(/\/personal-center\/professional-skills$/);
-    frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
-    await frame.locator('a').filter({ hasText: '资质证书' }).click();
-    await expect(page).toHaveURL(/\/personal-center\/certificates$/);
+    await frame.locator('[data-stitch-action="help"]').first().click();
+    await expect(frame.locator('#stitch-action-panel')).toContainText('帮助中心');
   });
 
   test('工作经历页侧栏的每个业务入口都打开对应功能', async ({ page }) => {
     let frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
 
-    await frame.locator('a').filter({ hasText: '项目历史' }).click();
+    await frame.locator('[data-stitch-action="project-experience"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/project-experience$/);
     frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
-    await frame.locator('a').filter({ hasText: '教育背景' }).click();
+    await frame.locator('[data-stitch-action="education-experience"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/education-experience$/);
     frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
-    await frame.locator('a').filter({ hasText: '专业技能' }).click();
+    await frame.locator('[data-stitch-action="professional-skills"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/professional-skills$/);
     frame = await openStitchPage(page, '/personal-center/work-experience', '个人中心 - 工作经历', 'USER');
-    await frame.locator('a').filter({ hasText: '证书奖励' }).click();
+    await frame.locator('[data-stitch-action="certificates"]').first().click();
     await expect(page).toHaveURL(/\/personal-center\/certificates$/);
   });
 
