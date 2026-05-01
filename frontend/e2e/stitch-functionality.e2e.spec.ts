@@ -400,6 +400,13 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.getByText('Chen Wei')).toHaveCount(0);
     await expect(frame.getByText('Global Tech Corp')).toHaveCount(0);
     await expect(frame.getByText('张伟')).toHaveCount(0);
+    await expect(frame.getByText('zhang.wei@example.com')).toHaveCount(0);
+    await expect(frame.getByText('+86 138 0013 8000')).toHaveCount(0);
+    await expect(frame.getByText('8年经验')).toHaveCount(0);
+    await expect(frame.getByText('当前简历完善度: 92%')).toHaveCount(0);
+    await expect(frame.getByText('邮箱待完善')).toBeVisible();
+    await expect(frame.getByText('电话待完善')).toBeVisible();
+    await expect(frame.getByText('当前简历完善度: 0%')).toBeVisible();
     await expect(frame.getByText('拥有超过8年')).toHaveCount(0);
 
     await page.goto('/personal-center/work-experience');

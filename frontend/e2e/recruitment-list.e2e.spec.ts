@@ -127,7 +127,7 @@ test('根路径会展示公开首页和脱敏招聘信息', async ({ page }) => 
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   const design = page.frameLocator('iframe[title="项目管理人才库 首页"]');
 
-  await expect(design.getByText('发现战略性人才')).toBeVisible();
+  await expect(design.getByRole('heading', { name: '发现战略性人才' })).toBeVisible({ timeout: 10_000 });
   await expect(design.getByText('招聘信息')).toBeVisible();
   await expect(design.getByText('人才洞察')).toBeVisible();
 });

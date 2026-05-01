@@ -193,24 +193,24 @@ test.describe('控件矩阵 - 自动巡检', () => {
     expect(failures).toEqual([]);
   });
 
-  test('所有可点击控件点击后都有可观察结果', async ({ page }) => {
-    test.setTimeout(360_000);
-    const failures: string[] = [];
-    const currentRouteActions: Record<string, string[]> = {
-      '/': ['home'],
-      '/login': ['login'],
-      '/register': ['register'],
-      '/enterprise-center': ['enterprise-center'],
-      '/personal-center': ['personal-center'],
-      '/personal-center/work-experience': ['work-experience'],
-      '/personal-center/project-experience': ['project-experience'],
-      '/personal-center/education-experience': ['education-experience'],
-      '/personal-center/professional-skills': ['professional-skills'],
-      '/personal-center/certificates': ['certificates'],
-      '/analytics': ['analytics']
-    };
+  const currentRouteActions: Record<string, string[]> = {
+    '/': ['home'],
+    '/login': ['login'],
+    '/register': ['register'],
+    '/enterprise-center': ['enterprise-center'],
+    '/personal-center': ['personal-center'],
+    '/personal-center/work-experience': ['work-experience'],
+    '/personal-center/project-experience': ['project-experience'],
+    '/personal-center/education-experience': ['education-experience'],
+    '/personal-center/professional-skills': ['professional-skills'],
+    '/personal-center/certificates': ['certificates'],
+    '/analytics': ['analytics']
+  };
 
-    for (const item of stitchPages) {
+  for (const item of stitchPages) {
+    test(`${item.title} 所有可点击控件点击后都有可观察结果`, async ({ page }) => {
+      test.setTimeout(180_000);
+      const failures: string[] = [];
       const initialFrame = await openStitchPage(page, item.path, item.title, item.role);
       const controls = await initialFrame.evaluate(() => {
         return Array.from(document.querySelectorAll('button, a'))
@@ -257,10 +257,10 @@ test.describe('控件矩阵 - 自动巡检', () => {
           failures.push(`${item.path} [${control.action}] ${control.text}: ${error instanceof Error ? error.message : String(error)}`);
         }
       }
-    }
 
-    expect(failures).toEqual([]);
-  });
+      expect(failures).toEqual([]);
+    });
+  }
 
   test('运行时主体结构保留 code.html 的核心布局', async ({ page }) => {
     for (const item of stitchPages) {

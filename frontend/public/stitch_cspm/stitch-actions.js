@@ -952,6 +952,113 @@
           .stitch-footer-links {
             flex-wrap: wrap;
           }
+          body.stitch-page {
+            overflow-x: hidden;
+          }
+          body.stitch-page-enterprise > .flex,
+          body.stitch-page-personal > .flex,
+          body.stitch-page-work > .flex {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            min-width: 0 !important;
+          }
+          body.stitch-page-enterprise aside.stitch-role-sidebar,
+          body.stitch-page-personal aside.stitch-role-sidebar,
+          body.stitch-page-work aside.stitch-role-sidebar,
+          body.stitch-page-personal aside.fixed,
+          body.stitch-page-work aside.fixed {
+            position: static !important;
+            top: auto !important;
+            z-index: auto !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            height: auto !important;
+            max-height: none !important;
+            padding: 80px 16px 12px !important;
+            border-right: 0 !important;
+            border-bottom: 1px solid #d9e3ec !important;
+            box-shadow: none !important;
+          }
+          body.stitch-page-enterprise aside.stitch-role-sidebar {
+            padding-top: 16px !important;
+          }
+          .stitch-role-card {
+            padding: 0 0 12px !important;
+          }
+          .stitch-role-nav {
+            display: flex !important;
+            gap: 8px !important;
+            overflow-x: auto !important;
+            padding: 0 0 4px !important;
+          }
+          .stitch-role-nav a {
+            min-width: max-content !important;
+            min-height: 36px !important;
+            padding: 0 12px !important;
+          }
+          body.stitch-page-enterprise main,
+          body.stitch-page-personal main,
+          body.stitch-page-work main {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            margin-left: 0 !important;
+            padding: 88px 16px 32px !important;
+            box-sizing: border-box !important;
+          }
+          body.stitch-page-enterprise main {
+            padding-top: 0 !important;
+          }
+          body.stitch-page-enterprise main > header {
+            height: auto !important;
+            min-height: 64px !important;
+            align-items: stretch !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            padding: 12px 16px !important;
+            position: static !important;
+          }
+          body.stitch-page-enterprise main > header > div,
+          body.stitch-page-personal main > div:first-child,
+          body.stitch-page-work main > div:first-child {
+            align-items: stretch !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+          }
+          body.stitch-page-enterprise main > header input,
+          body.stitch-page-enterprise main > header .relative,
+          body.stitch-page-enterprise main > header button {
+            max-width: 100% !important;
+            width: 100% !important;
+          }
+          body.stitch-page-enterprise main > header img {
+            display: none !important;
+          }
+          body.stitch-page-enterprise main > div,
+          body.stitch-page-personal main > div,
+          body.stitch-page-work main > div,
+          body.stitch-page-enterprise section,
+          body.stitch-page-personal section,
+          body.stitch-page-work section {
+            max-width: 100% !important;
+            min-width: 0 !important;
+          }
+          body.stitch-page-enterprise main .grid,
+          body.stitch-page-personal main .grid,
+          body.stitch-page-work main .grid {
+            grid-template-columns: minmax(0, 1fr) !important;
+          }
+          body.stitch-page-enterprise main [class*="col-span-"],
+          body.stitch-page-personal main [class*="col-span-"],
+          body.stitch-page-work main [class*="col-span-"] {
+            grid-column: 1 / -1 !important;
+          }
+          body.stitch-page-personal main button,
+          body.stitch-page-work main button {
+            max-width: 100% !important;
+            white-space: normal !important;
+          }
         }
       `;
       document.head.appendChild(style);
@@ -996,8 +1103,16 @@
       replaceTextContent('Chen Wei', '');
       replaceTextContent('张伟', '待完善个人信息');
       replaceTextContent('高级产品经理', '');
+      replaceTextContent('在职-考虑机会', '状态待完善');
+      replaceTextContent('8年经验', '经验待补充');
+      replaceTextContent('zhang.wei@example.com', '邮箱待完善');
+      replaceTextContent('+86 138 0013 8000', '电话待完善');
       replaceTextContent('上海市, 浦东新区', '资料待完善');
       replaceTextContent('具备8年互联网产品经验，主导过3款千万级DAU产品的从0到1研发。擅长数据驱动决策，拥有极强的跨部门沟通与协调能力，能够快速响应市场变化并制定产品路线图。', '');
+      replaceTextContent('当前简历完善度: 92%', '当前简历完善度: 0%');
+      replaceTextContent('已实名', '待实名');
+      replaceTextContent('手机已验证', '手机待验证');
+      replaceTextContent('邮箱已验证', '邮箱待验证');
       replaceTextContent('高级产品设计师', '');
       replaceTextContent('拥有超过8年领导世界500强科技公司跨学科设计团队的经验。精通设计系统、用户研究和数据驱动的设计优化。曾为企业级SaaS产品实现转化率提升25%的优异战绩。具备出色的干系人管理和双语沟通能力。', '');
     }
