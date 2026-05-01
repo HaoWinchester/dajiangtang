@@ -244,11 +244,12 @@ test.describe('控件矩阵 - 自动巡检', () => {
 });
 
 test.describe('控件矩阵 - 易漏入口点名验证', () => {
-  test('登录页 SSO、辅助链接和记住设备都有明确功能', async ({ page }) => {
+  test('登录页辅助链接和记住设备都有明确功能，且不展示 SSO 登录', async ({ page }) => {
     const frame = await openStitchPage(page, '/login', '全国项目管理标准化技术委员会 - 人才库 登录');
 
-    await expectPanelAfterClick(frame, frame.getByRole('button', { name: 'Google' }), 'Google SSO 登录');
-    await expectPanelAfterClick(frame, frame.getByRole('button', { name: 'Microsoft' }), 'Microsoft SSO 登录');
+    await expect(frame.getByText('或通过企业 SSO 登录')).toHaveCount(0);
+    await expect(frame.getByRole('button', { name: 'Google' })).toHaveCount(0);
+    await expect(frame.getByRole('button', { name: 'Microsoft' })).toHaveCount(0);
     await expectPanelAfterClick(frame, frame.getByText('忘记密码？'), '找回密码');
     await expectPanelAfterClick(frame, frame.getByRole('link', { name: '服务条款' }), '平台说明');
 

@@ -191,6 +191,10 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(remember).not.toBeChecked();
     await frame.getByText('记住设备（30天内）').click();
     await expect(remember).toBeChecked();
+    await expect.poll(() => remember.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return style.appearance || style.getPropertyValue('-webkit-appearance');
+    })).not.toBe('none');
     await expect.poll(() => frame.evaluate(() => localStorage.getItem('REMEMBER_DEVICE'))).toBe('true');
     await remember.click();
     await expect(remember).not.toBeChecked();

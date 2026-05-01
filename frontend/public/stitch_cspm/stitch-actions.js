@@ -161,6 +161,26 @@
           box-shadow: 0 0 0 3px rgba(30, 111, 148, 0.14) !important;
           outline: none !important;
         }
+        body.stitch-page-login #remember {
+          width: 16px !important;
+          height: 16px !important;
+          padding: 0 !important;
+          border: 1px solid #757684 !important;
+          border-radius: 4px !important;
+          background: #ffffff !important;
+          accent-color: #00288e;
+          appearance: auto !important;
+          -webkit-appearance: checkbox !important;
+          cursor: pointer;
+        }
+        body.stitch-page-login #remember:checked {
+          border-color: #00288e !important;
+          background-color: #00288e !important;
+        }
+        body.stitch-page-login label[for="remember"] {
+          cursor: pointer;
+          user-select: none;
+        }
         body.stitch-page main button:not(.material-symbols-outlined),
         body.stitch-page main a[data-stitch-action] {
           border-radius: 6px !important;
@@ -956,8 +976,6 @@
     if (/高管猎寻/.test(label)) return 'executive-search';
     if (/帮助|帮助支持|帮助中心/.test(label)) return 'help';
     if (/隐私|服务条款|系统状态|安全信息|Cookie|关于我们|联系我们|加入我们/.test(label)) return 'policy-info';
-    if (/Google/.test(label)) return 'sso-google';
-    if (/Microsoft/.test(label)) return 'sso-microsoft';
     if (/swap_horiz|负责人/.test(label)) return 'assign-owner';
     if (/contact_support/.test(label)) return 'support';
     return 'details-panel';
@@ -1056,12 +1074,6 @@
         break;
       case 'forgot-password':
         openPanel('找回密码', '请输入注册手机号后通过短信验证码重置密码。演示环境验证码为 123456。');
-        break;
-      case 'sso-google':
-        openPanel('Google SSO 登录', '将跳转到 Google 企业身份认证。演示环境暂不连接外部身份源，因此仅展示接入入口。');
-        break;
-      case 'sso-microsoft':
-        openPanel('Microsoft SSO 登录', '将跳转到 Microsoft Entra ID 企业身份认证。演示环境暂不连接外部身份源，因此仅展示接入入口。');
         break;
       case 'filter-panel':
         openPanel('筛选条件', '可按城市、薪资、CSPM 优先、岗位状态筛选首页岗位预览。完整筛选能力在招聘信息列表中提供。', [
