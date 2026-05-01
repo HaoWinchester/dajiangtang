@@ -139,15 +139,19 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     }
   });
 
-  test('所有 Stitch 页面保留 code.html 原始头部', async ({ page }) => {
+  test('所有 Stitch 页面保留统一旧版头部和本次 code.html 中间内容', async ({ page }) => {
     for (const item of stitchPages) {
       await gotoStitchPage(page, item.path);
       const frame = await frameByTitle(page, item.title);
-      const sourceHeader = frame.locator('body > header, body > nav, header, nav').first();
+      const preservedHeader = frame.locator('header.stitch-preserved-header');
 
-      await expect(sourceHeader).toBeVisible();
-      await expect(frame.locator('.stitch-global-header')).toHaveCount(0);
-      await expect(sourceHeader).toContainText(/项目管理人才库|Dashboard|Overview|仪表盘|控制台|Talent Pool/i);
+      await expect(preservedHeader).toBeVisible();
+      await expect(preservedHeader.locator('img[alt="项目管理人才库 Logo"]')).toHaveAttribute('src', '/assets/logo.png');
+      await expect(preservedHeader).toContainText('项目管理人才库');
+      await expect(preservedHeader).toContainText('首页');
+      await expect(preservedHeader).toContainText('招聘信息');
+      await expect(preservedHeader).toContainText('人才信息');
+      await expect(frame.locator('main')).toBeVisible();
     }
   });
 
@@ -180,12 +184,12 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     }
   });
 
-  test('注册页保留 code.html 原始设计结构', async ({ page }) => {
+  test('注册页保留 code.html 中间设计结构并使用统一旧版头尾', async ({ page }) => {
     await page.goto('/register', { waitUntil: 'domcontentloaded' });
     const frame = await frameByTitle(page, '项目管理人才库 注册');
 
-    await expect(frame.locator('body > header')).toBeVisible();
-    await expect(frame.locator('.stitch-global-header')).toHaveCount(0);
+    await expect(frame.locator('header.stitch-preserved-header')).toBeVisible();
+    await expect(frame.locator('footer.stitch-preserved-footer')).toBeVisible();
     await expect(frame.locator('body')).not.toHaveClass(/stitch-page /);
     await expect(frame.getByRole('heading', { name: '开启您的职业进阶之旅' })).toBeVisible();
     await expect(frame.getByRole('heading', { name: '创建新账号' })).toBeVisible();
@@ -582,8 +586,8 @@ test.describe('工作流程功能 - 页面跳转', () => {
   test('退出登录会清理角色并回到公开首页', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => {
-      window.localStorage.setItem('USER_ROLE', 'ADMIN');
-      document.cookie = 'USER_ROLE=ADMIN; path=/';
+      window.localStorage.setItem('USER_ROLE', 'USER');
+      document.cookie = 'USER_ROLE=USER; path=/';
     });
     await page.goto('/personal-center');
     const frame = await frameByTitle(page, '个人中心 - 基础信息');
@@ -669,6 +673,40 @@ test.describe('流程间数据交互 - 角色与接口', () => {
     await page.goto('/recruitments/new');
 
     await expect(page).toHaveURL(/\/login-required$/);
+  });
+
+  test('企业账号直访个人中心会回到企业中心', async ({ page }) => {
+    await loginAs(page, 'COMPANY');
+    await page.goto('/personal-center/work-experience');
+
+    await expect(page).toHaveURL(/\/enterprise-center$/);
+    await expect(await frameByTitle(page, '企业中心 - 资料维护')).toBeTruthy();
+  });
+
+  test('管理员账号直访个人中心会回到招聘管理', async ({ page }) => {
+    await mockRecruitments(page);
+    await loginAs(page, 'ADMIN');
+    await page.goto('/personal-center');
+
+    await expect(page).toHaveURL(/\/recruitments$/);
+    await expect(page.getByRole('heading', { name: '招聘信息' })).toBeVisible();
+  });
+
+  test('个人账号直访企业中心会回到个人中心', async ({ page }) => {
+    await loginAs(page, 'USER');
+    await page.goto('/enterprise-center');
+
+    await expect(page).toHaveURL(/\/personal-center$/);
+    await expect(await frameByTitle(page, '个人中心 - 基础信息')).toBeTruthy();
+  });
+
+  test('管理员账号直访企业中心会回到招聘管理', async ({ page }) => {
+    await mockRecruitments(page);
+    await loginAs(page, 'ADMIN');
+    await page.goto('/enterprise-center');
+
+    await expect(page).toHaveURL(/\/recruitments$/);
+    await expect(page.getByRole('heading', { name: '招聘信息' })).toBeVisible();
   });
 });
 

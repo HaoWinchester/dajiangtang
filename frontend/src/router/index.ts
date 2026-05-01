@@ -32,7 +32,33 @@ function readClientRole(): string | undefined {
   return ALLOWED_ROLES.has(role) ? role : undefined;
 }
 
-export function requireAuthGuard(to: { meta: { requiresAuth?: unknown; requiresAdmin?: unknown } }) {
+type RouteRole = 'ADMIN' | 'USER' | 'COMPANY';
+
+type GuardTarget = {
+  meta: {
+    requiresAuth?: unknown;
+    requiresAdmin?: unknown;
+    allowedRoles?: unknown;
+  };
+};
+
+function roleHome(role: RouteRole) {
+  if (role === ADMIN_ROLE) {
+    return { name: 'recruitments' };
+  }
+
+  if (role === 'COMPANY') {
+    return { name: 'enterprise-center' };
+  }
+
+  return { name: 'personal-center' };
+}
+
+function isAllowedRoleList(value: unknown): value is RouteRole[] {
+  return Array.isArray(value) && value.every((role) => ALLOWED_ROLES.has(role));
+}
+
+export function requireAuthGuard(to: GuardTarget) {
   const role = readClientRole();
 
   if (to.meta.requiresAuth && !role) {
@@ -43,8 +69,14 @@ export function requireAuthGuard(to: { meta: { requiresAuth?: unknown; requiresA
     return { name: 'recruitments' };
   }
 
+  if (role && isAllowedRoleList(to.meta.allowedRoles) && !to.meta.allowedRoles.includes(role as RouteRole)) {
+    return roleHome(role as RouteRole);
+  }
+
   return true;
 }
+
+const USER_ONLY_META = { requiresAuth: true, allowedRoles: ['USER'] };
 
 const router = createRouter({
   history: createWebHistory(),
@@ -80,7 +112,7 @@ const router = createRouter({
       path: '/enterprise-center',
       name: 'enterprise-center',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, allowedRoles: ['COMPANY'] },
       props: {
         src: '/stitch_cspm/_4/code.html',
         title: '企业中心 - 资料维护'
@@ -90,7 +122,7 @@ const router = createRouter({
       path: '/personal-center',
       name: 'personal-center',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: USER_ONLY_META,
       props: {
         src: '/stitch_cspm/_5/code.html',
         title: '个人中心 - 基础信息'
@@ -100,7 +132,7 @@ const router = createRouter({
       path: '/personal-center/work-experience',
       name: 'personal-work-experience',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: USER_ONLY_META,
       props: {
         src: '/stitch_cspm/_6/code.html',
         title: '个人中心 - 工作经历'
@@ -110,7 +142,7 @@ const router = createRouter({
       path: '/personal-center/project-experience',
       name: 'personal-project-experience',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: USER_ONLY_META,
       props: {
         src: '/stitch_cspm/_6/code.html',
         title: '个人中心 - 项目经历'
@@ -120,7 +152,7 @@ const router = createRouter({
       path: '/personal-center/honors',
       name: 'personal-honors',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: USER_ONLY_META,
       props: {
         src: '/stitch_cspm/_7/code.html',
         title: '个人中心 - 获得荣誉'
@@ -130,7 +162,7 @@ const router = createRouter({
       path: '/personal-center/education-experience',
       name: 'personal-education-experience',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: USER_ONLY_META,
       props: {
         src: '/stitch_cspm/_8/code.html',
         title: '个人中心 - 教育经历'
@@ -140,7 +172,7 @@ const router = createRouter({
       path: '/personal-center/professional-skills',
       name: 'personal-professional-skills',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: USER_ONLY_META,
       props: {
         src: '/stitch_cspm/_6/code.html',
         title: '个人中心 - 专业技能'
@@ -150,7 +182,7 @@ const router = createRouter({
       path: '/personal-center/certificates',
       name: 'personal-certificates',
       component: StitchFrameView,
-      meta: { requiresAuth: true },
+      meta: USER_ONLY_META,
       props: {
         src: '/stitch_cspm/_9/code.html',
         title: '个人中心 - 资格证书'

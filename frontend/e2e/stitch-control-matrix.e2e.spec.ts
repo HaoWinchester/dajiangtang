@@ -181,7 +181,7 @@ test.describe('控件矩阵 - 自动巡检', () => {
       '/': ['home'],
       '/login': ['login'],
       '/register': ['register'],
-      '/enterprise-center': ['enterprise-center', 'personal-center'],
+      '/enterprise-center': ['enterprise-center'],
       '/personal-center': ['personal-center'],
       '/personal-center/work-experience': ['work-experience'],
       '/personal-center/project-experience': ['project-experience'],
@@ -246,6 +246,10 @@ test.describe('控件矩阵 - 自动巡检', () => {
     for (const item of stitchPages) {
       const frame = await openStitchPage(page, item.path, item.title, item.role);
       await expect(frame.locator('main')).toBeVisible();
+      await expect(frame.locator('header.stitch-preserved-header')).toBeVisible();
+      await expect(frame.locator('footer.stitch-preserved-footer')).toBeVisible();
+      await expect(frame.locator('header.stitch-preserved-header')).toContainText('项目管理人才库');
+      await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('项目管理人才库');
 
       if (item.path === '/register') {
         await expect(frame.locator('main')).toHaveClass(/flex/);
@@ -293,6 +297,19 @@ test.describe('控件矩阵 - 自动巡检', () => {
 
     expect(loginFooter).toEqual(registerFooter);
   });
+
+  test('所有 Stitch 页面头部和底部保持同一套旧版外壳', async ({ page }) => {
+    for (const item of stitchPages) {
+      const frame = await openStitchPage(page, item.path, item.title, item.role);
+      await expect(frame.locator('header.stitch-preserved-header img[alt="项目管理人才库 Logo"]')).toHaveAttribute('src', '/assets/logo.png');
+      await expect(frame.locator('header.stitch-preserved-header')).toContainText('首页');
+      await expect(frame.locator('header.stitch-preserved-header')).toContainText('招聘信息');
+      await expect(frame.locator('header.stitch-preserved-header')).toContainText('人才信息');
+      await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('帮助中心');
+      await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('系统状态');
+      await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('Cookie 政策');
+    }
+  });
 });
 
 test.describe('控件矩阵 - 易漏入口点名验证', () => {
@@ -303,7 +320,7 @@ test.describe('控件矩阵 - 易漏入口点名验证', () => {
     await expect(frame.getByRole('button', { name: 'Google' })).toHaveCount(0);
     await expect(frame.getByRole('button', { name: 'Microsoft' })).toHaveCount(0);
     await expectPanelAfterClick(frame, frame.getByText('忘记密码？'), '找回密码');
-    await expectPanelAfterClick(frame, frame.getByRole('link', { name: 'Terms of Service' }), '平台说明');
+    await expectPanelAfterClick(frame, frame.getByRole('link', { name: 'Cookie 政策' }), '平台说明');
 
     const remember = frame.locator('#remember');
     await expect(remember).not.toBeChecked();
@@ -338,6 +355,36 @@ test.describe('控件矩阵 - 易漏入口点名验证', () => {
     frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
     await frame.locator('[data-stitch-action="help"]').first().click();
     await expect(frame.locator('#stitch-action-panel')).toContainText('帮助中心');
+  });
+
+  test('企业账号点击企业中心所有可见入口不会串到个人中心', async ({ page }) => {
+    test.setTimeout(180_000);
+    const initialFrame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+    const controls = await initialFrame.evaluate(() => {
+      return Array.from(document.querySelectorAll('button, a'))
+        .filter((control) => control instanceof HTMLElement)
+        .filter((control) => Boolean(control.offsetWidth || control.offsetHeight || control.getClientRects().length))
+        .map((control, visibleIndex) => {
+          const element = control as HTMLElement;
+          return {
+            visibleIndex,
+            action: element.dataset.stitchAction || '',
+            text: (element.textContent || element.getAttribute('aria-label') || element.outerHTML).replace(/\s+/g, ' ').trim()
+          };
+        });
+    });
+    const failures: string[] = [];
+
+    for (const control of controls) {
+      const frame = await openStitchPage(page, '/enterprise-center', '企业中心 - 资料维护', 'COMPANY');
+      await frame.locator('button, a').filter({ visible: true }).nth(control.visibleIndex).click({ timeout: 5000 });
+      await page.waitForTimeout(150);
+      if (new URL(page.url()).pathname.startsWith('/personal-center')) {
+        failures.push(`[${control.action}] ${control.text}`);
+      }
+    }
+
+    expect(failures).toEqual([]);
   });
 
   test('工作经历页侧栏的每个业务入口都打开对应功能', async ({ page }) => {

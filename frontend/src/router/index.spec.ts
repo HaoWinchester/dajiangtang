@@ -40,6 +40,56 @@ describe('recruitment route guard', () => {
     expect(requireAuthGuard({ meta: { requiresAuth: true } })).toBe(true);
   });
 
+  it('allows only regular users to enter personal center routes', async () => {
+    localStorage.setItem('USER_ROLE', 'USER');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['USER'] } })).toBe(true);
+  });
+
+  it('redirects company users away from personal center routes to enterprise center', async () => {
+    localStorage.setItem('USER_ROLE', 'COMPANY');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['USER'] } })).toEqual({
+      name: 'enterprise-center'
+    });
+  });
+
+  it('redirects admins away from personal center routes to recruitment management', async () => {
+    localStorage.setItem('USER_ROLE', 'ADMIN');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['USER'] } })).toEqual({
+      name: 'recruitments'
+    });
+  });
+
+  it('allows only company users to enter enterprise center routes', async () => {
+    localStorage.setItem('USER_ROLE', 'COMPANY');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['COMPANY'] } })).toBe(true);
+  });
+
+  it('redirects regular users away from enterprise center routes to personal center', async () => {
+    localStorage.setItem('USER_ROLE', 'USER');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['COMPANY'] } })).toEqual({
+      name: 'personal-center'
+    });
+  });
+
+  it('redirects admins away from enterprise center routes to recruitment management', async () => {
+    localStorage.setItem('USER_ROLE', 'ADMIN');
+    const { requireAuthGuard } = await import('./index');
+
+    expect(requireAuthGuard({ meta: { requiresAuth: true, allowedRoles: ['COMPANY'] } })).toEqual({
+      name: 'recruitments'
+    });
+  });
+
   it('allows admins to enter the recruitment create route', async () => {
     localStorage.setItem('USER_ROLE', 'ADMIN');
     const { requireAuthGuard } = await import('./index');
@@ -124,6 +174,7 @@ describe('recruitment route guard', () => {
 
     expect(router.resolve('/enterprise-center').name).toBe('enterprise-center');
     expect(router.resolve('/enterprise-center').meta.requiresAuth).toBe(true);
+    expect(router.resolve('/enterprise-center').meta.allowedRoles).toEqual(['COMPANY']);
   });
 
   it('maps personal center to the stitch personal basic info design', async () => {
@@ -131,6 +182,7 @@ describe('recruitment route guard', () => {
 
     expect(router.resolve('/personal-center').name).toBe('personal-center');
     expect(router.resolve('/personal-center').meta.requiresAuth).toBe(true);
+    expect(router.resolve('/personal-center').meta.allowedRoles).toEqual(['USER']);
   });
 
   it('maps work experience to the stitch work experience design', async () => {
@@ -138,6 +190,7 @@ describe('recruitment route guard', () => {
 
     expect(router.resolve('/personal-center/work-experience').name).toBe('personal-work-experience');
     expect(router.resolve('/personal-center/work-experience').meta.requiresAuth).toBe(true);
+    expect(router.resolve('/personal-center/work-experience').meta.allowedRoles).toEqual(['USER']);
   });
 
   it('registers all personal-center module pages as protected Stitch pages', async () => {
