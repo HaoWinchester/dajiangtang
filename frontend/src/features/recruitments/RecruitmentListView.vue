@@ -132,7 +132,7 @@ onMounted(() => {
               v-model="form.city"
               name="city"
               type="search"
-              placeholder="输入标准城市名"
+              placeholder="输入城市关键词"
               autocomplete="off"
             />
           </label>

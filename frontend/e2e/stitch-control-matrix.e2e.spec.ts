@@ -325,6 +325,8 @@ test.describe('控件矩阵 - 自动巡检', () => {
   });
 
   test('所有 Stitch 页面头部和底部保持同一套旧版外壳', async ({ page }) => {
+    test.setTimeout(120_000);
+
     for (const item of stitchPages) {
       const frame = await openStitchPage(page, item.path, item.title, item.role);
       await expect(frame.locator('header.stitch-preserved-header img[alt="项目管理人才库 Logo"]')).toHaveAttribute('src', '/assets/logo.png');

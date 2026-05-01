@@ -64,7 +64,7 @@ async function mockRecruitments(page: Page) {
       return;
     }
 
-    if (positionKeyword === '不存在' || city === '北京') {
+    if (positionKeyword === '不存在' || city === '不存在城市') {
       await route.fulfill({
         contentType: 'application/json',
         body: JSON.stringify(response({ items: [], totalItems: 0, totalPages: 0, canCreate: role === 'ADMIN' }))
@@ -301,6 +301,27 @@ test('岗位和城市组合搜索会刷新列表并携带查询条件', async ({
   await requestPromise;
 
   await expect(page.getByText('Java 后端工程师')).toBeVisible();
+});
+
+test('城市支持模糊搜索，输入北京能搜到北京市岗位', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByLabel('城市').fill('北京');
+
+  const requestPromise = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === '/api/recruitments'
+      && url.searchParams.get('city') === '北京'
+      && url.searchParams.get('page') === '1'
+      && url.searchParams.get('pageSize') === '10';
+  });
+  await page.getByRole('button', { name: '搜索', exact: true }).click();
+  await requestPromise;
+
+  await expect(page.getByText('项目经理')).toBeVisible();
+  await expect(page.getByText('北京市')).toBeVisible();
 });
 
 test('清空搜索会清掉两个输入框并回到第一页默认查询', async ({ page }) => {

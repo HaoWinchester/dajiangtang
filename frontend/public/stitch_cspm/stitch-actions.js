@@ -251,6 +251,7 @@
   }
 
   function restoreSavedPageData() {
+    bindEnterpriseBenefitControls();
     const saved = localStorage.getItem(pageDataKey());
     if (!saved) {
       return;
@@ -259,9 +260,42 @@
       const fields = JSON.parse(saved);
       applyPageFields(fields);
       syncPersonalSummary(fields);
+      bindEnterpriseBenefitControls();
     } catch {
       localStorage.removeItem(pageDataKey());
     }
+  }
+
+  function bindEnterpriseBenefitControls() {
+    if (window.parent.location.pathname !== '/enterprise-center') {
+      return;
+    }
+
+    const benefitInputs = Array.from(document.querySelectorAll('label'))
+      .filter((label) => /五险一金|餐补\/交通补助|补充医疗保险|年度体检/.test(textOf(label)))
+      .map((label, index) => {
+        const input = label.querySelector('input[type="checkbox"]');
+        return input instanceof HTMLInputElement ? { input, label, index } : null;
+      })
+      .filter(Boolean);
+
+    benefitInputs.forEach((entry) => {
+      const { input, label, index } = entry;
+      const benefitName = textOf(label).replace(/\s+/g, ' ').trim();
+      input.id = input.id || `enterprise-benefit-${index}`;
+      input.name = input.name || `enterpriseBenefit${index}`;
+      input.setAttribute('aria-label', benefitName);
+      label.dataset.enterpriseBenefit = input.checked ? 'selected' : 'unselected';
+
+      if (input.dataset.enterpriseBenefitBound === 'true') {
+        return;
+      }
+
+      input.dataset.enterpriseBenefitBound = 'true';
+      input.addEventListener('change', () => {
+        label.dataset.enterpriseBenefit = input.checked ? 'selected' : 'unselected';
+      });
+    });
   }
 
   function uploadDataKey(target) {
@@ -589,6 +623,41 @@
           border-color: #1e6f94 !important;
           box-shadow: 0 0 0 3px rgba(30, 111, 148, 0.14) !important;
           outline: none !important;
+        }
+        body.stitch-page input[type="checkbox"],
+        body.stitch-page input[type="radio"] {
+          width: 16px !important;
+          height: 16px !important;
+          padding: 0 !important;
+          border: 1px solid #8a99a8 !important;
+          background: #ffffff !important;
+          accent-color: #00288e;
+          appearance: auto !important;
+          -webkit-appearance: checkbox !important;
+          cursor: pointer;
+          flex: 0 0 auto;
+        }
+        body.stitch-page input[type="radio"] {
+          border-radius: 999px !important;
+          -webkit-appearance: radio !important;
+        }
+        body.stitch-page input[type="checkbox"]:checked,
+        body.stitch-page input[type="radio"]:checked {
+          border-color: #00288e !important;
+        }
+        body.stitch-page-enterprise label[data-enterprise-benefit] {
+          cursor: pointer;
+          user-select: none;
+          border: 1px solid #d4dde7;
+          border-radius: 8px;
+          padding: 8px 10px;
+          transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+        }
+        body.stitch-page-enterprise label[data-enterprise-benefit="selected"] {
+          background: #eef6ff;
+          border-color: #00288e;
+          color: #00288e !important;
+          font-weight: 700;
         }
         body.stitch-page-login #remember {
           width: 16px !important;

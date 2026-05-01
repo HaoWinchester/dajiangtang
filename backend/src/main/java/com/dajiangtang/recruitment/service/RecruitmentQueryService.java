@@ -6,7 +6,6 @@ import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
-import com.dajiangtang.common.domain.CityCatalog;
 import com.dajiangtang.recruitment.domain.Recruitment;
 import com.dajiangtang.recruitment.dto.RecruitmentListItemResponse;
 import com.dajiangtang.recruitment.dto.RecruitmentListQuery;
@@ -19,16 +18,13 @@ import com.dajiangtang.user.domain.UserRole;
 public class RecruitmentQueryService {
 
     private final RecruitmentRepository recruitmentRepository;
-    private final CityCatalog cityCatalog;
     private final CurrentUserRoleResolver roleResolver;
 
     public RecruitmentQueryService(
             RecruitmentRepository recruitmentRepository,
-            CityCatalog cityCatalog,
             CurrentUserRoleResolver roleResolver
     ) {
         this.recruitmentRepository = recruitmentRepository;
-        this.cityCatalog = cityCatalog;
         this.roleResolver = roleResolver;
     }
 
@@ -72,6 +68,8 @@ public class RecruitmentQueryService {
         if (!query.hasCity()) {
             return true;
         }
-        return cityCatalog.isStandardCityName(query.city()) && recruitment.city().equals(query.city());
+        return recruitment.city()
+                .toLowerCase(Locale.ROOT)
+                .contains(query.city().toLowerCase(Locale.ROOT));
     }
 }

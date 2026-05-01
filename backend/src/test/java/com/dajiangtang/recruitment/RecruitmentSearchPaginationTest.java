@@ -75,6 +75,29 @@ class RecruitmentSearchPaginationTest {
     }
 
     @Test
+    void searchesCityByPartialName() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("city", "北京")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItems").value(3))
+                .andExpect(jsonPath("$.items[0].id").value("rec-013"))
+                .andExpect(jsonPath("$.items[1].id").value("rec-001"))
+                .andExpect(jsonPath("$.items[2].id").value("rec-005"));
+    }
+
+    @Test
+    void searchesCityByInnerKeyword() throws Exception {
+        mockMvc.perform(get("/api/recruitments")
+                        .param("city", "圳")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItems").value(2))
+                .andExpect(jsonPath("$.items[0].id").value("rec-003"))
+                .andExpect(jsonPath("$.items[1].id").value("rec-012"));
+    }
+
+    @Test
     void combinesPositionAndCityFilters() throws Exception {
         mockMvc.perform(get("/api/recruitments")
                         .param("positionKeyword", "Java")
@@ -149,9 +172,9 @@ class RecruitmentSearchPaginationTest {
     }
 
     @Test
-    void nonStandardCityNameReturnsEmptyResult() throws Exception {
+    void unmatchedCityKeywordReturnsEmptyResult() throws Exception {
         mockMvc.perform(get("/api/recruitments")
-                        .param("city", "北京")
+                        .param("city", "不存在城市")
                         .header(CurrentUserRoleResolver.ROLE_HEADER, "USER"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalItems").value(0))

@@ -31,7 +31,7 @@ paths:
           required: false
           schema:
             type: string
-          description: 标准城市名，按标准城市名匹配。
+          description: 城市关键词，使用模糊匹配，例如输入“北京”可匹配“北京市”。
         - name: page
           in: query
           required: false

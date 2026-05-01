@@ -442,6 +442,43 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.locator('#stitch-action-panel')).toContainText('上传图片');
   });
 
+  test('企业中心核心福利可以选择、取消并保存后刷新保留', async ({ page }) => {
+    await loginAs(page, 'COMPANY');
+    await page.goto('/enterprise-center');
+    let frame = await frameByTitle(page, '企业中心 - 资料维护');
+
+    const medicalBenefit = frame.getByLabel('补充医疗保险');
+    const mealBenefit = frame.getByLabel('餐补/交通补助');
+    const medicalLabel = frame.locator('label').filter({ hasText: '补充医疗保险' });
+    const mealLabel = frame.locator('label').filter({ hasText: '餐补/交通补助' });
+
+    await expect(medicalBenefit).toBeVisible();
+    await expect(medicalBenefit).not.toBeChecked();
+
+    await medicalLabel.click();
+    await expect(medicalBenefit).toBeChecked();
+    await expect(medicalLabel).toHaveAttribute('data-enterprise-benefit', 'selected');
+
+    await medicalLabel.click();
+    await expect(medicalBenefit).not.toBeChecked();
+    await expect(medicalLabel).toHaveAttribute('data-enterprise-benefit', 'unselected');
+
+    await medicalLabel.click();
+    if (!(await mealBenefit.isChecked())) {
+      await mealLabel.click();
+    }
+    await frame.getByRole('button', { name: '保存变更' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('保存成功');
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    frame = await frameByTitle(page, '企业中心 - 资料维护');
+
+    await expect(frame.getByLabel('补充医疗保险')).toBeChecked();
+    await expect(frame.getByLabel('餐补/交通补助')).toBeChecked();
+    await expect(frame.locator('label').filter({ hasText: '补充医疗保险' })).toHaveAttribute('data-enterprise-benefit', 'selected');
+    await expect(frame.locator('label').filter({ hasText: '餐补/交通补助' })).toHaveAttribute('data-enterprise-benefit', 'selected');
+  });
+
   test('企业中心品牌图片可以真实上传、预览、保存并刷新保留', async ({ page }) => {
     await loginAs(page, 'COMPANY');
     await page.goto('/enterprise-center');
