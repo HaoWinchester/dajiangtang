@@ -199,7 +199,7 @@ test.describe('单点功能 - Stitch 页面控件', () => {
 
     await expect(frame.getByText('张*明')).toBeVisible();
     await expect(frame.getByText('李*华')).toBeVisible();
-    await expect(frame.locator('#talent-result-summary')).toContainText('共 4 条结果');
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-2 条，共 4 条结果');
 
     await frame.getByPlaceholder('输入姓名（脱敏）').fill('李');
     await frame.getByRole('button', { name: '开始检索' }).click();
@@ -245,7 +245,42 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.getByText('暂无匹配人才')).not.toBeVisible();
     await expect(frame.getByText('张*明')).toBeVisible();
     await expect(frame.getByText('李*华')).toBeVisible();
-    await expect(frame.locator('#talent-result-summary')).toContainText('共 4 条结果');
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-2 条，共 4 条结果');
+  });
+
+  test('人才库表格分页可以上一页、下一页和页码切换，并与检索结果联动', async ({ page }) => {
+    await loginAs(page, 'ADMIN');
+    await page.goto('/talents');
+    const frame = await frameByTitle(page, '人才信息 - 列表');
+
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-2 条，共 4 条结果');
+    await expect(frame.getByText('张*明')).toBeVisible();
+    await expect(frame.getByText('李*华')).toBeVisible();
+    await expect(frame.getByText('王*雪')).not.toBeVisible();
+
+    await frame.getByRole('button', { name: '下一页' }).click();
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 3-4 条，共 4 条结果');
+    await expect(frame.getByText('王*雪')).toBeVisible();
+    await expect(frame.getByText('陈*刚')).toBeVisible();
+    await expect(frame.getByText('张*明')).not.toBeVisible();
+
+    await frame.getByRole('button', { name: '上一页' }).click();
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-2 条，共 4 条结果');
+    await expect(frame.getByText('张*明')).toBeVisible();
+    await expect(frame.getByText('王*雪')).not.toBeVisible();
+
+    await frame.locator('#talent-pagination button[data-talent-page-target="2"]').click();
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 3-4 条，共 4 条结果');
+    await expect(frame.getByText('陈*刚')).toBeVisible();
+
+    await frame.getByPlaceholder('输入城市名称').fill('北京');
+    await frame.getByRole('button', { name: '开始检索' }).click();
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-1 条，共 1 条结果');
+    await expect(frame.getByText('李*华')).toBeVisible();
+    await expect(frame.getByText('陈*刚')).not.toBeVisible();
+    await frame.getByRole('button', { name: '下一页' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('已经是最后一页');
+    await expect(frame.getByText('李*华')).toBeVisible();
   });
 
   test('固定顶部栏在宽屏下铺满视口右侧不留缺口', async ({ page }) => {

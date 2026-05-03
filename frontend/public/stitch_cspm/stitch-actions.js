@@ -1427,6 +1427,7 @@
     '深圳智造科技有限公司',
     '苏州精工智能制造有限公司'
   ];
+  const TALENT_PAGE_SIZE = 2;
 
   function normalizeSearchText(value = '') {
     return String(value).replace(/\s+/g, '').toLowerCase();
@@ -1444,6 +1445,15 @@
   function talentRows() {
     return Array.from(document.querySelectorAll('tbody tr'))
       .filter((row) => row instanceof HTMLTableRowElement && row.id !== 'talent-empty-state');
+  }
+
+  function matchedTalentRows() {
+    return talentRows().filter((row) => row.dataset.talentMatches !== 'false');
+  }
+
+  function talentPaginationButtons() {
+    const pagination = document.getElementById('talent-pagination');
+    return pagination ? Array.from(pagination.querySelectorAll('button')) : [];
   }
 
   function matchesTalentIndustry(rowIndustry, selectedIndustry) {
@@ -1506,10 +1516,34 @@
       summary.id = 'talent-result-summary';
     }
 
+    const pagination = Array.from(document.querySelectorAll('div.flex.gap-1')).find((item) => {
+      const text = textOf(item);
+      return text.includes('chevron_left') && text.includes('chevron_right');
+    });
+    if (pagination instanceof HTMLElement) {
+      pagination.id = 'talent-pagination';
+      Array.from(pagination.querySelectorAll('button')).forEach((button) => {
+        const label = textOf(button);
+        if (label.includes('chevron_left')) {
+          button.setAttribute('aria-label', '上一页');
+          button.dataset.talentPageTarget = 'prev';
+        } else if (label.includes('chevron_right')) {
+          button.setAttribute('aria-label', '下一页');
+          button.dataset.talentPageTarget = 'next';
+        } else if (/^\d+$/.test(label)) {
+          button.dataset.talentPageTarget = label;
+        }
+      });
+      const ellipsis = Array.from(pagination.children).find((item) => textOf(item) === '...');
+      if (ellipsis instanceof HTMLElement) {
+        ellipsis.id = 'talent-pagination-ellipsis';
+      }
+    }
+
     applyTalentSearch(false);
   }
 
-  function updateTalentSearchSummary(total) {
+  function updateTalentSearchSummary(total, currentPage = 1) {
     const countBadge = Array.from(document.querySelectorAll('span')).find((item) => textOf(item).includes('名候选人'));
     if (countBadge) {
       const icon = countBadge.querySelector('.material-symbols-outlined')?.outerHTML || '';
@@ -1518,14 +1552,70 @@
 
     const summary = document.getElementById('talent-result-summary');
     if (summary) {
+      const start = total > 0 ? (currentPage - 1) * TALENT_PAGE_SIZE + 1 : 0;
+      const end = total > 0 ? Math.min(currentPage * TALENT_PAGE_SIZE, total) : 0;
       summary.innerHTML = total > 0
-        ? `显示第 <span class="font-bold">1-${total}</span> 条，共 <span class="font-bold">${total}</span> 条结果`
+        ? `显示第 <span class="font-bold">${start}-${end}</span> 条，共 <span class="font-bold">${total}</span> 条结果`
         : `显示第 <span class="font-bold">0-0</span> 条，共 <span class="font-bold">0</span> 条结果`;
     }
 
     const empty = document.getElementById('talent-empty-state');
     if (empty) {
       empty.classList.toggle('hidden', total > 0);
+    }
+  }
+
+  function renderTalentPage(requestedPage = Number(document.body.dataset.talentCurrentPage || '1')) {
+    const rows = talentRows();
+    const matched = matchedTalentRows();
+    const total = matched.length;
+    const totalPages = Math.max(1, Math.ceil(total / TALENT_PAGE_SIZE));
+    const currentPage = Math.min(Math.max(Number(requestedPage) || 1, 1), totalPages);
+    document.body.dataset.talentCurrentPage = String(currentPage);
+    document.body.dataset.talentTotalPages = String(totalPages);
+
+    rows.forEach((row) => {
+      row.style.display = 'none';
+    });
+
+    matched.forEach((row, index) => {
+      const page = Math.floor(index / TALENT_PAGE_SIZE) + 1;
+      row.style.display = page === currentPage ? (row.dataset.talentOriginalDisplay || '') : 'none';
+    });
+
+    updateTalentSearchSummary(total, currentPage);
+
+    const buttons = talentPaginationButtons();
+    buttons.forEach((button) => {
+      const target = button.dataset.talentPageTarget || '';
+      const targetPage = Number(target);
+      const isVisiblePageNumber = Number.isInteger(targetPage) && targetPage >= 1 && targetPage <= totalPages;
+      const isArrow = target === 'prev' || target === 'next';
+
+      button.classList.toggle('hidden', !isArrow && !isVisiblePageNumber);
+      button.dataset.talentBoundary = (
+        (target === 'prev' && currentPage === 1)
+        || (target === 'next' && currentPage === totalPages)
+      ) ? 'true' : 'false';
+      button.classList.toggle('opacity-40', (
+        (target === 'prev' && currentPage === 1)
+        || (target === 'next' && currentPage === totalPages)
+      ));
+
+      if (Number.isInteger(targetPage)) {
+        const active = targetPage === currentPage;
+        button.classList.toggle('bg-primary', active);
+        button.classList.toggle('text-white', active);
+        button.classList.toggle('border-primary', active);
+        button.classList.toggle('text-slate-600', !active);
+        button.classList.toggle('border-slate-200', !active);
+        button.setAttribute('aria-current', active ? 'page' : 'false');
+      }
+    });
+
+    const ellipsis = document.getElementById('talent-pagination-ellipsis');
+    if (ellipsis) {
+      ellipsis.classList.toggle('hidden', totalPages <= 3);
     }
   }
 
@@ -1544,13 +1634,13 @@
         && matchesTalentIndustry(row.dataset.talentIndustry || '', industry)
         && (!city || normalizeSearchText(row.dataset.talentCity).includes(city));
 
-      row.style.display = visible ? (row.dataset.talentOriginalDisplay || '') : 'none';
+      row.dataset.talentMatches = visible ? 'true' : 'false';
       if (visible) {
         total += 1;
       }
     });
 
-    updateTalentSearchSummary(total);
+    renderTalentPage(1);
     if (showToast) {
       toast(total > 0 ? `已检索到 ${total} 名匹配人才` : '未检索到匹配人才，请调整条件后重试');
     }
@@ -1571,6 +1661,29 @@
     }
     applyTalentSearch(false);
     toast('人才检索条件已重置，已恢复全部人才');
+  }
+
+  function handleTalentPagination(element) {
+    const matched = matchedTalentRows();
+    const totalPages = Math.max(1, Math.ceil(matched.length / TALENT_PAGE_SIZE));
+    const currentPage = Number(document.body.dataset.talentCurrentPage || '1') || 1;
+    const target = element?.dataset.talentPageTarget || '';
+    let nextPage = currentPage;
+
+    if (target === 'prev') {
+      nextPage = Math.max(1, currentPage - 1);
+    } else if (target === 'next') {
+      nextPage = Math.min(totalPages, currentPage + 1);
+    } else if (/^\d+$/.test(target)) {
+      nextPage = Math.min(Math.max(Number(target), 1), totalPages);
+    }
+
+    renderTalentPage(nextPage);
+    if (nextPage === currentPage) {
+      toast(target === 'prev' ? '已经是第一页' : target === 'next' ? '已经是最后一页' : `当前已在第 ${currentPage} 页`);
+    } else {
+      toast(`已切换到第 ${nextPage} 页`);
+    }
   }
 
   function toast(message) {
@@ -2638,7 +2751,7 @@
         resetTalentSearch();
         break;
       case 'talent-pagination':
-        toast('人才列表分页已切换');
+        handleTalentPagination(element);
         break;
       case 'invite-cspm':
         openPanel('邀约 CSPM 专家', '已进入 CSPM 认证人才邀约流程，可根据候选人认证等级、期望城市和求职意向发起沟通。');
