@@ -15,7 +15,9 @@ const stitchPages: Array<{ path: string; title: string; role?: Role }> = [
   { path: '/personal-center/certificates', title: '个人中心 - 资格证书', role: 'USER' },
   { path: '/talents', title: '人才信息 - 列表', role: 'ADMIN' },
   { path: '/talents/sample', title: '人才信息 - 详情', role: 'ADMIN' },
-  { path: '/analytics', title: '数据分析', role: 'ADMIN' }
+  { path: '/analytics', title: '数据分析', role: 'ADMIN' },
+  { path: '/recruitments/sample', title: '招聘信息 - 详情', role: 'USER' },
+  { path: '/recruitments/sample/apply', title: '招聘申请 - 提交申请', role: 'USER' }
 ];
 
 test.beforeEach(async ({ page }) => {
@@ -125,6 +127,45 @@ test.describe('控件矩阵 - 自动巡检', () => {
     expect(violations).toEqual([]);
   });
 
+  test('所有页面可见动作集合与交互清单一致', async ({ page }) => {
+    const expectedActionsByPath: Record<string, string[]> = {
+      '/': ['apply-recruitment', 'bookmark', 'filter-panel', 'help', 'home', 'login', 'policy-info', 'recruitment-detail', 'recruitments', 'register', 'sort-panel', 'talents'],
+      '/login': ['forgot-password', 'help', 'home', 'login', 'policy-info', 'recruitments', 'register', 'start-login', 'talents'],
+      '/register': ['help', 'home', 'login', 'policy-info', 'recruitments', 'register', 'register-submit', 'register-tab', 'send-code', 'talents'],
+      '/enterprise-center': ['analytics', 'cancel', 'enterprise-center', 'help', 'home', 'logout', 'notifications', 'policy-info', 'recruitments', 'save', 'settings', 'talents', 'upload'],
+      '/personal-center': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'save', 'talents', 'upload', 'work-experience'],
+      '/personal-center/work-experience': ['add-experience', 'cancel', 'certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
+      '/personal-center/project-experience': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'manage-module', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
+      '/personal-center/education-experience': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'manage-module', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
+      '/personal-center/professional-skills': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'manage-module', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
+      '/personal-center/certificates': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'manage-module', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
+      '/talents': ['analytics', 'help', 'home', 'invite-cspm', 'logout', 'new-recruitment', 'policy-info', 'recruitments', 'talent-detail', 'talent-pagination', 'talent-search', 'talent-search-reset', 'talents'],
+      '/talents/sample': ['analytics', 'bookmark', 'contact-talent', 'download-resume', 'help', 'home', 'logout', 'new-recruitment', 'policy-info', 'recruitments', 'talents'],
+      '/analytics': ['analytics', 'help', 'home', 'logout', 'new-recruitment', 'policy-info', 'recruitments', 'talents'],
+      '/recruitments/sample': ['apply-recruitment', 'bookmark', 'certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
+      '/recruitments/sample/apply': ['bookmark', 'certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'submit-application', 'talents', 'work-experience']
+    };
+    const failures: string[] = [];
+
+    for (const item of stitchPages) {
+      const frame = await openStitchPage(page, item.path, item.title, item.role);
+      const actual = await frame.locator('button, a').evaluateAll((nodes) => {
+        return [...new Set(nodes
+          .filter((node) => node instanceof HTMLElement)
+          .filter((node) => Boolean((node as HTMLElement).offsetWidth || (node as HTMLElement).offsetHeight || (node as HTMLElement).getClientRects().length))
+          .map((node) => (node as HTMLElement).dataset.stitchAction || '')
+          .filter(Boolean))]
+          .sort();
+      });
+      const expected = [...(expectedActionsByPath[item.path] || [])].sort();
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+        failures.push(`${item.path}: expected ${expected.join(',')} actual ${actual.join(',')}`);
+      }
+    }
+
+    expect(failures).toEqual([]);
+  });
+
   test('所有可见表单控件都可以实际输入、选择或勾选', async ({ page }) => {
     const failures: string[] = [];
 
@@ -208,7 +249,9 @@ test.describe('控件矩阵 - 自动巡检', () => {
     '/personal-center/certificates': ['certificates'],
     '/talents': ['talents'],
     '/talents/sample': ['talent-detail'],
-    '/analytics': ['analytics']
+    '/analytics': ['analytics'],
+    '/recruitments/sample': [],
+    '/recruitments/sample/apply': []
   };
 
   for (const item of stitchPages) {
@@ -346,6 +389,26 @@ test.describe('控件矩阵 - 自动巡检', () => {
       await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('系统状态');
       await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('Cookie 政策');
     }
+  });
+
+  test('所有可见导航和按钮不泄露模板英文入口', async ({ page }) => {
+    const forbidden = /\b(Dashboard|Jobs|Talent|Analytics|Messages|Enterprise Portal|Post Job|Help Center|Logout|Basic Info|Work Experience|Project History|Education|Skills|Certifications|Edit Profile)\b/;
+    const leaks: string[] = [];
+
+    for (const item of stitchPages) {
+      const frame = await openStitchPage(page, item.path, item.title, item.role);
+      const pageLeaks = await frame.locator('button, a, nav, aside').evaluateAll((nodes) => {
+        return nodes
+          .filter((node) => node instanceof HTMLElement)
+          .filter((node) => Boolean((node as HTMLElement).offsetWidth || (node as HTMLElement).offsetHeight || (node as HTMLElement).getClientRects().length))
+          .map((node) => (node.textContent || '').replace(/\s+/g, ' ').trim())
+          .filter(Boolean);
+      });
+
+      leaks.push(...pageLeaks.filter((text) => forbidden.test(text)).map((text) => `${item.path}: ${text}`));
+    }
+
+    expect(leaks).toEqual([]);
   });
 });
 

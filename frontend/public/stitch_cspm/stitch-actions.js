@@ -362,6 +362,34 @@
     });
   }
 
+  function translateTemplateLabels() {
+    const translations = new Map([
+      ['Dashboard', '首页'],
+      ['Jobs', '招聘信息'],
+      ['Talent', '人才信息'],
+      ['Analytics', '数据分析'],
+      ['Messages', '消息'],
+      ['Enterprise Portal', '企业中心'],
+      ['Post Job', '新增招聘'],
+      ['Help Center', '帮助中心'],
+      ['Logout', '退出登录'],
+      ['Basic Info', '基本信息'],
+      ['Work Experience', '工作经历'],
+      ['Project History', '项目经历'],
+      ['Education', '教育经历'],
+      ['Skills', '专业技能'],
+      ['Certifications', '资格证书'],
+      ['Edit Profile', '编辑资料']
+    ]);
+
+    document.querySelectorAll('a, button, span, h3, p').forEach((element) => {
+      const text = textOf(element);
+      if (translations.has(text)) {
+        element.textContent = translations.get(text);
+      }
+    });
+  }
+
   async function postJson(url, body) {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 8000);
@@ -1419,6 +1447,48 @@
       </label>
     `;
     contentColumn.insertBefore(application, contentColumn.firstElementChild?.nextElementSibling || null);
+  }
+
+  function submitRecruitmentApplication() {
+    if (!currentRole()) {
+      openPanel('请先登录后提交申请', '岗位申请页已打开。登录或注册后即可提交申请并同步个人资料。', [
+        { label: '去登录', action: 'login' },
+        { label: '去注册', action: 'register' }
+      ]);
+      return;
+    }
+
+    const root = document.getElementById('application-materials');
+    if (!root) {
+      toast('请先进入岗位申请页');
+      return;
+    }
+
+    const name = root.querySelector('input[type="text"]')?.value.trim() || '';
+    const phone = root.querySelector('input[type="tel"]')?.value.trim() || '';
+    const note = root.querySelector('textarea')?.value.trim() || '';
+    const consent = root.querySelector('input[type="checkbox"]');
+
+    if (!name) {
+      toast('请填写申请人姓名');
+      return;
+    }
+    if (!/^1[3-9]\d{9}$/.test(phone)) {
+      toast('请填写有效的联系电话');
+      return;
+    }
+    if (!(consent instanceof HTMLInputElement) || !consent.checked) {
+      toast('请确认申请信息真实有效');
+      return;
+    }
+
+    localStorage.setItem(`APPLICATION:${currentRole()}:${recruitmentIdFromPath('featured')}`, JSON.stringify({
+      name,
+      phone,
+      note,
+      submittedAt: new Date().toISOString()
+    }));
+    toast('申请已提交，平台联系人会尽快跟进');
   }
 
   const talentCompanies = [
@@ -2594,7 +2664,7 @@
     if (/筛选|filter_list/.test(label)) return 'filter-panel';
     if (/排序|sort/.test(label)) return 'sort-panel';
     if (/bookmark|收藏/.test(label)) return 'bookmark';
-    if (/通知|notifications|Messages/.test(label)) return 'notifications';
+    if (/通知|消息|notifications|Messages/.test(label)) return 'notifications';
     if (/设置|settings/.test(label)) return 'settings';
     if (/忘记密码/.test(label)) return 'forgot-password';
     if (/查看所有报告|查看完整报告|数据分析|Analytics|insert_chart/.test(label)) return 'analytics';
@@ -2763,14 +2833,7 @@
         toast('简历下载任务已创建，请在下载中心查看');
         break;
       case 'submit-application':
-        if (!currentRole()) {
-          openPanel('请先登录后提交申请', '岗位申请页已打开。登录或注册后即可提交申请并同步个人资料。', [
-            { label: '去登录', action: 'login' },
-            { label: '去注册', action: 'register' }
-          ]);
-        } else {
-          toast('申请已提交，平台联系人会尽快跟进');
-        }
+        submitRecruitmentApplication();
         break;
       case 'ai-match':
         openPanel('AI 匹配', 'AI 匹配会基于岗位要求、项目经历、资格证书和求职意向生成候选人推荐。');
@@ -2821,6 +2884,7 @@
     if (/refresh/.test(icon)) return 'captcha-refresh';
     if (/notifications/.test(icon)) return 'notifications';
     if (/settings/.test(icon)) return 'settings';
+    if (/bookmark|收藏/.test(icon)) return 'bookmark';
     if (/photo_camera/.test(icon)) return 'upload';
     if (/swap_horiz/.test(icon)) return 'assign-owner';
     if (/contact_support/.test(icon)) return 'support';
@@ -2845,6 +2909,7 @@
     renderBlankBusinessState();
     renderRecruitmentApplyPage();
     prepareTalentSearchPage();
+    translateTemplateLabels();
     renderRoleSidebars();
 
     document.querySelectorAll('a').forEach((link) => {

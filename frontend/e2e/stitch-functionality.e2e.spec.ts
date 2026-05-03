@@ -576,6 +576,67 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.locator('label').filter({ hasText: '餐补/交通补助' })).toHaveAttribute('data-enterprise-benefit', 'selected');
   });
 
+  test('企业中心可见基础字段保存后刷新仍然保留', async ({ page }) => {
+    await loginAs(page, 'COMPANY');
+    await page.goto('/enterprise-center');
+    let frame = await frameByTitle(page, '企业中心 - 资料维护');
+
+    await frame.evaluate(() => {
+      const visible = (element: Element) => {
+        const html = element as HTMLElement;
+        return Boolean(html.offsetWidth || html.offsetHeight || html.getClientRects().length);
+      };
+      const setValue = (field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, value: string) => {
+        field.value = value;
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+      const fields = Array.from(document.querySelectorAll('main input, main textarea, main select'))
+        .filter((node): node is HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement => {
+          return node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement || node instanceof HTMLSelectElement;
+        })
+        .filter((field) => visible(field) && !(field instanceof HTMLInputElement && ['checkbox', 'file', 'hidden'].includes(field.type)));
+
+      fields.forEach((field, index) => {
+        if (field instanceof HTMLSelectElement) {
+          field.selectedIndex = Math.min(1, Math.max(0, field.options.length - 1));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+          return;
+        }
+        if (field instanceof HTMLInputElement && field.type === 'email') {
+          setValue(field, 'enterprise@example.com');
+          return;
+        }
+        if (field instanceof HTMLInputElement && field.type === 'url') {
+          setValue(field, 'https://enterprise.example.com');
+          return;
+        }
+        if (field instanceof HTMLInputElement && field.type === 'time') {
+          setValue(field, index % 2 === 0 ? '09:30' : '18:30');
+          return;
+        }
+        setValue(field, field instanceof HTMLTextAreaElement ? '企业备注测试：重点关注项目管理人才。' : `企业字段-${index}`);
+      });
+    });
+
+    await frame.getByRole('button', { name: '保存变更' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('保存成功');
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    frame = await frameByTitle(page, '企业中心 - 资料维护');
+    await expect.poll(() => frame.evaluate(() => {
+      return Array.from(document.querySelectorAll('main input, main textarea')).map((field) => {
+        return (field as HTMLInputElement | HTMLTextAreaElement).value;
+      });
+    })).toEqual(expect.arrayContaining([
+      'enterprise@example.com',
+      'https://enterprise.example.com',
+      '09:30',
+      '18:30',
+      '企业备注测试：重点关注项目管理人才。'
+    ]));
+  });
+
   test('企业中心品牌图片可以真实上传、预览、保存并刷新保留', async ({ page }) => {
     await loginAs(page, 'COMPANY');
     await page.goto('/enterprise-center');
@@ -737,6 +798,50 @@ test.describe('工作流程功能 - 页面跳转', () => {
     await expect(page).toHaveURL(/\/recruitments\/rec-001\/apply$/);
     const application = await frameByTitle(page, '招聘申请 - 提交申请');
     await expect(application.getByRole('button', { name: '提交申请' })).toBeVisible();
+  });
+
+  test('招聘详情页收藏职位不会误跳转到招聘列表', async ({ page }) => {
+    await loginAs(page, 'USER');
+    await page.goto('/recruitments/rec-001');
+    const detail = await frameByTitle(page, '招聘信息 - 详情');
+
+    await detail.getByRole('button', { name: /收藏职位/ }).click();
+
+    await expect(page).toHaveURL(/\/recruitments\/rec-001$/);
+    await expect(detail.locator('#stitch-toast')).toContainText('已收藏该岗位');
+  });
+
+  test('招聘申请页提交覆盖未登录、缺字段、非法手机号、未确认和成功保存', async ({ page }) => {
+    await page.goto('/recruitments/rec-001/apply');
+    let frame = await frameByTitle(page, '招聘申请 - 提交申请');
+
+    await frame.getByRole('button', { name: '提交申请' }).click();
+    await expect(frame.locator('#stitch-action-panel')).toContainText('请先登录后提交申请');
+
+    await loginAs(page, 'USER');
+    await page.goto('/recruitments/rec-001/apply');
+    frame = await frameByTitle(page, '招聘申请 - 提交申请');
+
+    await frame.getByRole('button', { name: '提交申请' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('请填写申请人姓名');
+
+    await frame.getByPlaceholder('请输入姓名').fill('李明');
+    await frame.getByPlaceholder('请输入手机号').fill('12345');
+    await frame.getByRole('button', { name: '提交申请' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('请填写有效的联系电话');
+
+    await frame.getByPlaceholder('请输入手机号').fill('13800001234');
+    await frame.getByPlaceholder('请补充与该岗位匹配的项目经验、证书或到岗时间').fill('具备复杂项目治理与标准化交付经验。');
+    await frame.getByRole('button', { name: '提交申请' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('请确认申请信息真实有效');
+
+    await frame.locator('#application-materials input[type="checkbox"]').check();
+    await frame.getByRole('button', { name: '提交申请' }).click();
+    await expect(frame.locator('#stitch-toast')).toContainText('申请已提交');
+    await expect.poll(() => page.evaluate(() => {
+      const saved = localStorage.getItem('APPLICATION:USER:rec-001');
+      return saved ? JSON.parse(saved).phone : '';
+    })).toBe('13800001234');
   });
 
   test('注册页立即登录按钮跳转登录页', async ({ page }) => {
