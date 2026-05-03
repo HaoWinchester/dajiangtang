@@ -264,7 +264,7 @@ button:disabled {
 }
 
 .search-actions,
-.pagination div {
+.pagination-controls {
   display: flex;
   gap: 10px;
   align-items: center;
@@ -639,9 +639,59 @@ tbody tr:last-child td {
   font-size: 14px;
 }
 
+.pagination-range {
+  white-space: nowrap;
+}
+
+.pagination-controls {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.page-size-control,
+.page-jump,
+.page-jump label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-size-control select,
+.page-jump input {
+  height: 40px;
+  border: 1px solid #c9d6e2;
+  border-radius: 6px;
+  color: #17202a;
+  background: #fff;
+  outline: none;
+}
+
+.page-size-control select {
+  min-width: 92px;
+  padding: 0 10px;
+}
+
+.page-jump input {
+  width: 82px;
+  padding: 0 10px;
+}
+
+.page-size-control select:focus,
+.page-jump input:focus {
+  border-color: #2d7aa3;
+  box-shadow: 0 0 0 3px rgba(45, 122, 163, 0.14);
+}
+
 .page-index {
   min-width: 100px;
   text-align: center;
+}
+
+.pagination-message {
+  width: 100%;
+  margin: -6px 0 0;
+  color: #a23737;
+  text-align: right;
 }
 
 @media (max-width: 760px) {
@@ -699,10 +749,18 @@ tbody tr:last-child td {
   }
 
   .search-actions,
-  .pagination div,
+  .pagination-controls,
   .header-actions,
   .home-actions {
     flex-wrap: wrap;
+  }
+
+  .pagination-controls {
+    justify-content: flex-start;
+  }
+
+  .pagination-message {
+    text-align: left;
   }
 
   .home-shell {

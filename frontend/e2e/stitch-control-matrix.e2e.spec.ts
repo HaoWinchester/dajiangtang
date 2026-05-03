@@ -139,7 +139,7 @@ test.describe('控件矩阵 - 自动巡检', () => {
       '/personal-center/education-experience': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'manage-module', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
       '/personal-center/professional-skills': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'manage-module', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
       '/personal-center/certificates': ['certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'manage-module', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
-      '/talents': ['analytics', 'help', 'home', 'invite-cspm', 'logout', 'new-recruitment', 'policy-info', 'recruitments', 'talent-detail', 'talent-pagination', 'talent-search', 'talent-search-reset', 'talents'],
+      '/talents': ['analytics', 'help', 'home', 'invite-cspm', 'logout', 'new-recruitment', 'policy-info', 'recruitments', 'talent-detail', 'talent-page-jump', 'talent-pagination', 'talent-search', 'talent-search-reset', 'talents'],
       '/talents/sample': ['analytics', 'bookmark', 'contact-talent', 'download-resume', 'help', 'home', 'logout', 'new-recruitment', 'policy-info', 'recruitments', 'talents'],
       '/analytics': ['analytics', 'help', 'home', 'logout', 'new-recruitment', 'policy-info', 'recruitments', 'talents'],
       '/recruitments/sample': ['apply-recruitment', 'bookmark', 'certificates', 'education-experience', 'help', 'home', 'honors', 'logout', 'personal-center', 'policy-info', 'professional-skills', 'project-experience', 'recruitments', 'talents', 'work-experience'],
@@ -218,7 +218,8 @@ test.describe('控件矩阵 - 自动巡检', () => {
               email: 'tester@example.com',
               url: 'https://example.com',
               tel: '13800001111',
-              month: '2026-05'
+              month: '2026-05',
+              number: '1'
             };
             const value = values[type] || (tagName === 'textarea' ? `测试内容-${index}` : `测试-${index}`);
             field.value = value;

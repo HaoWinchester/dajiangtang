@@ -54,6 +54,7 @@ async function mockRecruitments(page: Page) {
     const positionKeyword = url.searchParams.get('positionKeyword');
     const city = url.searchParams.get('city');
     const requestedPage = Number(url.searchParams.get('page') ?? '1');
+    const requestedPageSize = Number(url.searchParams.get('pageSize') ?? '10');
 
     if (positionKeyword === '错误') {
       await route.fulfill({
@@ -72,6 +73,9 @@ async function mockRecruitments(page: Page) {
       return;
     }
 
+    const totalItems = 11;
+    const totalPages = Math.max(1, Math.ceil(totalItems / requestedPageSize));
+
     if (requestedPage === 2) {
       await route.fulfill({
         contentType: 'application/json',
@@ -89,8 +93,9 @@ async function mockRecruitments(page: Page) {
               }
             ],
             page: 2,
-            totalItems: 11,
-            totalPages: 2,
+            pageSize: requestedPageSize,
+            totalItems,
+            totalPages,
             canCreate: role === 'ADMIN'
           })
         )
@@ -100,7 +105,7 @@ async function mockRecruitments(page: Page) {
 
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify(response({ totalItems: 11, totalPages: 2, canCreate: role === 'ADMIN' }))
+      body: JSON.stringify(response({ pageSize: requestedPageSize, totalItems, totalPages, canCreate: role === 'ADMIN' }))
     });
   });
 }
@@ -377,6 +382,50 @@ test('下一页会请求第二页并展示分页范围', async ({ page }) => {
 
   await expect(page.getByText('客户成功经理')).toBeVisible();
   await expect(page.getByText('11-11 / 共 11 条')).toBeVisible();
+  await expect(page.getByText('第 2 / 2 页')).toBeVisible();
+});
+
+test('招聘列表可以设置每页条数并重新请求第一页', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+
+  const requestPromise = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === '/api/recruitments'
+      && url.searchParams.get('page') === '1'
+      && url.searchParams.get('pageSize') === '20';
+  });
+  await page.getByLabel('每页').selectOption('20');
+  await requestPromise;
+
+  await expect(page.getByText('1-11 / 共 11 条')).toBeVisible();
+  await expect(page.getByText('第 1 / 1 页')).toBeVisible();
+});
+
+test('招聘列表可以输入页码跳转且越界页码不发请求', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+
+  await page.getByLabel('跳转至').fill('9');
+  await page.getByRole('button', { name: '跳转' }).click();
+  await expect(page.getByText('请输入 1-2 之间的页码')).toBeVisible();
+  await expect(page.getByText('项目经理')).toBeVisible();
+
+  const requestPromise = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === '/api/recruitments'
+      && url.searchParams.get('page') === '2'
+      && url.searchParams.get('pageSize') === '10';
+  });
+  await page.getByLabel('跳转至').fill('2');
+  await page.getByRole('button', { name: '跳转' }).click();
+  await requestPromise;
+
+  await expect(page.getByText('客户成功经理')).toBeVisible();
   await expect(page.getByText('第 2 / 2 页')).toBeVisible();
 });
 

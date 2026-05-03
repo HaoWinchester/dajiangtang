@@ -7,7 +7,8 @@ import PlatformFooter from './PlatformFooter.vue';
 import PlatformHeader from './PlatformHeader.vue';
 import type { RecruitmentListQuery, RecruitmentListResponse } from './types';
 
-const PAGE_SIZE = 10 as const;
+const PAGE_SIZE_OPTIONS = [10, 20, 50] as const;
+const DEFAULT_PAGE_SIZE = PAGE_SIZE_OPTIONS[0];
 
 const form = reactive({
   positionKeyword: '',
@@ -22,20 +23,24 @@ const activeQuery = reactive({
 const list = ref<RecruitmentListResponse>({
   items: [],
   page: 1,
-  pageSize: PAGE_SIZE,
+  pageSize: DEFAULT_PAGE_SIZE,
   totalItems: 0,
   totalPages: 0,
   canCreate: false
 });
 const isLoading = ref(false);
 const errorMessage = ref('');
+const paginationMessage = ref('');
 const lastRequestedPage = ref(1);
+const pageSize = ref<number>(DEFAULT_PAGE_SIZE);
+const jumpPage = ref('');
 
 const hasItems = computed(() => list.value.items.length > 0);
 const canGoPrevious = computed(() => list.value.page > 1 && !isLoading.value);
 const canGoNext = computed(
   () => list.value.page < Math.max(list.value.totalPages, 1) && !isLoading.value
 );
+const maxPage = computed(() => Math.max(list.value.totalPages, 1));
 const rangeText = computed(() => {
   if (!list.value.totalItems) {
     return '共 0 条';
@@ -55,11 +60,12 @@ async function loadRecruitments(page = 1) {
     positionKeyword: activeQuery.positionKeyword,
     city: activeQuery.city,
     page,
-    pageSize: PAGE_SIZE
+    pageSize: pageSize.value
   };
 
   try {
     list.value = await fetchRecruitments(query);
+    pageSize.value = list.value.pageSize;
   } catch (error) {
     errorMessage.value =
       error instanceof Error ? error.message : '招聘信息加载失败，请稍后重试。';
@@ -71,6 +77,7 @@ async function loadRecruitments(page = 1) {
 function submitSearch() {
   activeQuery.positionKeyword = form.positionKeyword.trim();
   activeQuery.city = form.city.trim();
+  paginationMessage.value = '';
   void loadRecruitments(1);
 }
 
@@ -79,6 +86,8 @@ function clearSearch() {
   form.city = '';
   activeQuery.positionKeyword = '';
   activeQuery.city = '';
+  paginationMessage.value = '';
+  jumpPage.value = '';
   void loadRecruitments(1);
 }
 
@@ -87,7 +96,25 @@ function retry() {
 }
 
 function goToPage(page: number) {
+  paginationMessage.value = '';
   void loadRecruitments(page);
+}
+
+function changePageSize() {
+  paginationMessage.value = '';
+  jumpPage.value = '';
+  void loadRecruitments(1);
+}
+
+function submitJumpPage() {
+  const target = Number(jumpPage.value);
+  if (!Number.isInteger(target) || target < 1 || target > maxPage.value) {
+    paginationMessage.value = `请输入 1-${maxPage.value} 之间的页码`;
+    return;
+  }
+
+  paginationMessage.value = '';
+  void loadRecruitments(target);
 }
 
 onMounted(() => {
@@ -198,16 +225,49 @@ onMounted(() => {
           </div>
 
           <nav class="pagination" aria-label="招聘信息分页">
-            <span>{{ rangeText }}</span>
-            <div>
+            <span class="pagination-range">{{ rangeText }}</span>
+            <div class="pagination-controls">
+              <label class="page-size-control">
+                <span>每页</span>
+                <select
+                  v-model.number="pageSize"
+                  name="pageSize"
+                  :disabled="isLoading"
+                  @change="changePageSize"
+                >
+                  <option v-for="size in PAGE_SIZE_OPTIONS" :key="size" :value="size">
+                    {{ size }} 条
+                  </option>
+                </select>
+              </label>
+
               <button class="ghost-button" type="button" :disabled="!canGoPrevious" @click="goToPage(list.page - 1)">
                 上一页
               </button>
-              <span class="page-index">第 {{ list.page }} / {{ Math.max(list.totalPages, 1) }} 页</span>
+              <span class="page-index">第 {{ list.page }} / {{ maxPage }} 页</span>
               <button class="ghost-button" type="button" :disabled="!canGoNext" @click="goToPage(list.page + 1)">
                 下一页
               </button>
+
+              <form class="page-jump" aria-label="招聘页码跳转" novalidate @submit.prevent="submitJumpPage">
+                <label>
+                  <span>跳转至</span>
+                  <input
+                    v-model="jumpPage"
+                    name="jumpPage"
+                    type="number"
+                    min="1"
+                    :max="maxPage"
+                    inputmode="numeric"
+                    :disabled="isLoading"
+                  />
+                </label>
+                <button class="ghost-button" type="submit" :disabled="isLoading">跳转</button>
+              </form>
             </div>
+            <p v-if="paginationMessage" class="pagination-message" role="alert">
+              {{ paginationMessage }}
+            </p>
           </nav>
         </template>
       </section>

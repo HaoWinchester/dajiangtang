@@ -215,7 +215,7 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await expect(frame.getByText('张*明')).not.toBeVisible();
 
     await frame.getByRole('button', { name: '重置条件' }).click();
-    await frame.locator('select').selectOption({ label: '制造业' });
+    await frame.locator('section').getByRole('combobox').selectOption({ label: '制造业' });
     await frame.getByRole('button', { name: '开始检索' }).click();
     await expect(frame.getByText('陈*刚')).toBeVisible();
     await expect(frame.getByText('李*华')).not.toBeVisible();
@@ -281,6 +281,32 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     await frame.getByRole('button', { name: '下一页' }).click();
     await expect(frame.locator('#stitch-toast')).toContainText('已经是最后一页');
     await expect(frame.getByText('李*华')).toBeVisible();
+  });
+
+  test('人才库表格可以设置每页条数、输入页码跳转并校验越界页码', async ({ page }) => {
+    await loginAs(page, 'ADMIN');
+    await page.goto('/talents');
+    const frame = await frameByTitle(page, '人才信息 - 列表');
+
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-2 条，共 4 条结果');
+    await expect(frame.getByText('王*雪')).not.toBeVisible();
+
+    await frame.locator('#talent-page-size').selectOption('4');
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-4 条，共 4 条结果');
+    await expect(frame.getByText('王*雪')).toBeVisible();
+    await expect(frame.getByText('陈*刚')).toBeVisible();
+
+    await frame.locator('#talent-page-size').selectOption('2');
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 1-2 条，共 4 条结果');
+    await frame.locator('#talent-jump-page').fill('2');
+    await frame.getByRole('button', { name: '跳转' }).click();
+    await expect(frame.locator('#talent-result-summary')).toContainText('显示第 3-4 条，共 4 条结果');
+    await expect(frame.getByText('王*雪')).toBeVisible();
+
+    await frame.locator('#talent-jump-page').fill('9');
+    await frame.getByRole('button', { name: '跳转' }).click();
+    await expect(frame.locator('#talent-pagination-message')).toContainText('请输入 1-2 之间的页码');
+    await expect(frame.getByText('王*雪')).toBeVisible();
   });
 
   test('固定顶部栏在宽屏下铺满视口右侧不留缺口', async ({ page }) => {

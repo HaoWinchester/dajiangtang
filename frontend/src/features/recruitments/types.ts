@@ -11,7 +11,7 @@ export interface RecruitmentListItem {
 export interface RecruitmentListResponse {
   items: RecruitmentListItem[];
   page: number;
-  pageSize: 10;
+  pageSize: number;
   totalItems: number;
   totalPages: number;
   canCreate: boolean;
@@ -21,5 +21,5 @@ export interface RecruitmentListQuery {
   positionKeyword?: string;
   city?: string;
   page?: number;
-  pageSize?: 10;
+  pageSize?: number;
 }

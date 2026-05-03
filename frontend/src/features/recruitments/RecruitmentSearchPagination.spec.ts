@@ -252,6 +252,67 @@ describe('Recruitment search and pagination', () => {
     expect(wrapper.text()).toContain('第 2 / 2 页');
   });
 
+  it('changes the page size and reloads the first page', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(responseWithPages(1, 4, 10, 40))
+      .mockResolvedValueOnce(responseWithPages(1, 2, 20, 40));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await wrapper.find('select[name="pageSize"]').setValue('20');
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenLastCalledWith('/api/recruitments?page=1&pageSize=20', expect.any(Object));
+    expect(wrapper.text()).toContain('第 1 / 2 页');
+    expect(wrapper.text()).toContain('1-20 / 共 40 条');
+  });
+
+  it('jumps to an entered page using the active filters and page size', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(responseWithPages(1, 3, 10, 30))
+      .mockResolvedValueOnce(responseWithPages(1, 3, 10, 30))
+      .mockResolvedValueOnce(responseWithPages(1, 2, 20, 30))
+      .mockResolvedValueOnce(responseWithPages(2, 2, 20, 30));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await wrapper.find('input[name="positionKeyword"]').setValue('项目');
+    await wrapper.find('.search-form').trigger('submit');
+    await flushPromises();
+    await wrapper.find('select[name="pageSize"]').setValue('20');
+    await flushPromises();
+    await wrapper.find('input[name="jumpPage"]').setValue('2');
+    await wrapper.find('form[aria-label="招聘页码跳转"]').trigger('submit');
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/recruitments?positionKeyword=%E9%A1%B9%E7%9B%AE&page=2&pageSize=20',
+      expect.any(Object)
+    );
+    expect(wrapper.text()).toContain('第 2 / 2 页');
+  });
+
+  it('rejects invalid jump pages without sending another request', async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce(responseWithPages(1, 2, 10, 12));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    await wrapper.find('input[name="jumpPage"]').setValue('9');
+    await wrapper.find('form[aria-label="招聘页码跳转"]').trigger('submit');
+    await flushPromises();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).toContain('请输入 1-2 之间的页码');
+  });
+
   it('requests the previous page with the active search filters', async () => {
     const fetchMock = vi
       .fn()
@@ -388,12 +449,13 @@ describe('Recruitment search and pagination', () => {
   });
 });
 
-function responseWithPages(page: number, totalPages: number): Promise<Response> {
+function responseWithPages(page: number, totalPages: number, pageSize = 10, totalItems = 12): Promise<Response> {
   return Promise.resolve(
     jsonResponse(
       response({
         page,
-        totalItems: 12,
+        pageSize,
+        totalItems,
         totalPages,
         items: [
           {

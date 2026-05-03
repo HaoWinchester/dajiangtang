@@ -1497,7 +1497,8 @@
     '深圳智造科技有限公司',
     '苏州精工智能制造有限公司'
   ];
-  const TALENT_PAGE_SIZE = 2;
+  const TALENT_DEFAULT_PAGE_SIZE = 2;
+  const TALENT_PAGE_SIZE_OPTIONS = [2, 4, 10];
 
   function normalizeSearchText(value = '') {
     return String(value).replace(/\s+/g, '').toLowerCase();
@@ -1524,6 +1525,96 @@
   function talentPaginationButtons() {
     const pagination = document.getElementById('talent-pagination');
     return pagination ? Array.from(pagination.querySelectorAll('button')) : [];
+  }
+
+  function talentPageSize() {
+    const select = document.getElementById('talent-page-size');
+    const selectedValue = select instanceof HTMLSelectElement
+      ? select.value
+      : document.body.dataset.talentPageSize;
+    const size = Number(selectedValue || TALENT_DEFAULT_PAGE_SIZE);
+    return TALENT_PAGE_SIZE_OPTIONS.includes(size) ? size : TALENT_DEFAULT_PAGE_SIZE;
+  }
+
+  function talentTotalPages() {
+    return Math.max(1, Math.ceil(matchedTalentRows().length / talentPageSize()));
+  }
+
+  function updateTalentPaginationMessage(message = '') {
+    const panel = document.getElementById('talent-pagination-message');
+    if (panel) {
+      panel.textContent = message;
+    }
+  }
+
+  function changeTalentPageSize() {
+    const select = document.getElementById('talent-page-size');
+    if (select instanceof HTMLSelectElement) {
+      document.body.dataset.talentPageSize = select.value;
+    }
+    const jumpInput = document.getElementById('talent-jump-page');
+    if (jumpInput instanceof HTMLInputElement) {
+      jumpInput.value = '';
+    }
+    updateTalentPaginationMessage('');
+    renderTalentPage(1);
+    toast(`已切换为每页 ${talentPageSize()} 条`);
+  }
+
+  function jumpTalentPage() {
+    const input = document.getElementById('talent-jump-page');
+    const totalPages = talentTotalPages();
+    const target = input instanceof HTMLInputElement ? Number(input.value) : NaN;
+    if (!Number.isInteger(target) || target < 1 || target > totalPages) {
+      const message = `请输入 1-${totalPages} 之间的页码`;
+      updateTalentPaginationMessage(message);
+      toast(message);
+      return;
+    }
+
+    updateTalentPaginationMessage('');
+    renderTalentPage(target);
+    toast(`已跳转到第 ${target} 页`);
+  }
+
+  function ensureTalentAdvancedPaginationControls(pagination) {
+    const footer = pagination.parentElement;
+    if (!footer || document.getElementById('talent-page-size')) {
+      return;
+    }
+
+    const controls = document.createElement('div');
+    controls.id = 'talent-pagination-controls';
+    controls.className = 'flex flex-wrap items-center gap-2 text-body-sm text-slate-600';
+    controls.innerHTML = `
+      <label class="flex items-center gap-2 whitespace-nowrap">每页
+        <select id="talent-page-size" class="h-9 rounded border border-slate-200 bg-white px-2 text-body-sm text-slate-700 outline-none">
+          ${TALENT_PAGE_SIZE_OPTIONS.map((size) => `<option value="${size}">${size} 条</option>`).join('')}
+        </select>
+      </label>
+      <form id="talent-page-jump" class="flex items-center gap-2">
+        <label class="flex items-center gap-2 whitespace-nowrap">跳转至
+          <input id="talent-jump-page" name="talentJumpPage" type="number" min="1" inputmode="numeric" class="h-9 w-20 rounded border border-slate-200 px-2 text-body-sm text-slate-700 outline-none" />
+        </label>
+        <button type="button" class="rounded border border-slate-200 px-3 py-1.5 text-body-sm text-slate-600" data-talent-page-jump="true">跳转</button>
+      </form>
+      <span id="talent-pagination-message" role="alert" class="text-xs font-medium text-red-600"></span>
+    `;
+    footer.insertBefore(controls, pagination);
+
+    const select = controls.querySelector('#talent-page-size');
+    if (select instanceof HTMLSelectElement) {
+      select.value = String(talentPageSize());
+      select.addEventListener('change', changeTalentPageSize);
+    }
+
+    const form = controls.querySelector('#talent-page-jump');
+    if (form instanceof HTMLFormElement) {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        jumpTalentPage();
+      });
+    }
   }
 
   function matchesTalentIndustry(rowIndustry, selectedIndustry) {
@@ -1592,6 +1683,7 @@
     });
     if (pagination instanceof HTMLElement) {
       pagination.id = 'talent-pagination';
+      ensureTalentAdvancedPaginationControls(pagination);
       Array.from(pagination.querySelectorAll('button')).forEach((button) => {
         const label = textOf(button);
         if (label.includes('chevron_left')) {
@@ -1613,7 +1705,7 @@
     applyTalentSearch(false);
   }
 
-  function updateTalentSearchSummary(total, currentPage = 1) {
+  function updateTalentSearchSummary(total, currentPage = 1, pageSize = talentPageSize()) {
     const countBadge = Array.from(document.querySelectorAll('span')).find((item) => textOf(item).includes('名候选人'));
     if (countBadge) {
       const icon = countBadge.querySelector('.material-symbols-outlined')?.outerHTML || '';
@@ -1622,8 +1714,8 @@
 
     const summary = document.getElementById('talent-result-summary');
     if (summary) {
-      const start = total > 0 ? (currentPage - 1) * TALENT_PAGE_SIZE + 1 : 0;
-      const end = total > 0 ? Math.min(currentPage * TALENT_PAGE_SIZE, total) : 0;
+      const start = total > 0 ? (currentPage - 1) * pageSize + 1 : 0;
+      const end = total > 0 ? Math.min(currentPage * pageSize, total) : 0;
       summary.innerHTML = total > 0
         ? `显示第 <span class="font-bold">${start}-${end}</span> 条，共 <span class="font-bold">${total}</span> 条结果`
         : `显示第 <span class="font-bold">0-0</span> 条，共 <span class="font-bold">0</span> 条结果`;
@@ -1639,21 +1731,23 @@
     const rows = talentRows();
     const matched = matchedTalentRows();
     const total = matched.length;
-    const totalPages = Math.max(1, Math.ceil(total / TALENT_PAGE_SIZE));
+    const pageSize = talentPageSize();
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const currentPage = Math.min(Math.max(Number(requestedPage) || 1, 1), totalPages);
     document.body.dataset.talentCurrentPage = String(currentPage);
     document.body.dataset.talentTotalPages = String(totalPages);
+    document.body.dataset.talentPageSize = String(pageSize);
 
     rows.forEach((row) => {
       row.style.display = 'none';
     });
 
     matched.forEach((row, index) => {
-      const page = Math.floor(index / TALENT_PAGE_SIZE) + 1;
+      const page = Math.floor(index / pageSize) + 1;
       row.style.display = page === currentPage ? (row.dataset.talentOriginalDisplay || '') : 'none';
     });
 
-    updateTalentSearchSummary(total, currentPage);
+    updateTalentSearchSummary(total, currentPage, pageSize);
 
     const buttons = talentPaginationButtons();
     buttons.forEach((button) => {
@@ -1735,7 +1829,7 @@
 
   function handleTalentPagination(element) {
     const matched = matchedTalentRows();
-    const totalPages = Math.max(1, Math.ceil(matched.length / TALENT_PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(matched.length / talentPageSize()));
     const currentPage = Number(document.body.dataset.talentCurrentPage || '1') || 1;
     const target = element?.dataset.talentPageTarget || '';
     let nextPage = currentPage;
@@ -1749,6 +1843,7 @@
     }
 
     renderTalentPage(nextPage);
+    updateTalentPaginationMessage('');
     if (nextPage === currentPage) {
       toast(target === 'prev' ? '已经是第一页' : target === 'next' ? '已经是最后一页' : `当前已在第 ${currentPage} 页`);
     } else {
@@ -2654,6 +2749,7 @@
     if (/查看详情/.test(label)) return pageName === 'talent-list' ? 'talent-detail' : 'recruitment-detail';
     if (/开始检索/.test(label)) return 'talent-search';
     if (/重置条件/.test(label)) return 'talent-search-reset';
+    if (/^跳转$/.test(label) && pageName === 'talent-list') return 'talent-page-jump';
     if (/chevron_left|chevron_right|^\d+$|^\.\.\.$/.test(label)) return 'talent-pagination';
     if (/立即邀约 CSPM 专家|add/.test(label) && pageName === 'talent-list') return 'invite-cspm';
     if (/立即沟通|forum/.test(label)) return 'contact-talent';
@@ -2823,6 +2919,9 @@
       case 'talent-pagination':
         handleTalentPagination(element);
         break;
+      case 'talent-page-jump':
+        jumpTalentPage();
+        break;
       case 'invite-cspm':
         openPanel('邀约 CSPM 专家', '已进入 CSPM 认证人才邀约流程，可根据候选人认证等级、期望城市和求职意向发起沟通。');
         break;
@@ -2878,6 +2977,7 @@
     const icon = `${label} ${iconText}`.trim();
     if (button.dataset.modulePageManage) return 'manage-module';
     if (button.dataset.modulePageDelete) return 'delete-module-record';
+    if (button.dataset.talentPageJump) return 'talent-page-jump';
     if (currentPageName() === 'login' && button.closest('main') && /^(登录|立即登录)$/.test(label)) return 'start-login';
     if (button.closest('#captcha-modal') && /chevron_right/.test(icon)) return 'captcha-complete';
     if (/close/.test(icon)) return 'close-panel';
@@ -2952,7 +3052,9 @@
       form.onsubmit = null;
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        if (currentPageName() === 'login') {
+        if (form.id === 'talent-page-jump') {
+          jumpTalentPage();
+        } else if (currentPageName() === 'login') {
           startLoginFlow();
         } else {
           submitRegistration();
