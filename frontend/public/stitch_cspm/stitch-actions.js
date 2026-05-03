@@ -1603,33 +1603,33 @@
       return;
     }
 
-    const application = document.createElement('section');
-    application.id = 'application-materials';
-    application.className = 'bg-white border border-slate-100 p-xl rounded-lg space-y-md';
-    application.innerHTML = `
-      <div>
-        <p class="text-label-sm text-secondary uppercase">申请信息</p>
-        <h2 class="font-h3 text-h3 text-primary">申请材料</h2>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-        <label class="flex flex-col gap-xs">
-          <span class="text-label-sm text-secondary">申请人姓名</span>
-          <input class="rounded-lg border border-outline-variant px-md py-sm" type="text" placeholder="请输入姓名" />
-        </label>
-        <label class="flex flex-col gap-xs">
-          <span class="text-label-sm text-secondary">联系电话</span>
-          <input class="rounded-lg border border-outline-variant px-md py-sm" type="tel" placeholder="请输入手机号" />
-        </label>
-      </div>
-      <label class="flex flex-col gap-xs">
-        <span class="text-label-sm text-secondary">申请说明</span>
-        <textarea class="min-h-28 rounded-lg border border-outline-variant px-md py-sm" placeholder="请补充与该岗位匹配的项目经验、证书或到岗时间"></textarea>
-      </label>
-      <label class="flex items-start gap-sm text-body-sm text-secondary">
-        <input class="mt-1 rounded border-outline-variant" type="checkbox" />
-        <span>本人确认申请信息真实有效，并同意平台联系人基于本次岗位申请进行沟通。</span>
-      </label>
-    `;
+    // const application = document.createElement('section');
+    // application.id = 'application-materials';
+    // application.className = 'bg-white border border-slate-100 p-xl rounded-lg space-y-md';
+    // application.innerHTML = `
+    //   <div>
+    //     <p class="text-label-sm text-secondary uppercase">申请信息</p>
+    //     <h2 class="font-h3 text-h3 text-primary">申请材料</h2>
+    //   </div>
+    //   <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+    //     <label class="flex flex-col gap-xs">
+    //       <span class="text-label-sm text-secondary">申请人姓名</span>
+    //       <input class="rounded-lg border border-outline-variant px-md py-sm" type="text" placeholder="请输入姓名" />
+    //     </label>
+    //     <label class="flex flex-col gap-xs">
+    //       <span class="text-label-sm text-secondary">联系电话</span>
+    //       <input class="rounded-lg border border-outline-variant px-md py-sm" type="tel" placeholder="请输入手机号" />
+    //     </label>
+    //   </div>
+    //   <label class="flex flex-col gap-xs">
+    //     <span class="text-label-sm text-secondary">申请说明</span>
+    //     <textarea class="min-h-28 rounded-lg border border-outline-variant px-md py-sm" placeholder="请补充与该岗位匹配的项目经验、证书或到岗时间"></textarea>
+    //   </label>
+    //   <label class="flex items-start gap-sm text-body-sm text-secondary">
+    //     <input class="mt-1 rounded border-outline-variant" type="checkbox" />
+    //     <span>本人确认申请信息真实有效，并同意平台联系人基于本次岗位申请进行沟通。</span>
+    //   </label>
+    // `;
     contentColumn.insertBefore(application, contentColumn.firstElementChild?.nextElementSibling || null);
   }
 
