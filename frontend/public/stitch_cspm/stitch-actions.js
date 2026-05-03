@@ -614,7 +614,6 @@
         ['企业资料', 'enterprise-center'],
         ['招聘信息', 'recruitments'],
         ['人才信息', 'talents'],
-        ['数据分析', 'analytics'],
         ['帮助支持', 'help']
       ];
     }
@@ -725,7 +724,7 @@
       ['招聘信息', 'recruitments'],
       ['人才信息', 'talents']
     ];
-    if (role === 'ADMIN' || role === 'COMPANY') {
+    if (role === 'ADMIN') {
       navItems.push(['数据分析', 'analytics']);
     }
     navItems.forEach(([label, action]) => {
@@ -750,15 +749,17 @@
 
     document.querySelectorAll('footer').forEach((footer) => footer.remove());
     const footer = document.createElement('footer');
+    const now = new Date();
+    const year = now.getFullYear();
     footer.className = 'stitch-preserved-footer';
     footer.innerHTML = `
       <div class="stitch-preserved-footer-inner">
         <div class="stitch-footer-brand">项目管理人才库</div>
-        <p>© 2024 项目管理人才库 Human Capital Management. All rights reserved.</p>
+        <p>© ${year} 项目管理人才库</p>
         <div class="stitch-footer-links">
           <a href="#" data-stitch-action="help">帮助中心</a>
           <a href="#" data-stitch-action="policy-info">系统状态</a>
-          <a href="#" data-stitch-action="policy-info">Cookie 政策</a>
+          <a href="https://www.jncxwh.cn/" data-stitch-action="policy-info">聚能创项提供技术支持</a>
         </div>
       </div>
     `;
@@ -1624,10 +1625,6 @@
                   <span class="material-symbols-outlined bg-surface-container-low p-2 rounded-lg text-primary">groups</span>
                   <div><p class="text-[10px] font-bold uppercase text-outline">招聘人数</p><p class="text-label-md font-label-md text-on-surface">${Number(item.headcount) || 0} 人</p></div>
                 </div>
-                <div class="flex items-center gap-3 text-on-surface-variant">
-                  <span class="material-symbols-outlined bg-surface-container-low p-2 rounded-lg text-primary">person</span>
-                  <div><p class="text-[10px] font-bold uppercase text-outline">负责人</p><p class="text-label-md font-label-md text-on-surface">${escapeHtml(item.owner)}</p></div>
-                </div>
               </div>
             </div>
             <div class="mt-8 flex gap-3">
@@ -1655,7 +1652,6 @@
           <div class="mt-6 space-y-4">
             <div class="flex justify-between border-b border-slate-100 pb-2"><span class="text-label-sm font-label-sm text-outline">薪资</span><span class="text-label-sm font-bold text-on-surface">${escapeHtml(item.salary)}</span></div>
             <div class="flex justify-between border-b border-slate-100 pb-2"><span class="text-label-sm font-label-sm text-outline">城市</span><span class="text-label-sm font-bold text-on-surface">${escapeHtml(item.city)}</span></div>
-            <div class="flex justify-between border-b border-slate-100 pb-2"><span class="text-label-sm font-label-sm text-outline">负责人</span><span class="text-label-sm font-bold text-on-surface">${escapeHtml(item.owner)}</span></div>
             <div class="flex justify-between"><span class="text-label-sm font-label-sm text-outline">招聘人数</span><span class="text-label-sm font-bold text-on-surface">${Number(item.headcount) || 0} 人</span></div>
           </div>
         </div>

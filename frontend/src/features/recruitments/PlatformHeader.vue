@@ -23,7 +23,6 @@ const navLinks = computed(() => {
       { name: 'home', label: '首页' },
       { name: 'recruitments', label: '招聘信息' },
       { name: 'talents', label: '人才信息' },
-      { name: 'analytics', label: '数据分析' },
       { name: 'enterprise-center', label: '企业中心' }
     ];
   }

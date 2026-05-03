@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS dajiangtang
   DEFAULT CHARACTER SET utf8mb4
-  DEFAULT COLLATE utf8mb4_0900_ai_ci;
+  DEFAULT COLLATE utf8mb4_unicode_ci;
 
 USE dajiangtang;
 
@@ -30,7 +30,7 @@ CREATE TABLE user_accounts (
   role ENUM('ADMIN', 'USER', 'COMPANY') NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='登录与注册账号';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='登录与注册账号';
 
 CREATE TABLE recruitments (
   id VARCHAR(32) PRIMARY KEY,
@@ -61,7 +61,7 @@ CREATE TABLE recruitments (
   INDEX idx_recruitments_position (position),
   INDEX idx_recruitments_city (city),
   INDEX idx_recruitments_status (status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='招聘信息列表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='招聘信息列表';
 
 CREATE TABLE companies (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -92,7 +92,7 @@ CREATE TABLE companies (
   INDEX idx_companies_name (company_name),
   INDEX idx_companies_city (city),
   INDEX idx_companies_industry (industry)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='企业中心资料';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='企业中心资料';
 
 CREATE TABLE talents (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -114,7 +114,7 @@ CREATE TABLE talents (
   INDEX idx_talents_company (current_company),
   INDEX idx_talents_city (current_city),
   INDEX idx_talents_industry (industry)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='人才库列表与详情';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='人才库列表与详情';
 
 CREATE TABLE profile_module_records (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -133,7 +133,7 @@ CREATE TABLE talent_certificates (
   certificate_level VARCHAR(64),
   issued_at DATE,
   FOREIGN KEY (talent_id) REFERENCES talents(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='人才资格证书';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='人才资格证书';
 
 CREATE TABLE recruitment_applications (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -148,7 +148,7 @@ CREATE TABLE recruitment_applications (
   INDEX idx_applications_recruitment (recruitment_id),
   INDEX idx_applications_account (account_username),
   INDEX idx_applications_phone (phone)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='招聘申请';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='招聘申请';
 
 CREATE TABLE user_uploads (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -182,7 +182,7 @@ CREATE TABLE personal_profiles (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uk_profiles_account (account_username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学员基本信息';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='学员基本信息';
 
 CREATE TABLE work_experiences (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -194,7 +194,7 @@ CREATE TABLE work_experiences (
   position_title VARCHAR(128),
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_work_account (account_username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='工作经历';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='工作经历';
 
 CREATE TABLE project_experiences (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -204,7 +204,7 @@ CREATE TABLE project_experiences (
   content TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_project_account (account_username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='项目经历';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='项目经历';
 
 CREATE TABLE honors (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -214,7 +214,7 @@ CREATE TABLE honors (
   content TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_honors_account (account_username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='获得荣誉';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='获得荣誉';
 
 CREATE TABLE education_experiences (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -227,7 +227,7 @@ CREATE TABLE education_experiences (
   graduation_date DATE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_education_account (account_username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='教育经历';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='教育经历';
 
 CREATE TABLE qualification_certificates (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -237,7 +237,7 @@ CREATE TABLE qualification_certificates (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uk_cert_account (account_username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='资格证书';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='资格证书';
 
 SET FOREIGN_KEY_CHECKS = 1;
 

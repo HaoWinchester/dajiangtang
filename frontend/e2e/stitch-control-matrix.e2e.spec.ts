@@ -382,7 +382,7 @@ test.describe('控件矩阵 - 自动巡检', () => {
       }
       await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('帮助中心');
       await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('系统状态');
-      await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('Cookie 政策');
+      await expect(frame.locator('footer.stitch-preserved-footer')).toContainText('聚能创项提供技术支持');
     }
   });
 
