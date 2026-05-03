@@ -3,7 +3,7 @@
 本文档用于把“项目管理人才库”部署到服务器。当前 Docker 编排包含：
 
 - `frontend`：Vue 静态资源，Nginx 对外提供页面，并把 `/api` 反向代理到后端。
-- `backend`：Spring Boot Java 后端，容器内端口 `8080`。
+- `backend`：Spring Boot Java 后端，容器内端口 `8080`，默认映射宿主机 `8080`，便于本地 Vite 开发服务代理 `/api`。
 - `mysql`：MySQL 8.4，自动初始化 `database/dajiangtang_dump.sql`。
 
 > 重要说明：Docker 部署默认启用 `jdbc` profile，后端通过 Spring JDBC + HikariCP 连接 MySQL。首页招聘卡片、招聘列表和登录注册账号均读取数据库初始化数据，不使用前端静态岗位数据作为业务数据来源。
@@ -121,6 +121,7 @@ SPRING_DATASOURCE_HIKARI_MAX_LIFETIME=1800000
 
 ```dotenv
 WEB_PUBLIC_PORT=80
+BACKEND_PUBLIC_PORT=8080
 MYSQL_PUBLIC_PORT=3306
 ```
 
@@ -128,9 +129,16 @@ MYSQL_PUBLIC_PORT=3306
 
 ```dotenv
 WEB_PUBLIC_PORT=8088
+BACKEND_PUBLIC_PORT=18080
 ```
 
 然后通过 `http://服务器IP:8088` 访问。
+
+本地如果使用 `npm run dev` 打开 `http://localhost:5173`，Vite 会把 `/api` 代理到 `http://localhost:8080`。如果把后端宿主机端口改成了 `18080`，启动前端开发服务时同步指定：
+
+```bash
+VITE_DEV_PROXY_TARGET=http://localhost:18080 npm run dev
+```
 
 ## 五、构建并启动
 
@@ -385,6 +393,7 @@ docker compose up -d
 ```bash
 curl http://127.0.0.1/api/home/recruitments
 curl -H 'X-User-Role: ADMIN' http://127.0.0.1/api/recruitments
+curl http://127.0.0.1:8080/api/home/recruitments
 ```
 
 如果 Web 端口不是 80：
@@ -429,4 +438,5 @@ docker compose up -d
 2. 不建议长期对公网开放 3306；优先使用安全组白名单或 SSH 隧道。
 3. `.env` 不要提交到公开仓库，服务器上单独维护。
 4. 本地开发默认 `app.persistence=memory`，方便不启动 MySQL 时跑单元测试；服务器 Docker 已通过 `SPRING_PROFILES_ACTIVE=jdbc` 切换到数据库模式。
-5. 如果前端打开正常但接口失败，优先查看 `frontend/nginx.conf` 的 `/api/` 反代和 `backend` 容器日志。
+5. 如果 Docker 前端打开正常但接口失败，优先查看 `frontend/nginx.conf` 的 `/api/` 反代和 `backend` 容器日志。
+6. 如果本地 `http://localhost:5173` 提示“招聘信息读取失败”，先确认 `http://localhost:8080/api/home/recruitments` 可访问；如果后端端口不是 `8080`，用 `VITE_DEV_PROXY_TARGET` 指向实际后端地址。
