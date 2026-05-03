@@ -38,6 +38,7 @@ CREATE TABLE recruitments (
   city VARCHAR(64) NOT NULL,
   owner VARCHAR(64) NOT NULL,
   headcount INT NOT NULL,
+  cspm_preferred BOOLEAN NOT NULL DEFAULT FALSE COMMENT '首页与列表展示时是否标记为CSPM优先',
   status ENUM('ACTIVE', 'RECRUITING', 'PAUSED', 'CLOSED') NOT NULL,
   contact_phone VARCHAR(32) NOT NULL,
   published_at TIMESTAMP NOT NULL,

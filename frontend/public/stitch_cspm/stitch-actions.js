@@ -1396,6 +1396,194 @@
     restoreSavedPageData();
   }
 
+  function escapeHtml(value = '') {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function homeRecruitmentGrid() {
+    const explicitGrid = document.getElementById('home-recruitment-grid');
+    if (explicitGrid) {
+      return explicitGrid;
+    }
+
+    return Array.from(document.querySelectorAll('main .grid')).find((grid) => {
+      const text = textOf(grid);
+      return text.includes('招聘人数') && (text.includes('立即申请') || text.includes('查看详情'));
+    });
+  }
+
+  function recruitmentBadge(item, featured = false) {
+    if (item.cspmPreferred) {
+      return featured
+        ? `<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 rounded-full text-label-sm font-label-sm flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+            CSPM 优先
+          </span>`
+        : '<span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-2 py-0.5 rounded text-[11px] font-bold uppercase">CSPM</span>';
+    }
+
+    return featured
+      ? '<span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-label-sm font-label-sm">标准岗位</span>'
+      : '<span class="bg-slate-100 text-slate-400 px-2 py-0.5 rounded text-[11px] font-bold uppercase">标准</span>';
+  }
+
+  function featuredRecruitmentCard(item) {
+    return `
+      <div class="lg:col-span-2 group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300" data-home-recruitment-id="${escapeHtml(item.id)}">
+        <div class="flex flex-col md:flex-row h-full">
+          <div class="md:w-1/3 relative min-h-[200px]">
+            <img class="absolute inset-0 w-full h-full object-cover" alt="项目管理人才库招聘岗位封面" src="/assets/stitch-local-images/stitch-image-01-eb5d03d049.png"/>
+            <div class="absolute inset-0 bg-primary/10 group-hover:bg-transparent transition-colors"></div>
+          </div>
+          <div class="md:w-2/3 p-lg flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start gap-4 mb-4">
+                <div>
+                  <span class="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider rounded mb-2">数据库岗位</span>
+                  <h3 class="font-h3 text-h3 text-on-surface">${escapeHtml(item.position)}</h3>
+                  <p class="text-on-surface-variant font-body-sm text-body-sm mt-1">${escapeHtml(item.companyName)}</p>
+                </div>
+                ${recruitmentBadge(item, true)}
+              </div>
+              <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="flex items-center gap-3 text-on-surface-variant">
+                  <span class="material-symbols-outlined bg-surface-container-low p-2 rounded-lg text-primary">payments</span>
+                  <div><p class="text-[10px] font-bold uppercase text-outline">薪资范围</p><p class="text-label-md font-label-md text-on-surface">${escapeHtml(item.salary)}</p></div>
+                </div>
+                <div class="flex items-center gap-3 text-on-surface-variant">
+                  <span class="material-symbols-outlined bg-surface-container-low p-2 rounded-lg text-primary">location_on</span>
+                  <div><p class="text-[10px] font-bold uppercase text-outline">城市</p><p class="text-label-md font-label-md text-on-surface">${escapeHtml(item.city)}</p></div>
+                </div>
+                <div class="flex items-center gap-3 text-on-surface-variant">
+                  <span class="material-symbols-outlined bg-surface-container-low p-2 rounded-lg text-primary">groups</span>
+                  <div><p class="text-[10px] font-bold uppercase text-outline">招聘人数</p><p class="text-label-md font-label-md text-on-surface">${Number(item.headcount) || 0} 人</p></div>
+                </div>
+                <div class="flex items-center gap-3 text-on-surface-variant">
+                  <span class="material-symbols-outlined bg-surface-container-low p-2 rounded-lg text-primary">person</span>
+                  <div><p class="text-[10px] font-bold uppercase text-outline">负责人</p><p class="text-label-md font-label-md text-on-surface">${escapeHtml(item.owner)}</p></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-8 flex gap-3">
+              <button class="flex-1 bg-primary text-on-primary font-label-md text-label-md py-3 rounded hover:opacity-90 transition-opacity" data-home-recruitment-apply="${escapeHtml(item.id)}">立即申请</button>
+              <button class="px-4 py-3 border border-outline text-on-surface-variant rounded hover:bg-slate-50 transition-colors" data-home-recruitment-bookmark="${escapeHtml(item.id)}" aria-label="收藏${escapeHtml(item.position)}">
+                <span class="material-symbols-outlined">bookmark</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function compactRecruitmentCard(item) {
+    const priorityClass = item.cspmPreferred ? ' border-l-4 border-l-primary' : '';
+    return `
+      <div class="bg-white border border-slate-200 rounded-xl p-lg flex flex-col justify-between hover:shadow-lg transition-all${priorityClass}" data-home-recruitment-id="${escapeHtml(item.id)}">
+        <div>
+          <div class="flex justify-between items-start gap-3">
+            <h3 class="font-h3 text-[20px] text-on-surface">${escapeHtml(item.position)}</h3>
+            ${recruitmentBadge(item)}
+          </div>
+          <p class="text-on-surface-variant font-body-sm text-body-sm mt-1 italic">${escapeHtml(item.companyName)}</p>
+          <div class="mt-6 space-y-4">
+            <div class="flex justify-between border-b border-slate-100 pb-2"><span class="text-label-sm font-label-sm text-outline">薪资</span><span class="text-label-sm font-bold text-on-surface">${escapeHtml(item.salary)}</span></div>
+            <div class="flex justify-between border-b border-slate-100 pb-2"><span class="text-label-sm font-label-sm text-outline">城市</span><span class="text-label-sm font-bold text-on-surface">${escapeHtml(item.city)}</span></div>
+            <div class="flex justify-between border-b border-slate-100 pb-2"><span class="text-label-sm font-label-sm text-outline">负责人</span><span class="text-label-sm font-bold text-on-surface">${escapeHtml(item.owner)}</span></div>
+            <div class="flex justify-between"><span class="text-label-sm font-label-sm text-outline">招聘人数</span><span class="text-label-sm font-bold text-on-surface">${Number(item.headcount) || 0} 人</span></div>
+          </div>
+        </div>
+        <div class="mt-8">
+          <button class="w-full border border-primary text-primary font-label-md text-label-md py-2 rounded hover:bg-primary hover:text-on-primary transition-all" data-home-recruitment-detail="${escapeHtml(item.id)}">查看详情</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function wireHomeRecruitmentActions(root) {
+    root.querySelectorAll('[data-home-recruitment-apply]').forEach((button) => {
+      const id = button.getAttribute('data-home-recruitment-apply');
+      mark(button, 'apply-recruitment');
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        go(`/recruitments/${encodeURIComponent(id || 'featured')}/apply`);
+      });
+    });
+    root.querySelectorAll('[data-home-recruitment-detail]').forEach((button) => {
+      const id = button.getAttribute('data-home-recruitment-detail');
+      mark(button, 'recruitment-detail');
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        go(`/recruitments/${encodeURIComponent(id || 'sample')}`);
+      });
+    });
+    root.querySelectorAll('[data-home-recruitment-bookmark]').forEach((button) => {
+      mark(button, 'bookmark');
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toast('已收藏该岗位，可在个人中心查看收藏记录');
+      });
+    });
+  }
+
+  async function renderHomeRecruitments() {
+    if (currentPageName() !== 'home') {
+      return;
+    }
+
+    const grid = homeRecruitmentGrid();
+    if (!(grid instanceof HTMLElement)) {
+      return;
+    }
+
+    grid.innerHTML = `
+      <div class="lg:col-span-3 bg-white border border-slate-200 rounded-xl p-xl text-on-surface">
+        <p class="font-label-md text-label-md text-primary">正在从数据库读取招聘信息...</p>
+        <p class="text-body-sm text-on-surface-variant mt-2">首页岗位卡片不使用静态示例数据。</p>
+      </div>
+    `;
+
+    try {
+      const response = await fetch('/api/home/recruitments', {
+        headers: { Accept: 'application/json' },
+        cache: 'no-store'
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const items = await response.json();
+      if (!Array.isArray(items) || items.length === 0) {
+        grid.innerHTML = `
+          <div class="lg:col-span-3 bg-white border border-dashed border-slate-300 rounded-xl p-xl text-on-surface">
+            <p class="font-label-md text-label-md">数据库暂无可展示招聘信息</p>
+            <p class="text-body-sm text-on-surface-variant mt-2">请先在 recruitments 表中维护 ACTIVE 或 RECRUITING 状态的岗位。</p>
+          </div>
+        `;
+        return;
+      }
+
+      const [featured, ...rest] = items;
+      grid.innerHTML = [
+        featuredRecruitmentCard(featured),
+        ...rest.map(compactRecruitmentCard)
+      ].join('');
+      wireHomeRecruitmentActions(grid);
+    } catch (error) {
+      grid.innerHTML = `
+        <div class="lg:col-span-3 bg-white border border-red-200 rounded-xl p-xl text-on-surface">
+          <p class="font-label-md text-label-md text-red-700">招聘信息读取失败</p>
+          <p class="text-body-sm text-on-surface-variant mt-2">请检查后端服务、数据库连接池和 recruitments 表初始化数据。</p>
+        </div>
+      `;
+    }
+  }
+
   function renderRecruitmentApplyPage() {
     if (currentPageName() !== 'recruitment-apply') {
       return;
@@ -3007,6 +3195,7 @@
     setupAuthFieldIds();
     setupRegisterTabs();
     renderBlankBusinessState();
+    renderHomeRecruitments();
     renderRecruitmentApplyPage();
     prepareTalentSearchPage();
     translateTemplateLabels();

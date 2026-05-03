@@ -10,6 +10,7 @@ public record Recruitment(
         String city,
         String owner,
         int headcount,
+        boolean cspmPreferred,
         RecruitmentStatus status,
         Instant publishedAt,
         Instant updatedAt,

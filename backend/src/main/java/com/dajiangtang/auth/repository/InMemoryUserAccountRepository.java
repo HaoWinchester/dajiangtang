@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
 import com.dajiangtang.auth.domain.UserAccount;
@@ -13,6 +14,7 @@ import com.dajiangtang.auth.service.PasswordHasher;
 import com.dajiangtang.user.domain.UserRole;
 
 @Repository
+@ConditionalOnProperty(name = "app.persistence", havingValue = "memory", matchIfMissing = true)
 public class InMemoryUserAccountRepository implements UserAccountRepository {
 
     private final Map<String, UserAccount> accounts = new ConcurrentHashMap<>();

@@ -800,9 +800,10 @@ test.describe('工作流程功能 - 页面跳转', () => {
     await page.goto('/');
     const frame = await frameByTitle(page, '项目管理人才库 首页');
 
+    await expect(frame.getByRole('heading', { name: 'Java 架构师' })).toBeVisible();
     await frame.getByRole('button', { name: '立即申请' }).first().click();
 
-    await expect(page).toHaveURL(/\/recruitments\/featured\/apply$/);
+    await expect(page).toHaveURL(/\/recruitments\/rec-013\/apply$/);
     const application = await frameByTitle(page, '招聘申请 - 提交申请');
     await expect(application.getByRole('heading', { name: '岗位申请' })).toBeVisible();
     await expect(application.getByText('申请材料')).toBeVisible();

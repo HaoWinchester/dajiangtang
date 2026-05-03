@@ -217,3 +217,38 @@ test('所有 Stitch 页面图片资源都使用本地路径', async ({ page }, t
 
   expect(failures).toEqual([]);
 });
+
+test('首页招聘卡片只使用后端接口数据，不展示 code.html 静态岗位示例', async ({ page }, testInfo) => {
+  const homeItems = [
+    {
+      id: 'rec-db-only',
+      position: '数据库同步岗位',
+      salary: '26k-39k',
+      companyName: '客户部署数据库公司',
+      city: '北京市',
+      owner: '赵义民',
+      headcount: 2,
+      cspmPreferred: true
+    }
+  ];
+
+  let apiCalled = false;
+  await page.route('**/api/home/recruitments', async (route) => {
+    apiCalled = true;
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(homeItems)
+    });
+  });
+
+  const frame = await openStitchPage(page, { path: '/', title: '项目管理人才库 首页' }, testInfo);
+
+  await expect(frame.getByRole('heading', { name: '数据库同步岗位' })).toBeVisible();
+  await expect(frame.getByText('客户部署数据库公司')).toBeVisible();
+  await expect(frame.getByText('北京市')).toBeVisible();
+  await expect(frame.getByText('赵义民')).toBeVisible();
+
+  const mainText = await frame.locator('main').innerText();
+  expect(apiCalled).toBe(true);
+  expect(mainText).not.toMatch(/高级项目架构师|首席数据科学家|云解决方案专家|全球HR总监|DevOps 工程师/);
+});

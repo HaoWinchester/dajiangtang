@@ -5,6 +5,9 @@ spring:
   application:
     name: dajiangtang-backend
 
+app:
+  persistence: memory
+
 management:
   endpoints:
     enabled-by-default: false
