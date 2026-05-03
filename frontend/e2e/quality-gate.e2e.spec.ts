@@ -29,12 +29,6 @@ const viewports = [
   { name: 'mobile', width: 390, height: 844 }
 ];
 
-test.beforeEach(async ({ page }) => {
-  await page.route('https://lh3.googleusercontent.com/**', async (route) => {
-    await route.abort();
-  });
-});
-
 function originFrom(testInfo: TestInfo) {
   return new URL(testInfo.project.use.baseURL ?? 'http://127.0.0.1:5173').origin;
 }
@@ -153,7 +147,7 @@ test('真实用户巡检：核心页面无运行时错误、兜底动作和明�
     }
 
     const text = message.text();
-    if (/Failed to load resource: net::ERR_FAILED|googleusercontent|favicon/i.test(text)) {
+    if (/Failed to load resource: net::ERR_FAILED|favicon/i.test(text)) {
       return;
     }
 
@@ -162,7 +156,7 @@ test('真实用户巡检：核心页面无运行时错误、兜底动作和明�
   page.on('requestfailed', (request) => {
     const url = request.url();
     const resourceType = request.resourceType();
-    if (/googleusercontent|favicon/i.test(url) || !['document', 'script', 'stylesheet', 'xhr', 'fetch'].includes(resourceType)) {
+    if (/favicon/i.test(url) || !['document', 'script', 'stylesheet', 'xhr', 'fetch'].includes(resourceType)) {
       return;
     }
 
@@ -196,5 +190,30 @@ test('真实用户巡检：核心页面无运行时错误、兜底动作和明�
   }
 
   expect(runtimeErrors).toEqual([]);
+  expect(failures).toEqual([]);
+});
+
+test('所有 Stitch 页面图片资源都使用本地路径', async ({ page }, testInfo) => {
+  const failures: string[] = [];
+
+  for (const item of stitchPages) {
+    const frame = await openStitchPage(page, item, testInfo);
+    const remoteImages = await frame.evaluate(() => {
+      const imageSources = Array.from(document.images)
+        .map((image) => image.getAttribute('src') || '')
+        .filter((src) => /^https?:\/\//i.test(src));
+
+      const inlineBackgrounds = Array.from(document.querySelectorAll<HTMLElement>('[style*="background-image"]'))
+        .map((element) => element.getAttribute('style') || '')
+        .filter((style) => /background-image:\s*url\(['"]?https?:\/\//i.test(style));
+
+      return [...imageSources, ...inlineBackgrounds];
+    });
+
+    if (remoteImages.length > 0) {
+      failures.push(`${item.path}: ${remoteImages.join(' | ')}`);
+    }
+  }
+
   expect(failures).toEqual([]);
 });

@@ -1,11 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
 
-test.beforeEach(async ({ page }) => {
-  await page.route('https://lh3.googleusercontent.com/**', async (route) => {
-    await route.abort();
-  });
-});
-
 const defaultItems = [
   {
     id: 'rec-001',

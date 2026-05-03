@@ -20,12 +20,6 @@ const stitchPages: Array<{ path: string; title: string; role?: Role }> = [
   { path: '/recruitments/sample/apply', title: '招聘申请 - 提交申请', role: 'USER' }
 ];
 
-test.beforeEach(async ({ page }) => {
-  await page.route('https://lh3.googleusercontent.com/**', async (route) => {
-    await route.abort();
-  });
-});
-
 async function loginAs(page: Page, role: Role) {
   await page.context().addCookies([
     {

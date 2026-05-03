@@ -1,11 +1,5 @@
 import { expect, test, type Frame, type Page } from '@playwright/test';
 
-test.beforeEach(async ({ page }) => {
-  await page.route('https://lh3.googleusercontent.com/**', async (route) => {
-    await route.abort();
-  });
-});
-
 const stitchPages = [
   { path: '/', title: '项目管理人才库 首页' },
   { path: '/login', title: '项目管理人才库 登录' },
