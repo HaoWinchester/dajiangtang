@@ -1,0 +1,55 @@
+name: dajiangtang
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: dajiangtang-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ChangeMeRoot_2026}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-dajiangtang}
+      MYSQL_USER: ${MYSQL_USER:-dajiangtang}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ChangeMeApp_2026}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PUBLIC_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/dajiangtang_dump.sql:/docker-entrypoint-initdb.d/01-dajiangtang_dump.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: dajiangtang/backend:latest
+    container_name: dajiangtang-backend
+    restart: unless-stopped
+    environment:
+      SERVER_PORT: 8080
+      TZ: Asia/Shanghai
+      JAVA_OPTS: ${JAVA_OPTS:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    expose:
+      - "8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: dajiangtang/frontend:latest
+    container_name: dajiangtang-frontend
+    restart: unless-stopped
+    ports:
+      - "${WEB_PUBLIC_PORT:-80}:80"
+    depends_on:
+      - backend
+
+volumes:
+  mysql-data:

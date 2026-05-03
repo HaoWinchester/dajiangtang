@@ -1,0 +1,12 @@
+.git
+.idea
+.vscode
+**/.DS_Store
+**/node_modules
+**/dist
+**/coverage
+**/test-results
+**/playwright-report
+**/target
+**/*.log
+frontend/.vite
