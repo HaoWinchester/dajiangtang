@@ -217,12 +217,6 @@ button:disabled {
   padding: 32px;
 }
 
-.create-entry {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-}
-
 .muted {
   color: #627083;
 }
@@ -299,6 +293,130 @@ button:disabled {
 .text-link {
   color: #1e6f94;
   font-weight: 700;
+}
+
+.recruitment-create {
+  display: grid;
+  gap: 18px;
+}
+
+.create-header {
+  align-items: flex-start;
+}
+
+.create-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.create-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 18px;
+  align-items: start;
+}
+
+.form-section {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+}
+
+.form-section--wide {
+  grid-column: 1 / 2;
+}
+
+.execution-section {
+  position: sticky;
+  top: 86px;
+  grid-column: 2 / 3;
+  grid-row: 1 / span 2;
+}
+
+.form-section h2 {
+  margin: 0;
+  color: #16202c;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-grid--single {
+  grid-template-columns: 1fr;
+}
+
+.form-section label {
+  display: grid;
+  gap: 8px;
+  color: #344154;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-section input,
+.form-section select,
+.form-section textarea {
+  width: 100%;
+  border: 1px solid #c9d6e2;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #17202a;
+  background: #fff;
+  outline: none;
+}
+
+.form-section input,
+.form-section select {
+  min-height: 42px;
+}
+
+.form-section textarea {
+  resize: vertical;
+}
+
+.form-section input:focus,
+.form-section select:focus,
+.form-section textarea:focus {
+  border-color: #2d7aa3;
+  box-shadow: 0 0 0 3px rgba(45, 122, 163, 0.14);
+}
+
+.checkbox-row {
+  display: flex !important;
+  grid-template-columns: none !important;
+  align-items: center;
+  gap: 10px !important;
+}
+
+.checkbox-row input {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+}
+
+.form-message {
+  margin: 0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.form-message--error {
+  border: 1px solid #ffc9c9;
+  color: #a61e1e;
+  background: #fff5f5;
+}
+
+.form-message--success {
+  border: 1px solid #b7e4c7;
+  color: #206a3a;
+  background: #f0fff4;
 }
 
 .site-header {

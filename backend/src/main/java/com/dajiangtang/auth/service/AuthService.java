@@ -13,6 +13,7 @@ import com.dajiangtang.auth.repository.UserAccountRepository;
 import com.dajiangtang.common.error.BadRequestException;
 import com.dajiangtang.common.error.ConflictException;
 import com.dajiangtang.common.error.UnauthorizedException;
+import com.dajiangtang.talent.service.TalentSyncService;
 import com.dajiangtang.user.domain.UserRole;
 
 @Service
@@ -21,11 +22,13 @@ public class AuthService {
     private final UserAccountRepository accountRepository;
     private final PasswordHasher passwordHasher;
     private final Clock clock;
+    private final TalentSyncService talentSyncService;
 
-    public AuthService(UserAccountRepository accountRepository, PasswordHasher passwordHasher, Clock clock) {
+    public AuthService(UserAccountRepository accountRepository, PasswordHasher passwordHasher, Clock clock, TalentSyncService talentSyncService) {
         this.accountRepository = accountRepository;
         this.passwordHasher = passwordHasher;
         this.clock = clock;
+        this.talentSyncService = talentSyncService;
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -51,6 +54,9 @@ public class AuthService {
                 Instant.now(clock)
         );
         accountRepository.save(account);
+        if (role == UserRole.USER) {
+            talentSyncService.syncRegisteredUser(account.username(), account.phone());
+        }
 
         return new AuthResponse(account.username(), account.role().name(), "注册成功。");
     }

@@ -24,9 +24,29 @@ INSERT INTO recruitments (id, position, salary, company_name, city, owner, headc
 ('rec-014', 'CSPM 顾问', '25k-40k', '北京合规科技有限公司', '北京市', '唐砚', 1, TRUE, 'CLOSED', '13800000000', '2026-04-24 09:00:00', '2026-04-30 09:00:00'),
 ('rec-015', '招聘专员', '8k-13k', '上海人才服务有限公司', '上海市', '朱宁', 2, FALSE, 'PAUSED', '13800000000', '2026-04-10 09:00:00', '2026-04-16 09:00:00');
 
-INSERT INTO companies (company_type, company_name, full_name, company_size, industry, city, contact_name, work_time, welfare_insurance, welfare_allowance, maintainer, phone, website, address, email, description, status, user_level, remark) VALUES
-('民营企业', '华东数字科技有限公司', '华东数字科技有限公司', '500-999人', '互联网', '上海市', '张经理', '9:00-18:00', '五险一金', '餐补、交通补贴', '赵义民', '021-88888888', 'https://example.com', '上海市浦东新区示例路 100 号', 'hr@example.com', '专注项目管理数字化平台建设。', '正常', '重点用户', '演示企业数据'),
-('国有企业', '中信咨询集团', '中信咨询集团有限公司', '1000人以上', '金融', '北京市', '李经理', '9:00-18:00', '五险一金', '餐补', '贺强', '010-88888888', 'https://example.cn', '北京市朝阳区示例路 200 号', 'contact@example.cn', '提供咨询、项目治理与人才服务。', '正常', '重点用户', '演示企业数据');
+UPDATE recruitments
+SET department = COALESCE(department, '业务部'),
+    recruitment_post = COALESCE(recruitment_post, position),
+    job_tags = IF(cspm_preferred, 'CSPM优先,项目管理', '项目管理'),
+    work_location = CONCAT(city, '核心商务区'),
+    required_arrival_date = '2026-06-01',
+    recruitment_progress = CASE status
+      WHEN 'ACTIVE' THEN '简历筛选中'
+      WHEN 'RECRUITING' THEN '面试推进中'
+      WHEN 'PAUSED' THEN '暂缓招聘'
+      ELSE '已关闭'
+    END,
+    job_description = CONCAT('负责', position, '相关项目规划、交付推进、风险控制与跨部门协同，确保岗位目标按期达成。'),
+    job_requirement = '具备相关岗位经验，熟悉项目管理流程，沟通协调能力强，能够独立推进复杂任务。',
+    skill_requirement = '项目管理,沟通协作,风险控制,需求分析',
+    welfare = '五险一金,带薪年假,绩效奖金,定期体检',
+    follower = owner,
+    level = 'P4',
+    remark = '数据库初始化岗位，详情字段完整可用于客户演示。';
+
+INSERT INTO companies (account_username, company_type, company_name, full_name, company_size, industry, city, contact_name, work_time, welfare_insurance, welfare_allowance, maintainer, phone, website, address, email, description, status, user_level, remark, fields_json) VALUES
+('cspm_company', '民营企业', '智博未来科技有限公司', '智博未来科技有限公司', '100-499人', '人工智能 / 云计算', '上海市', '陈静', '09:00-18:00', '五险一金', '餐补/交通补助', '张建国', '021-88889999', 'www.zhibo_future.tech', '张江高科技园区张衡路1000号智博大厦12层', 'contact@zhibo_future.com', '智博未来科技成立于2015年，是一家专注于政企数字化转型的领先服务商。', '活跃', '重点用户', '该客户目前正在进行B轮融资，扩招需求明显。', JSON_OBJECT('公司名称 *', '智博未来科技有限公司', '公司类型', '民营企业', '所属行业', '人工智能 / 云计算', '人员规模', '100-499人', '客户简介', '智博未来科技成立于2015年，是一家专注于政企数字化转型的领先服务商。', '联系人姓名', '陈静', '企业总机', '021-88889999', '商务邮箱', 'contact@zhibo_future.com', '官方网址', 'www.zhibo_future.tech', '详细办公地址', '张江高科技园区张衡路1000号智博大厦12层', '五险一金 (全额缴纳)', true, '餐补/交通补助', true, '年度体检 & 团建', true, '输入仅内部可见的备注信息...', '该客户目前正在进行B轮融资，扩招需求明显。')),
+(NULL, '国有企业', '中信咨询集团', '中信咨询集团有限公司', '1000人以上', '金融', '北京市', '李经理', '9:00-18:00', '五险一金', '餐补', '贺强', '010-88888888', 'https://example.cn', '北京市朝阳区示例路 200 号', 'contact@example.cn', '提供咨询、项目治理与人才服务。', '正常', '重点用户', '演示企业数据', NULL);
 
 INSERT INTO talents (masked_name, gender, job_intention, expected_city, current_company, position_title, current_city, industry, personal_advantage, profile, contact_owner) VALUES
 ('张*明', '男', '高级项目经理', '上海市', '华东数字科技有限公司', '项目经理', '上海市', '互联网', '具备跨部门项目治理、进度风险控制与团队协同经验。', '10 年项目管理经验，主导多个企业数字化转型项目。', '赵义民'),

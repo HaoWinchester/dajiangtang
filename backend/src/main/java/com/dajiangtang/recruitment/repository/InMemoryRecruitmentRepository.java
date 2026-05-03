@@ -1,7 +1,9 @@
 package com.dajiangtang.recruitment.repository;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
@@ -13,7 +15,7 @@ import com.dajiangtang.recruitment.domain.RecruitmentStatus;
 @ConditionalOnProperty(name = "app.persistence", havingValue = "memory", matchIfMissing = true)
 public class InMemoryRecruitmentRepository implements RecruitmentRepository {
 
-    private final List<Recruitment> recruitments = List.of(
+    private final List<Recruitment> recruitments = new ArrayList<>(List.of(
             recruitment("rec-001", "项目经理", "15k-25k", "北京示例科技有限公司", "北京市", "赵义民", 3, true,
                     RecruitmentStatus.RECRUITING, "2026-04-20T09:00:00Z", "2026-04-25T09:00:00Z"),
             recruitment("rec-002", "Java 后端工程师", "20k-35k", "上海云启软件有限公司", "上海市", "钱启航", 5, false,
@@ -44,11 +46,25 @@ public class InMemoryRecruitmentRepository implements RecruitmentRepository {
                     RecruitmentStatus.CLOSED, "2026-04-24T09:00:00Z", "2026-04-30T09:00:00Z"),
             recruitment("rec-015", "招聘专员", "8k-13k", "上海人才服务有限公司", "上海市", "朱宁", 2, false,
                     RecruitmentStatus.PAUSED, "2026-04-10T09:00:00Z", "2026-04-16T09:00:00Z")
-    );
+    ));
 
     @Override
-    public List<Recruitment> findAll() {
-        return recruitments;
+    public synchronized List<Recruitment> findAll() {
+        return List.copyOf(recruitments);
+    }
+
+    @Override
+    public synchronized Optional<Recruitment> findById(String id) {
+        return recruitments.stream()
+                .filter(recruitment -> recruitment.id().equals(id))
+                .findFirst();
+    }
+
+    @Override
+    public synchronized Recruitment save(Recruitment recruitment) {
+        recruitments.removeIf(item -> item.id().equals(recruitment.id()));
+        recruitments.add(recruitment);
+        return recruitment;
     }
 
     private static Recruitment recruitment(
@@ -69,6 +85,10 @@ public class InMemoryRecruitmentRepository implements RecruitmentRepository {
                 position,
                 salary,
                 companyName,
+                "业务部",
+                position,
+                cspmPreferred ? "CSPM优先" : "",
+                city,
                 city,
                 owner,
                 headcount,
@@ -76,7 +96,16 @@ public class InMemoryRecruitmentRepository implements RecruitmentRepository {
                 status,
                 Instant.parse(publishedAt),
                 Instant.parse(updatedAt),
-                "13800000000"
+                "13800000000",
+                null,
+                status.name(),
+                "负责岗位相关项目交付与团队协作。",
+                "具备相关岗位经验，沟通能力强。",
+                "项目管理、沟通协作",
+                "五险一金、带薪年假",
+                owner,
+                "P4",
+                ""
         );
     }
 }

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { fetchRecruitments } from './api';
-import type { RecruitmentListResponse } from './types';
+import { createRecruitment, fetchRecruitmentDetail, fetchRecruitments } from './api';
+import type { RecruitmentCreatePayload, RecruitmentListResponse } from './types';
 
 const okResponse: RecruitmentListResponse = {
   items: [],
@@ -19,10 +19,111 @@ function jsonResponse(body: RecruitmentListResponse = okResponse): Response {
   } as Response;
 }
 
+const createPayload: RecruitmentCreatePayload = {
+  position: 'CSPM 项目经理',
+  companyName: '北京闭环科技有限公司',
+  department: '项目交付部',
+  recruitmentPost: '项目经理',
+  jobTags: 'CSPM优先',
+  headcount: 2,
+  city: '北京市',
+  workLocation: '北京市海淀区',
+  salary: '20k-35k',
+  requiredArrivalDate: '2026-06-30',
+  recruitmentProgress: '紧急启动',
+  owner: '赵义民',
+  contactPhone: '13800000000',
+  jobDescription: '负责平台项目交付。',
+  jobRequirement: '具备项目管理经验。',
+  skillRequirement: '项目计划,风险管理',
+  welfare: '五险一金',
+  follower: '贺强',
+  level: 'P4',
+  remark: '新增闭环测试',
+  cspmPreferred: true
+};
+
 afterEach(() => {
   vi.unstubAllGlobals();
   document.cookie = 'USER_ROLE=; Max-Age=0; path=/';
   localStorage.removeItem('USER_ROLE');
+});
+
+describe('recruitment create and detail API clients', () => {
+  it('creates a recruitment with JSON body and admin role header', async () => {
+    const responseBody = {
+      id: 'rec-created',
+      message: '招聘信息已新增。',
+      recruitment: {
+        id: 'rec-created',
+        ...createPayload,
+        headcount: 2,
+        status: 'RECRUITING'
+      }
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => responseBody
+    } as Response);
+    localStorage.setItem('USER_ROLE', 'ADMIN');
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(createRecruitment(createPayload)).resolves.toEqual(responseBody);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/recruitments',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'include',
+        headers: expect.objectContaining({
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-User-Role': 'ADMIN'
+        }),
+        body: JSON.stringify(createPayload)
+      })
+    );
+  });
+
+  it('uses backend create error messages', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({ message: '只有管理员可以新增招聘信息。' })
+      } as Response)
+    );
+
+    await expect(createRecruitment(createPayload)).rejects.toThrow('只有管理员可以新增招聘信息。');
+  });
+
+  it('loads recruitment detail by id with role header', async () => {
+    const detail = {
+      id: 'rec-001',
+      ...createPayload,
+      headcount: 2,
+      status: 'RECRUITING'
+    };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => detail
+    } as Response);
+    document.cookie = 'USER_ROLE=ADMIN; path=/';
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchRecruitmentDetail('rec-001')).resolves.toEqual(detail);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/recruitments/rec-001',
+      expect.objectContaining({
+        method: 'GET',
+        credentials: 'include',
+        headers: expect.objectContaining({
+          'X-User-Role': 'ADMIN'
+        })
+      })
+    );
+  });
 });
 
 describe('fetchRecruitments API client', () => {

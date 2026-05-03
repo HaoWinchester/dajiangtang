@@ -23,3 +23,39 @@ export interface RecruitmentListQuery {
   page?: number;
   pageSize?: number;
 }
+
+export interface RecruitmentCreatePayload {
+  position: string;
+  companyName: string;
+  department: string;
+  recruitmentPost: string;
+  jobTags: string;
+  headcount: number | null;
+  city: string;
+  workLocation: string;
+  salary: string;
+  requiredArrivalDate: string;
+  recruitmentProgress: string;
+  owner: string;
+  contactPhone: string;
+  jobDescription: string;
+  jobRequirement: string;
+  skillRequirement: string;
+  welfare: string;
+  follower: string;
+  level: string;
+  remark: string;
+  cspmPreferred: boolean;
+}
+
+export interface RecruitmentDetail extends Omit<RecruitmentCreatePayload, 'headcount'> {
+  id: string;
+  headcount: number;
+  status: string;
+}
+
+export interface RecruitmentCreateResponse {
+  id: string;
+  message: string;
+  recruitment: RecruitmentDetail;
+}

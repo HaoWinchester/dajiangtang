@@ -70,8 +70,8 @@
 - [X] T032 [US3] 在招聘列表接口中根据当前用户角色返回正确的 `canCreate` 值 `backend/src/main/java/com/dajiangtang/recruitment/controller/RecruitmentController.java`
 - [X] T033 [US3] 在前端类型和接口客户端中接入 `canCreate` 字段 `frontend/src/features/recruitments/types.ts` 和 `frontend/src/features/recruitments/api.ts`
 - [X] T034 [US3] 在招聘列表页中仅对管理员展示新增按钮 `frontend/src/features/recruitments/RecruitmentListView.vue`
-- [X] T035 [US3] 创建招聘新增流程入口占位页 `frontend/src/features/recruitments/RecruitmentCreateEntryView.vue`
-- [X] T036 [US3] 配置新增按钮跳转到招聘新增流程入口占位页 `frontend/src/router/index.ts`
+- [X] T035 [US3] 创建招聘新增流程完整表单页 `frontend/src/features/recruitments/RecruitmentCreateEntryView.vue`
+- [X] T036 [US3] 配置新增按钮跳转到招聘新增流程表单页 `frontend/src/router/index.ts`
 
 ## 最终阶段：完善
 
