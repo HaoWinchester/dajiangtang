@@ -239,7 +239,7 @@ test('企业用户能看列表但看不到新增按钮', async ({ page }) => {
   await expect(page.getByRole('link', { name: '新增' })).toHaveCount(0);
 });
 
-test('管理员点击新增按钮能进入新增入口', async ({ page }) => {
+test('管理员点击新增按钮能进入新增表单', async ({ page }) => {
   await loginAs(page, 'ADMIN');
   await mockRecruitments(page);
 
@@ -247,7 +247,10 @@ test('管理员点击新增按钮能进入新增入口', async ({ page }) => {
   await page.getByRole('link', { name: '新增', exact: true }).click();
 
   await expect(page).toHaveURL(/\/recruitments\/new$/);
-  await expect(page.getByRole('heading', { name: '招聘新增入口' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '创建新招聘职位' })).toBeVisible();
+  await expect(page.getByLabel('岗位名称 *')).toBeVisible();
+  await expect(page.getByLabel('公司 *')).toBeVisible();
+  await expect(page.getByRole('button', { name: '发布职位' })).toBeVisible();
 });
 
 test('普通用户直访新增入口会被重定向回招聘列表', async ({ page }) => {

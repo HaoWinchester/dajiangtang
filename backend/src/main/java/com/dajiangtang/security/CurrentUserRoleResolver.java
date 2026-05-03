@@ -16,6 +16,8 @@ public class CurrentUserRoleResolver {
 
     public static final String ROLE_HEADER = "X-User-Role";
     public static final String ROLE_COOKIE = "USER_ROLE";
+    public static final String USERNAME_HEADER = "X-Username";
+    public static final String USERNAME_COOKIE = "ACCOUNT_USERNAME";
 
     public UserRole resolve(HttpServletRequest request) {
         String roleToken = firstPresent(request.getHeader(ROLE_HEADER), roleFromCookie(request).orElse(null));
@@ -27,12 +29,32 @@ public class CurrentUserRoleResolver {
         return role.canCreateRecruitment();
     }
 
+    public String resolveUsername(HttpServletRequest request) {
+        UserRole role = resolve(request);
+        String username = firstPresent(request.getHeader(USERNAME_HEADER), valueFromCookie(request, USERNAME_COOKIE).orElse(null));
+        if (username != null && !username.isBlank()) {
+            return username.trim().toLowerCase();
+        }
+        return switch (role) {
+            case ADMIN -> "admin";
+            case COMPANY -> "cspm_company";
+            case USER -> "cspm_user";
+        };
+    }
+
     private Optional<String> roleFromCookie(HttpServletRequest request) {
         if (request.getCookies() == null) {
             return Optional.empty();
         }
+        return valueFromCookie(request, ROLE_COOKIE);
+    }
+
+    private Optional<String> valueFromCookie(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) {
+            return Optional.empty();
+        }
         return Arrays.stream(request.getCookies())
-                .filter(cookie -> ROLE_COOKIE.equals(cookie.getName()))
+                .filter(cookie -> name.equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue);
     }

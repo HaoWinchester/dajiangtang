@@ -814,6 +814,10 @@ test.describe('工作流程功能 - 页面跳转', () => {
     await page.goto('/recruitments/rec-001');
     const detail = await frameByTitle(page, '招聘信息 - 详情');
 
+    await expect(detail.getByRole('heading', { name: '项目经理' })).toBeVisible();
+    await expect(detail.getByText('北京示例科技有限公司').first()).toBeVisible();
+    await expect(detail.getByText('招聘人数：3人')).toBeVisible();
+    await expect(detail.getByText('15k-25k')).toBeVisible();
     await detail.getByRole('button', { name: '立即申请' }).click();
 
     await expect(page).toHaveURL(/\/recruitments\/rec-001\/apply$/);
@@ -1053,7 +1057,8 @@ test.describe('E2E - 最新页面完整链路', () => {
 
     await page.getByRole('link', { name: '新增', exact: true }).click();
     await expect(page).toHaveURL(/\/recruitments\/new$/);
-    await expect(page.getByRole('heading', { name: '招聘新增入口' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '创建新招聘职位' })).toBeVisible();
+    await expect(page.getByLabel('岗位名称 *')).toBeVisible();
   });
 
   test('注册到个人中心再到工作经历并新增经历', async ({ page }) => {

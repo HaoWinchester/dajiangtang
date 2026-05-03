@@ -6,8 +6,8 @@
 - Vue + TypeScript 前端骨架已创建。
 - 已实现 `GET /api/recruitments` 招聘信息列表接口。
 - 已实现招聘信息列表页、岗位搜索、城市搜索、清空搜索、分页、空状态、错误状态和重试。
-- 已实现管理员新增入口权限：`canCreate=true` 时显示新增按钮，并跳转到招聘新增流程入口占位页。
-- 已实现前端路由守卫：未登录访客不能进入招聘信息列表页或新增入口占位页；普通用户和企业用户直访新增入口会回到招聘列表。
+- 已实现管理员新增入口权限：`canCreate=true` 时显示新增按钮，并跳转到招聘新增流程表单页。
+- 已实现前端路由守卫：未登录访客不能进入招聘信息列表页或新增表单页；普通用户和企业用户直访新增表单页会回到招聘列表。
 - 已实现前端 API 角色标记透传：当登录态通过 `localStorage.USER_ROLE` 或 `USER_ROLE` cookie 模拟时，请求会携带 `X-User-Role`，避免路由已放行但后端接口返回未登录。
 - 已同步 OpenAPI 契约到前后端参考目录。
 
@@ -25,7 +25,7 @@
 ## 前端实现
 
 - 招聘列表页位于 `frontend/src/features/recruitments/RecruitmentListView.vue`。
-- 招聘新增流程入口占位页位于 `frontend/src/features/recruitments/RecruitmentCreateEntryView.vue`。
+- 招聘新增流程表单页位于 `frontend/src/features/recruitments/RecruitmentCreateEntryView.vue`，字段覆盖岗位名称、公司、部门、招聘岗位、岗位标签、需求人数、工作地点、薪资、到岗日期、招聘进度、负责人、联系电话、岗位说明、岗位要求、技能要求、福利待遇、跟进人员、级别、备注和 CSPM 优先。
 - API 客户端位于 `frontend/src/features/recruitments/api.ts`。
 - 类型定义位于 `frontend/src/features/recruitments/types.ts`。
 - 前端通过 `VITE_API_BASE_URL` 配置后端地址；未配置时使用相对路径 `/api/recruitments`。
@@ -48,5 +48,5 @@
 
 ## 已知限制
 
-- 招聘新增表单不在本功能范围内，当前只提供入口占位页。
-- 后端当前使用内存数据，后续接入真实数据库时需要替换 repository 实现并保留当前接口契约。
+- 招聘新增表单已接入 `POST /api/recruitments`，管理员提交后写入招聘信息库，并可从列表搜索和详情页读取。
+- 后端已提供内存与 JDBC 两种 repository 实现；Docker 部署使用 JDBC + MySQL。

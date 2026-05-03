@@ -1,5 +1,6 @@
 (function () {
   const roleKey = 'USER_ROLE';
+  const usernameKey = 'ACCOUNT_USERNAME';
 
   function go(path) {
     window.parent.location.href = path;
@@ -27,9 +28,13 @@
     return role === 'COMPANY' ? '企业账号' : '个人账号';
   }
 
-  function storeRole(role) {
+  function storeRole(role, username = '') {
     localStorage.setItem(roleKey, role);
     document.cookie = roleKey + '=' + role + '; path=/';
+    if (username) {
+      localStorage.setItem(usernameKey, username);
+      document.cookie = usernameKey + '=' + encodeURIComponent(username) + '; path=/';
+    }
   }
 
   function readCookie(name) {
@@ -45,6 +50,16 @@
   function currentRole() {
     const role = decodeURIComponent(readCookie(roleKey) || localStorage.getItem(roleKey) || '');
     return ['ADMIN', 'USER', 'COMPANY'].includes(role) ? role : '';
+  }
+
+  function currentUsername() {
+    const username = decodeURIComponent(readCookie(usernameKey) || localStorage.getItem(usernameKey) || '');
+    if (username) return username;
+    const role = currentRole();
+    if (role === 'ADMIN') return 'admin';
+    if (role === 'COMPANY') return 'cspm_company';
+    if (role === 'USER') return 'cspm_user';
+    return '';
   }
 
   function roleHomePath(role = currentRole()) {
@@ -144,6 +159,7 @@
   }
 
   function moduleActionFromPath(path = window.parent.location.pathname) {
+    if (path.endsWith('/work-experience')) return 'work-experience';
     if (path.endsWith('/project-experience')) return 'project-experience';
     if (path.endsWith('/honors')) return 'honors';
     if (path.endsWith('/education-experience')) return 'education-experience';
@@ -177,6 +193,13 @@
   }
 
   function fieldKey(field, index) {
+    if (field instanceof HTMLInputElement && (field.type === 'checkbox' || field.type === 'radio')) {
+      const choiceLabel = textOf(field.closest('label') || field);
+      if (choiceLabel) {
+        return choiceLabel;
+      }
+    }
+
     const directKey = field.id || field.name || field.getAttribute('aria-label') || field.getAttribute('placeholder');
     if (directKey) {
       return directKey.trim();
@@ -189,12 +212,6 @@
 
     const allFields = Array.from(document.querySelectorAll('input, textarea, select'));
     return `field-${Number.isInteger(index) ? index : allFields.indexOf(field)}`;
-  }
-
-  function pageDataKey() {
-    const role = localStorage.getItem(roleKey) || 'GUEST';
-    const path = window.parent.location.pathname;
-    return `PROFILE_DATA:${role}:${path}`;
   }
 
   function collectPageFields() {
@@ -251,19 +268,107 @@
     }
   }
 
-  function restoreSavedPageData() {
-    bindEnterpriseBenefitControls();
-    const saved = localStorage.getItem(pageDataKey());
-    if (!saved) {
+  function personalProfileFields() {
+    return {
+      name: findInputByLabel(/^姓名$/),
+      gender: findInputByLabel(/^性别$/),
+      ethnicity: findInputByLabel(/^民族$/),
+      birthday: findInputByLabel(/^出生年月$/),
+      nativePlace: findInputByLabel(/^籍贯$/),
+      politicalStatus: findInputByLabel(/^政治面貌$/),
+      jobIntention: findInputByLabel(/^求职意向$/),
+      expectedSalary: findInputByLabel(/^期望薪资$/),
+      industry: findInputByLabel(/^所在行业$/),
+      city: findInputByLabel(/^所在城市$/),
+      phone: findInputByLabel(/^电话$/),
+      email: findInputByLabel(/^邮箱$/),
+      address: findInputByLabel(/^居住地址|^地址$/),
+      personalAdvantage: document.querySelector('textarea[placeholder*="核心竞争力"], textarea[placeholder*="个人优势"]')
+    };
+  }
+
+  function collectPersonalProfilePayload() {
+    const fields = personalProfileFields();
+    const payload = {};
+    Object.entries(fields).forEach(([key, field]) => {
+      if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+        payload[key] = field.value.trim();
+      }
+    });
+    return payload;
+  }
+
+  function applyPersonalProfilePayload(fields = {}) {
+    const controls = personalProfileFields();
+    Object.entries(controls).forEach(([key, field]) => {
+      if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement || field instanceof HTMLSelectElement) {
+        field.value = fields[key] || '';
+      }
+    });
+    syncPersonalProfileSummary(fields);
+  }
+
+  function syncPersonalProfileSummary(fields = {}) {
+    const name = fields.name || '';
+    const city = fields.city || '';
+    const intent = fields.jobIntention || '';
+    const email = fields.email || '';
+    const phone = fields.phone || '';
+    if (name) {
+      setText('main h2.text-h2, main h2.font-h2', name);
+    }
+    const profileSummary = Array.from(document.querySelectorAll('main p')).find((item) => textOf(item).includes('请补充所在城市') || textOf(item).includes('资料待完善'));
+    if (profileSummary && (city || intent)) {
+      profileSummary.textContent = [city, intent].filter(Boolean).join(' • ');
+    }
+    replaceTextContent('邮箱待完善', email || '邮箱待完善');
+    replaceTextContent('电话待完善', phone || '电话待完善');
+  }
+
+  function applyEnterpriseProfilePayload(fields = {}) {
+    if (!fields || !Object.keys(fields).length) {
+      clearFormValues(document);
+      bindEnterpriseBenefitControls();
       return;
     }
-    try {
-      const fields = JSON.parse(saved);
-      applyPageFields(fields);
-      syncPersonalSummary(fields);
-      bindEnterpriseBenefitControls();
-    } catch {
-      localStorage.removeItem(pageDataKey());
+    applyPageFields(fields);
+    bindEnterpriseBenefitControls();
+  }
+
+  function ensurePersonalRequiredFields() {
+    if (window.parent.location.pathname !== '/personal-center') return;
+    const form = document.querySelector('main form');
+    if (!form || document.getElementById('profile-phone-field')) return;
+    const phone = document.createElement('div');
+    phone.id = 'profile-phone-field';
+    phone.className = 'space-y-2';
+    phone.innerHTML = '<label class="font-label-md text-slate-700">电话</label><input class="w-full border border-slate-200 rounded px-4 py-2.5 focus:ring-2 focus:ring-blue-700/20 focus:border-blue-700 transition-all font-body-md" type="tel" />';
+    const email = document.createElement('div');
+    email.id = 'profile-email-field';
+    email.className = 'space-y-2';
+    email.innerHTML = '<label class="font-label-md text-slate-700">邮箱</label><input class="w-full border border-slate-200 rounded px-4 py-2.5 focus:ring-2 focus:ring-blue-700/20 focus:border-blue-700 transition-all font-body-md" type="email" />';
+    const address = Array.from(form.children).find((item) => textOf(item).includes('居住地址'));
+    if (address) {
+      form.insertBefore(phone, address);
+      form.insertBefore(email, address);
+    } else {
+      form.append(phone, email);
+    }
+  }
+
+  function restoreSavedPageData() {
+    bindEnterpriseBenefitControls();
+    if (window.parent.location.pathname === '/personal-center') {
+      getJson('/api/me/profile', '个人资料读取失败，请稍后重试。')
+        .then((response) => applyPersonalProfilePayload(response.fields || {}))
+        .catch((error) => toast(error instanceof Error ? error.message : '个人资料读取失败，请稍后重试。'));
+      return;
+    }
+    if (window.parent.location.pathname === '/enterprise-center') {
+      getJson('/api/me/company-profile', '企业资料读取失败，请稍后重试。')
+        .then((response) => applyEnterpriseProfilePayload(response.fields || {}))
+        .catch((error) => toast(error instanceof Error ? error.message : '企业资料读取失败，请稍后重试。'));
+      return;
     }
   }
 
@@ -299,12 +404,6 @@
     });
   }
 
-  function uploadDataKey(target) {
-    const role = localStorage.getItem(roleKey) || 'GUEST';
-    const path = window.parent.location.pathname;
-    return `UPLOAD_IMAGE:${role}:${path}:${target}`;
-  }
-
   function uploadTargetFromElement(element) {
     const label = textOf(element);
     const icon = textOf(element.querySelector?.('.material-symbols-outlined') || element);
@@ -335,10 +434,16 @@
 
   function restoreUploadedImages() {
     ['avatar', 'brand-asset', 'image'].forEach((target) => {
-      const dataUrl = localStorage.getItem(uploadDataKey(target));
-      if (dataUrl) {
-        applyUploadedImage(target, dataUrl);
-      }
+      const params = new URLSearchParams({ pagePath: window.parent.location.pathname });
+      getJson(`/api/me/uploads/${encodeURIComponent(target)}?${params.toString()}`)
+        .then((response) => {
+          if (response.dataUrl) {
+            applyUploadedImage(target, response.dataUrl);
+          }
+        })
+        .catch(() => {
+          // 未登录或未上传时保持页面默认图片，不使用浏览器缓存兜底。
+        });
     });
   }
 
@@ -398,7 +503,9 @@
         method: 'POST',
         headers: {
           Accept: 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(currentRole() ? { 'X-User-Role': currentRole() } : {}),
+          ...(currentUsername() ? { 'X-Username': currentUsername() } : {})
         },
         credentials: 'include',
         signal: controller.signal,
@@ -417,6 +524,60 @@
     } finally {
       window.clearTimeout(timer);
     }
+  }
+
+  async function getJson(url, fallbackMessage = '数据读取失败，请稍后重试。') {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        ...(currentRole() ? { 'X-User-Role': currentRole() } : {}),
+        ...(currentUsername() ? { 'X-Username': currentUsername() } : {})
+      },
+      credentials: 'include',
+      cache: 'no-store'
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.message || fallbackMessage);
+    }
+    return payload;
+  }
+
+  async function putJson(url, body) {
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        ...(currentRole() ? { 'X-User-Role': currentRole() } : {}),
+        ...(currentUsername() ? { 'X-Username': currentUsername() } : {})
+      },
+      credentials: 'include',
+      body: JSON.stringify(body)
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.message || '保存失败，请稍后重试。');
+    }
+    return payload;
+  }
+
+  async function deleteJson(url) {
+    const response = await fetch(url, {
+      method: 'DELETE',
+      headers: {
+        Accept: 'application/json',
+        ...(currentRole() ? { 'X-User-Role': currentRole() } : {}),
+        ...(currentUsername() ? { 'X-Username': currentUsername() } : {})
+      },
+      credentials: 'include'
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(payload.message || '删除失败，请稍后重试。');
+    }
+    return payload;
   }
 
   function shellButton(label, action, isPrimary = false) {
@@ -1522,7 +1683,9 @@
       mark(button, 'bookmark');
       button.addEventListener('click', (event) => {
         event.stopPropagation();
-        toast('已收藏该岗位，可在个人中心查看收藏记录');
+        button.classList.add('bg-primary', 'text-white');
+        button.setAttribute('aria-pressed', 'true');
+        toast('已收藏该岗位');
       });
     });
   }
@@ -1580,60 +1743,253 @@
     }
   }
 
-  function renderRecruitmentApplyPage() {
+  async function renderRecruitmentDetailPage() {
+    if (currentPageName() !== 'recruitment-detail') {
+      return;
+    }
+
+    const id = recruitmentIdFromPath('');
+    if (!id) {
+      return;
+    }
+
+    const main = document.querySelector('main');
+    if (!(main instanceof HTMLElement)) {
+      return;
+    }
+
+    try {
+      const detail = await getJson(`/api/recruitments/${encodeURIComponent(id)}`, '招聘详情加载失败，请稍后重试。');
+      const requirementItems = splitDetailItems(detail.jobRequirement || '岗位要求待补充。');
+      const skillItems = splitDetailItems(detail.skillRequirement || detail.jobTags || '技能要求待补充。');
+      const benefitItems = splitDetailItems(detail.welfare || '福利待遇待沟通。');
+
+      main.className = 'pt-24 pb-3xl px-gutter max-w-[1440px] mx-auto grid grid-cols-12 gap-gutter';
+      main.innerHTML = `
+        <div class="col-span-12 lg:col-span-8 flex flex-col gap-lg">
+          <section class="bg-white border border-slate-100 p-xl rounded-lg">
+            <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-lg mb-lg">
+              <div>
+                <div class="flex flex-wrap items-center gap-md mb-xs">
+                  <h1 class="font-h1 text-h1 text-primary">${escapeHtml(detail.position || '招聘详情')}</h1>
+                  ${detail.cspmPreferred ? '<span class="bg-tertiary-fixed text-on-tertiary-fixed px-sm py-0.5 rounded text-label-sm font-semibold uppercase">CSPM优先</span>' : ''}
+                </div>
+                <div class="flex flex-wrap gap-sm items-center text-secondary">
+                  <span class="font-label-md">${escapeHtml(detail.companyName || '')}</span>
+                  <span class="w-1 h-1 bg-outline rounded-full"></span>
+                  <span class="font-body-sm">${escapeHtml(detail.department || detail.recruitmentPost || '部门待定')}</span>
+                  <span class="w-1 h-1 bg-outline rounded-full"></span>
+                  <span class="font-body-sm">招聘人数：${escapeHtml(detail.headcount || 0)}人</span>
+                </div>
+              </div>
+              <div class="md:text-right">
+                <div class="text-h2 font-h2 text-primary mb-xs">${escapeHtml(detail.salary || '')}</div>
+                <div class="text-body-sm text-secondary">${escapeHtml(detail.level || '级别待定')}</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-xl p-md bg-surface-container-low rounded-lg">
+              ${detailInfo('location_on', '工作地点', detail.workLocation || detail.city || '待沟通')}
+              ${detailInfo('calendar_today', '到岗日期', detail.requiredArrivalDate || '待沟通')}
+              ${detailInfo('work', '招聘进度', detail.recruitmentProgress || detail.status || '招聘中')}
+              ${detailInfo('person', '负责人', detail.owner || '待定')}
+            </div>
+            <div class="flex gap-md">
+              <button class="flex-1 bg-primary text-white py-md rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-sm" data-stitch-action="apply-recruitment">立即申请</button>
+              <button class="px-xl py-md border border-outline text-secondary rounded-lg font-label-md hover:bg-slate-50 transition-all flex items-center justify-center gap-sm" data-stitch-action="bookmark">
+                <span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+                收藏职位
+              </button>
+            </div>
+          </section>
+          <section class="bg-white border border-slate-100 p-xl rounded-lg space-y-xl">
+            ${detailTextSection('职位说明', detail.jobDescription || '岗位说明待补充。')}
+            <div>
+              <h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm"><span class="w-1 h-6 bg-primary rounded-full"></span>岗位要求</h3>
+              <ul class="list-disc list-inside text-body-md text-secondary space-y-sm marker:text-primary">
+                ${requirementItems.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+              </ul>
+            </div>
+            <div>
+              <h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm"><span class="w-1 h-6 bg-primary rounded-full"></span>技能要求</h3>
+              <div class="flex flex-wrap gap-sm">
+                ${skillItems.map((item) => `<span class="px-md py-xs bg-secondary-container text-on-secondary-container rounded-full text-label-sm">${escapeHtml(item)}</span>`).join('')}
+              </div>
+            </div>
+            <div>
+              <h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm"><span class="w-1 h-6 bg-primary rounded-full"></span>福利待遇</h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+                ${benefitItems.map((item) => `
+                  <div class="flex items-center gap-sm p-sm border border-slate-100 rounded">
+                    <span class="material-symbols-outlined text-primary" data-icon="card_giftcard">card_giftcard</span>
+                    <span class="text-body-sm">${escapeHtml(item)}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </section>
+        </div>
+        <aside class="col-span-12 lg:col-span-4 flex flex-col gap-lg">
+          <section class="bg-white border border-slate-100 p-xl rounded-lg">
+            <h3 class="font-h3 text-h3 text-primary mb-lg">联系信息</h3>
+            <div class="space-y-md">
+              ${sideInfo('公司', detail.companyName)}
+              ${sideInfo('负责人', detail.owner)}
+              ${sideInfo('联系电话', detail.contactPhone)}
+              ${sideInfo('跟进人员', detail.follower || '待分配')}
+              ${sideInfo('岗位标签', detail.jobTags || '无')}
+            </div>
+          </section>
+          <section class="bg-white border border-slate-100 p-xl rounded-lg">
+            <h3 class="font-h3 text-h3 text-primary mb-md">职位地点</h3>
+            <p class="text-body-sm font-semibold text-on-surface">${escapeHtml(detail.workLocation || detail.city || '待沟通')}</p>
+          </section>
+          <section class="bg-primary p-xl rounded-lg text-white">
+            <h3 class="font-h3 text-h3 mb-sm">备注</h3>
+            <p class="text-body-sm opacity-90 leading-relaxed">${escapeHtml(detail.remark || '暂无备注。')}</p>
+          </section>
+        </aside>
+      `;
+      wireStitchActionButtons(main);
+    } catch (error) {
+      main.innerHTML = `
+        <section class="col-span-12 bg-white border border-red-200 rounded-lg p-xl">
+          <p class="font-label-md text-label-md text-red-700">招聘详情读取失败</p>
+          <p class="text-body-sm text-secondary mt-2">${escapeHtml(error instanceof Error ? error.message : '请稍后重试。')}</p>
+        </section>
+      `;
+    }
+  }
+
+  function splitDetailItems(value = '') {
+    const items = String(value)
+      .split(/[,，、；;\n]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+    return items.length ? items : ['待补充'];
+  }
+
+  function detailInfo(icon, label, value) {
+    return `
+      <div class="flex items-center gap-sm">
+        <span class="material-symbols-outlined text-primary" data-icon="${escapeHtml(icon)}">${escapeHtml(icon)}</span>
+        <div class="flex flex-col">
+          <span class="text-label-sm text-secondary uppercase">${escapeHtml(label)}</span>
+          <span class="text-body-sm font-semibold">${escapeHtml(value)}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function detailTextSection(title, content) {
+    return `
+      <div>
+        <h3 class="font-h3 text-h3 text-primary mb-md flex items-center gap-sm"><span class="w-1 h-6 bg-primary rounded-full"></span>${escapeHtml(title)}</h3>
+        <p class="text-body-md text-secondary leading-relaxed">${escapeHtml(content)}</p>
+      </div>
+    `;
+  }
+
+  function sideInfo(label, value) {
+    return `
+      <div class="flex justify-between gap-md py-sm border-b border-slate-50">
+        <span class="text-label-sm text-secondary uppercase">${escapeHtml(label)}</span>
+        <span class="text-body-sm font-semibold text-right">${escapeHtml(value || '待补充')}</span>
+      </div>
+    `;
+  }
+
+  function wireStitchActionButtons(root) {
+    root.querySelectorAll('button[data-stitch-action]').forEach((button) => {
+      if (!(button instanceof HTMLButtonElement) || button.dataset.stitchWired === 'true') {
+        return;
+      }
+      button.type = 'button';
+      button.dataset.stitchWired = 'true';
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        runAction(button.dataset.stitchAction, button);
+      });
+    });
+  }
+
+  async function renderRecruitmentApplyPage() {
     if (currentPageName() !== 'recruitment-apply') {
       return;
     }
 
-    setText('main h1', '岗位申请');
-
-    const summary = Array.from(document.querySelectorAll('main p')).find((item) => textOf(item).includes('作为高级项目管理专家'));
-    if (summary) {
-      summary.textContent = '请确认岗位信息并补充申请说明。提交后，平台联系人会根据您的个人资料、项目经历与资格证书协助推进沟通。';
-    }
-
-    const actionButton = Array.from(document.querySelectorAll('main button')).find((button) => /立即申请/.test(textOf(button)));
-    if (actionButton instanceof HTMLButtonElement) {
-      actionButton.textContent = '提交申请';
-      mark(actionButton, 'submit-application');
-    }
-
-    const contentColumn = document.querySelector('main .col-span-12.lg\\:col-span-8');
-    if (!contentColumn || document.getElementById('application-materials')) {
+    const main = document.querySelector('main');
+    if (!(main instanceof HTMLElement)) {
       return;
     }
-
-    // const application = document.createElement('section');
-    // application.id = 'application-materials';
-    // application.className = 'bg-white border border-slate-100 p-xl rounded-lg space-y-md';
-    // application.innerHTML = `
-    //   <div>
-    //     <p class="text-label-sm text-secondary uppercase">申请信息</p>
-    //     <h2 class="font-h3 text-h3 text-primary">申请材料</h2>
-    //   </div>
-    //   <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-    //     <label class="flex flex-col gap-xs">
-    //       <span class="text-label-sm text-secondary">申请人姓名</span>
-    //       <input class="rounded-lg border border-outline-variant px-md py-sm" type="text" placeholder="请输入姓名" />
-    //     </label>
-    //     <label class="flex flex-col gap-xs">
-    //       <span class="text-label-sm text-secondary">联系电话</span>
-    //       <input class="rounded-lg border border-outline-variant px-md py-sm" type="tel" placeholder="请输入手机号" />
-    //     </label>
-    //   </div>
-    //   <label class="flex flex-col gap-xs">
-    //     <span class="text-label-sm text-secondary">申请说明</span>
-    //     <textarea class="min-h-28 rounded-lg border border-outline-variant px-md py-sm" placeholder="请补充与该岗位匹配的项目经验、证书或到岗时间"></textarea>
-    //   </label>
-    //   <label class="flex items-start gap-sm text-body-sm text-secondary">
-    //     <input class="mt-1 rounded border-outline-variant" type="checkbox" />
-    //     <span>本人确认申请信息真实有效，并同意平台联系人基于本次岗位申请进行沟通。</span>
-    //   </label>
-    // `;
-    contentColumn.insertBefore(application, contentColumn.firstElementChild?.nextElementSibling || null);
+    const id = recruitmentIdFromPath('');
+    try {
+      const detail = await getJson(`/api/recruitments/${encodeURIComponent(id)}`, '岗位申请信息读取失败，请稍后重试。');
+      main.className = 'pt-24 pb-3xl px-gutter max-w-[1440px] mx-auto grid grid-cols-12 gap-gutter';
+      main.innerHTML = `
+        <div class="col-span-12 lg:col-span-8 flex flex-col gap-lg">
+          <section class="bg-white border border-slate-100 p-xl rounded-lg">
+            <p class="text-label-sm text-secondary uppercase">岗位申请</p>
+            <h1 class="font-h1 text-h1 text-primary mt-xs">岗位申请</h1>
+            <h2 class="mt-sm font-h3 text-h3 text-on-surface">${escapeHtml(detail.position || '')}</h2>
+            <div class="mt-md flex flex-wrap gap-sm text-secondary">
+              <span>${escapeHtml(detail.companyName || '')}</span>
+              <span>•</span>
+              <span>${escapeHtml(detail.department || detail.recruitmentPost || '部门待定')}</span>
+              <span>•</span>
+              <span>招聘人数：${Number(detail.headcount) || 0}人</span>
+            </div>
+            <div class="mt-lg grid grid-cols-2 md:grid-cols-4 gap-md p-md bg-surface-container-low rounded-lg">
+              ${detailInfo('payments', '薪资', detail.salary || '待沟通')}
+              ${detailInfo('location_on', '工作地点', detail.workLocation || detail.city || '待沟通')}
+              ${detailInfo('calendar_today', '到岗日期', detail.requiredArrivalDate || '待沟通')}
+              ${detailInfo('person', '负责人', detail.owner || '待定')}
+            </div>
+          </section>
+          <section id="application-materials" class="bg-white border border-slate-100 p-xl rounded-lg space-y-md">
+            <div>
+              <p class="text-label-sm text-secondary uppercase">申请信息</p>
+              <h2 class="font-h3 text-h3 text-primary">申请材料</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+              <label class="flex flex-col gap-xs">
+                <span class="text-label-sm text-secondary">申请人姓名</span>
+                <input class="rounded-lg border border-outline-variant px-md py-sm" type="text" placeholder="请输入姓名" />
+              </label>
+              <label class="flex flex-col gap-xs">
+                <span class="text-label-sm text-secondary">联系电话</span>
+                <input class="rounded-lg border border-outline-variant px-md py-sm" type="tel" placeholder="请输入手机号" />
+              </label>
+            </div>
+            <label class="flex flex-col gap-xs">
+              <span class="text-label-sm text-secondary">申请说明</span>
+              <textarea class="min-h-28 rounded-lg border border-outline-variant px-md py-sm" placeholder="请补充与该岗位匹配的项目经验、证书或到岗时间"></textarea>
+            </label>
+            <label class="flex items-start gap-sm text-body-sm text-secondary">
+              <input class="mt-1 rounded border-outline-variant" type="checkbox" />
+              <span>本人确认申请信息真实有效，并同意平台联系人基于本次岗位申请进行沟通。</span>
+            </label>
+            <button class="w-full bg-primary text-white py-md rounded-lg font-label-md hover:opacity-90 transition-all" data-stitch-action="submit-application" type="button">提交申请</button>
+          </section>
+        </div>
+        <aside class="col-span-12 lg:col-span-4 flex flex-col gap-lg">
+          <section class="bg-white border border-slate-100 p-xl rounded-lg">
+            <h3 class="font-h3 text-h3 text-primary mb-md">职位说明</h3>
+            <p class="text-body-sm text-secondary leading-6">${escapeHtml(detail.jobDescription || '暂无岗位说明。')}</p>
+          </section>
+          <section class="bg-white border border-slate-100 p-xl rounded-lg">
+            <h3 class="font-h3 text-h3 text-primary mb-md">岗位要求</h3>
+            <p class="text-body-sm text-secondary leading-6">${escapeHtml(detail.jobRequirement || '暂无岗位要求。')}</p>
+          </section>
+        </aside>
+      `;
+      wireStitchActionButtons(main);
+    } catch (error) {
+      main.innerHTML = `<section class="col-span-12 bg-white border border-red-200 rounded-lg p-xl"><p class="font-label-md text-label-md text-red-700">岗位申请信息读取失败</p><p class="text-body-sm text-secondary mt-2">${escapeHtml(error instanceof Error ? error.message : '请稍后重试。')}</p></section>`;
+    }
   }
 
-  function submitRecruitmentApplication() {
+  async function submitRecruitmentApplication() {
     if (!currentRole()) {
       openPanel('请先登录后提交申请', '岗位申请页已打开。登录或注册后即可提交申请并同步个人资料。', [
         { label: '去登录', action: 'login' },
@@ -1666,13 +2022,16 @@
       return;
     }
 
-    localStorage.setItem(`APPLICATION:${currentRole()}:${recruitmentIdFromPath('featured')}`, JSON.stringify({
-      name,
-      phone,
-      note,
-      submittedAt: new Date().toISOString()
-    }));
-    toast('申请已提交，平台联系人会尽快跟进');
+    try {
+      const result = await postJson(`/api/recruitments/${encodeURIComponent(recruitmentIdFromPath(''))}/applications`, {
+        applicantName: name,
+        phone,
+        note
+      });
+      toast(result.message || '申请已提交，平台联系人会尽快跟进。');
+    } catch (error) {
+      toast(error instanceof Error ? error.message : '申请提交失败，请稍后重试。');
+    }
   }
 
   const talentCompanies = [
@@ -2035,6 +2394,241 @@
     }
   }
 
+  const talentState = { page: 1, pageSize: 2, totalPages: 1, query: {} };
+
+  function talentQueryFromPage() {
+    return {
+      name: document.getElementById('talent-name')?.value || '',
+      company: document.getElementById('talent-company')?.value || '',
+      industry: document.getElementById('talent-industry')?.value || '',
+      city: document.getElementById('talent-city')?.value || ''
+    };
+  }
+
+  async function loadTalentList(page = talentState.page) {
+    const query = talentQueryFromPage();
+    talentState.query = query;
+    const params = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    params.set('page', String(page));
+    params.set('pageSize', String(talentState.pageSize));
+    const response = await getJson(`/api/talents?${params.toString()}`, '人才信息读取失败，请稍后重试。');
+    talentState.page = response.page || page;
+    talentState.pageSize = response.pageSize || talentState.pageSize;
+    talentState.totalPages = Math.max(1, response.totalPages || 1);
+    renderTalentRows(response);
+  }
+
+  function prepareTalentSearchPage() {
+    if (currentPageName() !== 'talent-list') {
+      return;
+    }
+    const main = document.querySelector('main');
+    if (!(main instanceof HTMLElement)) {
+      return;
+    }
+    main.innerHTML = `
+      <div class="max-w-[1180px] mx-auto p-10">
+        <div class="mb-8">
+          <p class="text-label-sm text-secondary uppercase">人才信息</p>
+          <h1 class="font-h1 text-h1 text-on-background mt-2">人才库信息检索</h1>
+        </div>
+        <section class="bg-white border border-slate-100 rounded-xl p-6 mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input id="talent-name" class="rounded border border-slate-200 px-3 py-2" placeholder="输入姓名（脱敏）" />
+            <input id="talent-company" class="rounded border border-slate-200 px-3 py-2" placeholder="搜索公司名称" />
+            <select id="talent-industry" class="rounded border border-slate-200 px-3 py-2">
+              <option value="">不限行业</option>
+              <option value="互联网">信息技术 / 互联网</option>
+              <option value="金融">金融服务</option>
+              <option value="制造">制造业</option>
+              <option value="医疗">医疗健康</option>
+            </select>
+            <input id="talent-city" class="rounded border border-slate-200 px-3 py-2" placeholder="输入城市名称" />
+          </div>
+          <div class="mt-4 flex flex-wrap justify-end gap-3">
+            <button class="rounded border border-slate-200 px-4 py-2 text-slate-600" type="button" data-stitch-action="talent-search-reset">重置条件</button>
+            <button class="rounded bg-primary px-4 py-2 text-white" type="button" data-stitch-action="talent-search">开始检索</button>
+          </div>
+        </section>
+        <section class="bg-white border border-slate-100 rounded-xl overflow-hidden">
+          <table class="w-full text-left">
+            <thead class="bg-slate-50 text-sm text-slate-500">
+              <tr><th class="p-4">姓名</th><th class="p-4">性别</th><th class="p-4">求职意向</th><th class="p-4">期望城市</th><th class="p-4">所在行业</th><th class="p-4">资格证书</th><th class="p-4">操作</th></tr>
+            </thead>
+            <tbody id="talent-table-body"></tbody>
+          </table>
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 p-4 text-sm text-slate-600">
+            <span id="talent-result-summary">正在读取人才信息...</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="flex items-center gap-2">每页
+                <select id="talent-page-size" class="rounded border border-slate-200 px-2 py-1"><option value="2">2 条</option><option value="4">4 条</option><option value="10">10 条</option></select>
+              </label>
+              <button type="button" class="rounded border border-slate-200 px-3 py-1.5" data-talent-page-target="prev" data-stitch-action="talent-pagination">上一页</button>
+              <span id="talent-current-page">第 1 / 1 页</span>
+              <button type="button" class="rounded border border-slate-200 px-3 py-1.5" data-talent-page-target="next" data-stitch-action="talent-pagination">下一页</button>
+              <input id="talent-jump-page" class="w-20 rounded border border-slate-200 px-2 py-1" type="number" min="1" placeholder="页码" />
+              <button type="button" class="rounded border border-slate-200 px-3 py-1.5" data-stitch-action="talent-page-jump">跳转</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    `;
+    document.getElementById('talent-page-size')?.addEventListener('change', (event) => {
+      talentState.pageSize = Number(event.target.value) || 2;
+      loadTalentList(1).catch((error) => toast(error.message));
+    });
+    wireStitchActionButtons(main);
+    loadTalentList(1).catch((error) => toast(error instanceof Error ? error.message : '人才信息读取失败，请稍后重试。'));
+  }
+
+  function renderTalentRows(response) {
+    const body = document.getElementById('talent-table-body');
+    if (!body) return;
+    const items = response.items || [];
+    body.innerHTML = items.length
+      ? items.map((item) => `
+        <tr class="border-t border-slate-100">
+          <td class="p-4 font-bold text-slate-800">${escapeHtml(item.maskedName || '')}</td>
+          <td class="p-4">${escapeHtml(item.gender || '')}</td>
+          <td class="p-4">${escapeHtml(item.jobIntention || '')}</td>
+          <td class="p-4">${escapeHtml(item.expectedCity || '')}</td>
+          <td class="p-4">${escapeHtml(item.industry || '')}</td>
+          <td class="p-4">${(item.certificates || []).map((cert) => `<span class="mr-1 rounded bg-blue-50 px-2 py-1 text-xs text-blue-700">${escapeHtml(cert)}</span>`).join('')}</td>
+          <td class="p-4">
+            <button class="rounded border border-primary px-3 py-1.5 text-primary hover:bg-blue-50" data-talent-detail-id="${escapeHtml(String(item.id || ''))}" type="button">查看详情</button>
+          </td>
+        </tr>
+      `).join('')
+      : '<tr><td colspan="7" class="p-10 text-center text-slate-500">暂无匹配人才</td></tr>';
+    body.querySelectorAll('[data-talent-detail-id]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const id = button.getAttribute('data-talent-detail-id');
+        if (id) {
+          go(`/talents/${encodeURIComponent(id)}`);
+        } else {
+          toast('该人才缺少详情编号，请刷新后重试。');
+        }
+      });
+    });
+    const summary = document.getElementById('talent-result-summary');
+    if (summary) {
+      const start = response.totalItems > 0 ? (response.page - 1) * response.pageSize + 1 : 0;
+      const end = response.totalItems > 0 ? Math.min(response.page * response.pageSize, response.totalItems) : 0;
+      summary.textContent = `显示第 ${start}-${end} 条，共 ${response.totalItems || 0} 条结果`;
+    }
+    const current = document.getElementById('talent-current-page');
+    if (current) current.textContent = `第 ${response.page || 1} / ${Math.max(1, response.totalPages || 1)} 页`;
+  }
+
+  function applyTalentSearch(showToast = true) {
+    loadTalentList(1)
+      .then(() => {
+        if (showToast) toast('人才检索已完成');
+      })
+      .catch((error) => toast(error instanceof Error ? error.message : '人才检索失败，请稍后重试。'));
+  }
+
+  function resetTalentSearch() {
+    ['talent-name', 'talent-company', 'talent-industry', 'talent-city'].forEach((id) => {
+      const field = document.getElementById(id);
+      if (field instanceof HTMLInputElement || field instanceof HTMLSelectElement) {
+        field.value = '';
+      }
+    });
+    loadTalentList(1).then(() => toast('人才检索条件已重置')).catch((error) => toast(error.message));
+  }
+
+  function handleTalentPagination(element) {
+    const target = element?.dataset.talentPageTarget || '';
+    const next = target === 'prev'
+      ? Math.max(1, talentState.page - 1)
+      : target === 'next'
+        ? Math.min(talentState.totalPages, talentState.page + 1)
+        : talentState.page;
+    loadTalentList(next).catch((error) => toast(error instanceof Error ? error.message : '人才翻页失败，请稍后重试。'));
+  }
+
+  function jumpTalentPage() {
+    const input = document.getElementById('talent-jump-page');
+    const value = input instanceof HTMLInputElement ? Number(input.value) : NaN;
+    if (!Number.isInteger(value) || value < 1 || value > talentState.totalPages) {
+      toast(`请输入 1-${talentState.totalPages} 之间的页码`);
+      return;
+    }
+    loadTalentList(value).catch((error) => toast(error instanceof Error ? error.message : '人才翻页失败，请稍后重试。'));
+  }
+
+  async function renderTalentDetailPage() {
+    if (currentPageName() !== 'talent-detail') return;
+    const main = document.querySelector('main');
+    if (!(main instanceof HTMLElement)) return;
+    const pathId = window.parent.location.pathname.split('/').filter(Boolean).pop();
+    const id = /^\d+$/.test(pathId || '') ? pathId : '1';
+    try {
+      const talent = await getJson(`/api/talents/${encodeURIComponent(id)}`, '人才详情读取失败，请稍后重试。');
+      main.innerHTML = `
+        <div class="max-w-[1120px] mx-auto p-10 grid grid-cols-12 gap-6">
+          <section class="col-span-12 lg:col-span-8 bg-white border border-slate-100 rounded-xl p-8">
+            <p class="text-label-sm text-secondary uppercase">人才详情</p>
+            <h1 class="mt-2 font-h1 text-h1 text-primary">${escapeHtml(talent.maskedName || '')}</h1>
+            <div class="mt-4 grid grid-cols-2 gap-4 text-sm text-slate-600">
+              ${sideInfo('所在公司', talent.currentCompany)}
+              ${sideInfo('职务', talent.positionTitle)}
+              ${sideInfo('所在城市', talent.currentCity)}
+              ${sideInfo('所在行业', talent.industry)}
+            </div>
+            ${detailTextSection('个人优势', talent.personalAdvantage || '暂无个人优势。')}
+            ${detailTextSection('个人简介', talent.profile || '暂无个人简介。')}
+          </section>
+          <aside class="col-span-12 lg:col-span-4 space-y-6">
+            <section class="bg-white border border-slate-100 rounded-xl p-6">
+              <h2 class="font-h3 text-h3 text-primary">联系人</h2>
+              <div class="mt-4 space-y-3">${(talent.contacts || ['赵义民', '贺强', '蔡钰炜']).map((name) => `<p class="rounded bg-slate-50 p-3 font-bold">${escapeHtml(name)}</p>`).join('')}</div>
+            </section>
+            <section class="bg-white border border-slate-100 rounded-xl p-6 space-y-3">
+              <button class="w-full rounded bg-primary py-3 text-white" type="button" data-stitch-action="contact-talent">立即沟通</button>
+              <button class="w-full rounded border border-slate-200 py-3 text-slate-600" type="button" data-stitch-action="download-resume">下载简历 (PDF)</button>
+              <button class="w-full rounded border border-slate-200 py-3 text-slate-600" type="button" data-stitch-action="bookmark">收藏此人</button>
+            </section>
+          </aside>
+        </div>
+      `;
+      wireStitchActionButtons(main);
+    } catch (error) {
+      main.innerHTML = `<section class="m-10 rounded border border-red-200 bg-white p-8 text-red-700">人才详情读取失败：${escapeHtml(error instanceof Error ? error.message : '请稍后重试。')}</section>`;
+    }
+  }
+
+  async function renderAnalyticsPage() {
+    if (currentPageName() !== 'analytics') return;
+    const main = document.querySelector('main');
+    if (!(main instanceof HTMLElement)) return;
+    try {
+      const data = await getJson('/api/analytics', '数据分析读取失败，请稍后重试。');
+      main.innerHTML = `
+        <div class="max-w-[1180px] mx-auto p-10">
+          <p class="text-label-sm text-secondary uppercase">数据分析</p>
+          <h1 class="font-h1 text-h1 text-on-background mt-2 mb-8">系统数据看板</h1>
+          <section class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="bg-white border border-slate-100 rounded-xl p-6"><p class="text-slate-500">岗位总数</p><p class="mt-3 text-3xl font-black text-primary">${Number(data.recruitmentCount) || 0}</p></div>
+            <div class="bg-white border border-slate-100 rounded-xl p-6"><p class="text-slate-500">活跃人才</p><p class="mt-3 text-3xl font-black text-primary">${Number(data.activeTalentCount) || 0}</p></div>
+            <div class="bg-white border border-slate-100 rounded-xl p-6"><p class="text-slate-500">岗位申请</p><p class="mt-3 text-3xl font-black text-primary">${Number(data.applicationCount) || 0}</p></div>
+            <div class="bg-white border border-slate-100 rounded-xl p-6"><p class="text-slate-500">平均匹配度</p><p class="mt-3 text-3xl font-black text-primary">${Number(data.averageMatchRate) || 0}%</p></div>
+          </section>
+          <section class="mt-6 bg-white border border-slate-100 rounded-xl p-6">
+            <h2 class="font-h3 text-h3 text-primary">数据来源</h2>
+            <p class="mt-3 text-slate-600">本页指标来自数据库招聘岗位、人才资料和岗位申请记录，不再使用静态演示数字。</p>
+          </section>
+        </div>
+      `;
+    } catch (error) {
+      main.innerHTML = `<section class="m-10 rounded border border-red-200 bg-white p-8 text-red-700">数据分析读取失败：${escapeHtml(error instanceof Error ? error.message : '请稍后重试。')}</section>`;
+    }
+  }
+
   function toast(message) {
     let panel = document.getElementById('stitch-toast');
     if (!panel) {
@@ -2151,23 +2745,49 @@
       });
       reader.readAsDataURL(file);
     });
-    panel.querySelector('[data-upload-save]')?.addEventListener('click', () => {
+    panel.querySelector('[data-upload-save]')?.addEventListener('click', async () => {
       if (!selectedDataUrl) {
         toast('请先选择图片文件');
         return;
       }
-      localStorage.setItem(uploadDataKey(target), selectedDataUrl);
-      const applied = applyUploadedImage(target, selectedDataUrl, element);
-      panel.remove();
-      toast(applied ? '图片上传成功' : '图片已保存，请刷新页面查看');
+      try {
+        const response = await putJson(`/api/me/uploads/${encodeURIComponent(target)}`, {
+          pagePath: window.parent.location.pathname,
+          dataUrl: selectedDataUrl
+        });
+        const applied = applyUploadedImage(target, response.dataUrl || selectedDataUrl, element);
+        panel.remove();
+        toast(applied ? '图片上传成功，已保存到数据库' : '图片已保存到数据库，请刷新页面查看');
+      } catch (error) {
+        toast(error instanceof Error ? error.message : '图片保存失败，请稍后重试。');
+      }
     });
   }
 
-  function saveCurrentPageDraft() {
-    const fields = collectPageFields();
-    localStorage.setItem(pageDataKey(), JSON.stringify(fields));
-    syncPersonalSummary(fields);
-    toast('保存成功，资料已保存到当前账号');
+  async function saveCurrentPageDraft() {
+    if (window.parent.location.pathname === '/personal-center') {
+      try {
+        const response = await putJson('/api/me/profile', { fields: collectPersonalProfilePayload() });
+        applyPersonalProfilePayload(response.fields || {});
+        toast('保存成功，资料已保存到当前账号（数据库）');
+      } catch (error) {
+        toast(error instanceof Error ? error.message : '个人资料保存失败，请稍后重试。');
+      }
+      return;
+    }
+
+    if (window.parent.location.pathname === '/enterprise-center') {
+      try {
+        const response = await putJson('/api/me/company-profile', { fields: collectPageFields() });
+        applyEnterpriseProfilePayload(response.fields || {});
+        toast('保存成功，企业资料已保存到当前账号（数据库）');
+      } catch (error) {
+        toast(error instanceof Error ? error.message : '企业资料保存失败，请稍后重试。');
+      }
+      return;
+    }
+
+    toast('当前页面没有可保存的数据库资料');
   }
 
   async function completeLogin() {
@@ -2195,7 +2815,7 @@
     }
     try {
       const result = await postJson('/api/auth/login', { username, password });
-      storeRole(result.role);
+      storeRole(result.role, result.username);
       toast('验证通过，正在进入' + accountLabel(result.role));
       window.setTimeout(() => go(result.role === 'ADMIN' ? '/recruitments' : result.role === 'COMPANY' ? '/enterprise-center' : '/personal-center'), 260);
     } catch (error) {
@@ -2567,7 +3187,7 @@
         smsCode,
         role
       });
-      storeRole(result.role);
+      storeRole(result.role, result.username);
       toast(accountLabel(result.role) + '注册成功，正在进入对应中心');
       window.setTimeout(() => go(result.role === 'COMPANY' ? '/enterprise-center' : '/personal-center'), 260);
     } catch (error) {
@@ -2633,6 +3253,16 @@
   }
 
   const moduleConfigs = {
+    'work-experience': {
+      title: '工作经历',
+      empty: '暂无工作经历',
+      fields: [
+        { name: '起始时间', placeholder: '例如：2022.01 - 2025.04' },
+        { name: '工作单位', placeholder: '请填写工作单位' },
+        { name: '岗位/职责', placeholder: '请填写岗位职责' },
+        { name: '职位', placeholder: '请填写职位' }
+      ]
+    },
     'project-experience': {
       title: '项目经历',
       empty: '暂无项目经历',
@@ -2680,26 +3310,25 @@
     }
   };
 
-  function moduleStorageKey(action) {
-    const role = localStorage.getItem(roleKey) || 'GUEST';
-    return `PROFILE_MODULE:${role}:${action}`;
+  const moduleRecordCache = {};
+
+  async function fetchModuleRecords(action) {
+    const records = await getJson(`/api/me/profile/modules/${encodeURIComponent(action)}`, `${moduleConfigs[action]?.title || '资料'}读取失败，请稍后重试。`);
+    moduleRecordCache[action] = Array.isArray(records) ? records : [];
+    return moduleRecordCache[action];
   }
 
-  function loadModuleRecords(action) {
-    try {
-      return JSON.parse(localStorage.getItem(moduleStorageKey(action)) || '[]');
-    } catch {
-      localStorage.removeItem(moduleStorageKey(action));
-      return [];
-    }
+  function cachedModuleRecords(action) {
+    return moduleRecordCache[action] || [];
   }
 
-  function saveModuleRecords(action, records) {
-    localStorage.setItem(moduleStorageKey(action), JSON.stringify(records));
+  function recordFields(record = {}) {
+    return record.fields || record;
   }
 
   function recordSummary(record, config) {
-    return config.fields.map((field) => record[field.name]).filter(Boolean).join(' / ') || '待完善记录';
+    const fields = recordFields(record);
+    return config.fields.map((field) => fields[field.name]).filter(Boolean).join(' / ') || '待完善记录';
   }
 
   function setSidebarActive(labels) {
@@ -2714,7 +3343,7 @@
     });
   }
 
-  function renderModuleRoutePage() {
+  async function renderModuleRoutePage() {
     const action = moduleActionFromPath();
     const config = moduleConfigs[action];
     const main = document.querySelector('main');
@@ -2722,7 +3351,8 @@
       return;
     }
 
-    const labelMap = {
+      const labelMap = {
+      'work-experience': ['工作经历'],
       'project-experience': ['项目经历', '项目历史'],
       honors: ['获得荣誉', '荣誉奖励'],
       'education-experience': ['教育经历', '教育背景'],
@@ -2731,7 +3361,12 @@
     };
     setSidebarActive(labelMap[action] || [config.title]);
 
-    const records = loadModuleRecords(action);
+    let records = cachedModuleRecords(action);
+    try {
+      records = await fetchModuleRecords(action);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : `${config.title}读取失败，请稍后重试。`);
+    }
     const listHtml = records.length
       ? records.map((record, index) => `
         <article class="col-span-12 lg:col-span-6 bg-surface-container-lowest border border-slate-200 rounded-xl p-8 hover:border-primary/30 transition-colors group" data-module-page-record="${index}">
@@ -2740,16 +3375,20 @@
               <p class="text-xs uppercase tracking-widest text-primary font-bold">${config.title}</p>
               <h3 class="font-body-lg font-bold text-on-background mt-2">${recordSummary(record, config)}</h3>
             </div>
-            <div class="flex gap-1 opacity-100 transition-opacity">
-              <button class="p-1.5 text-slate-400 hover:text-primary transition-colors" data-module-page-manage="${action}" type="button"><span class="material-symbols-outlined text-xl">edit</span></button>
-              <button class="p-1.5 text-slate-400 hover:text-error transition-colors" data-module-page-delete="${action}:${index}" type="button"><span class="material-symbols-outlined text-xl">delete</span></button>
+            <div class="flex flex-wrap gap-2">
+              <button class="rounded border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-primary hover:bg-blue-50 transition-colors" data-module-page-edit="${action}:${index}" data-module-page-manage="${action}" data-module-page-index="${index}" type="button">
+                <span>编辑</span>
+              </button>
+              <button class="rounded border border-slate-200 bg-white px-3 py-1.5 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors" data-module-page-remove="${action}:${index}" data-module-page-delete="${action}:${index}" type="button">
+                <span>删除</span>
+              </button>
             </div>
           </div>
           <dl class="grid grid-cols-1 gap-3 text-sm">
             ${config.fields.map((field) => `
               <div class="rounded bg-slate-50 border border-slate-100 p-3">
                 <dt class="text-xs font-bold text-slate-400">${field.name}</dt>
-                <dd class="mt-1 text-slate-700">${record[field.name] || '待完善'}</dd>
+                <dd class="mt-1 text-slate-700">${recordFields(record)[field.name] || '待完善'}</dd>
               </div>
             `).join('')}
           </dl>
@@ -2770,7 +3409,7 @@
             <h1 class="font-h1 text-h1 text-on-background mb-2">个人中心 - ${config.title}</h1>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">维护${config.title}信息，保存后会绑定到当前登录账号并在刷新后保留。</p>
           </div>
-          <button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded shadow-sm hover:opacity-90 transition-all font-label-md text-label-md" data-module-page-manage="${action}" type="button">
+          <button class="flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded shadow-sm hover:opacity-90 transition-all font-label-md text-label-md" data-stitch-action="manage-module" data-module-page-manage="${action}" type="button">
             <span class="material-symbols-outlined">add</span>
             <span>添加${config.title}</span>
           </button>
@@ -2778,17 +3417,54 @@
         <div class="grid grid-cols-12 gap-6">${listHtml}</div>
       </div>
     `;
+    wireStitchActionButtons(main);
+    main.querySelectorAll('[data-module-page-edit]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const [moduleAction, indexText] = String(button.getAttribute('data-module-page-edit') || '').split(':');
+        openRecordManager(moduleAction, Number(indexText));
+      });
+    });
+    main.querySelectorAll('[data-module-page-remove]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const [moduleAction, indexText] = String(button.getAttribute('data-module-page-remove') || '').split(':');
+        const index = Number(indexText);
+        const configForAction = moduleConfigs[moduleAction];
+        if (!configForAction || !Number.isInteger(index)) {
+          toast('当前记录无法删除，请刷新后重试。');
+          return;
+        }
+        const recordsForAction = cachedModuleRecords(moduleAction);
+        const id = recordsForAction[index]?.id;
+        if (!id) {
+          toast('当前记录缺少数据库编号，请刷新后重试。');
+          return;
+        }
+        try {
+          await deleteJson(`/api/me/profile/modules/${encodeURIComponent(moduleAction)}/${id}`);
+          await fetchModuleRecords(moduleAction);
+          toast(`${configForAction.title}已删除`);
+          renderModuleRoutePage();
+        } catch (error) {
+          toast(error instanceof Error ? error.message : `${configForAction.title}删除失败，请稍后重试。`);
+        }
+      });
+    });
   }
 
-  function openRecordManager(action) {
+  async function openRecordManager(action, initialIndex = -1) {
     const config = moduleConfigs[action];
     if (!config) {
       openPanel('功能说明', '该入口正在配置中，请稍后再试。');
       return;
     }
 
-    let records = loadModuleRecords(action);
-    let editingIndex = -1;
+    let records = cachedModuleRecords(action);
+    try {
+      records = await fetchModuleRecords(action);
+    } catch (error) {
+      toast(error instanceof Error ? error.message : `${config.title}读取失败，请稍后重试。`);
+    }
+    let editingIndex = Number.isInteger(initialIndex) ? initialIndex : -1;
     let panel = document.getElementById('stitch-action-panel');
     if (!panel) {
       panel = document.createElement('div');
@@ -2827,7 +3503,7 @@
           </div>
           <div class="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2" data-module-form>${fields}</div>
           <div class="mt-4 flex justify-end gap-2">
-            <button type="button" class="rounded border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" data-module-cancel>取消编辑</button>
+            <button type="button" class="rounded border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" data-module-cancel>取消</button>
             <button type="button" class="rounded bg-[#135f83] px-4 py-2 text-sm font-bold text-white" data-module-save>添加记录</button>
           </div>
           <ul class="mt-5 space-y-3" data-module-list>${recordItems}</ul>
@@ -2837,7 +3513,7 @@
       const setForm = (record = {}) => {
         panel.querySelectorAll('[data-module-field]').forEach((input) => {
           if (input instanceof HTMLInputElement) {
-            input.value = record[input.dataset.moduleField] || '';
+            input.value = recordFields(record)[input.dataset.moduleField] || '';
           }
         });
       };
@@ -2852,7 +3528,7 @@
 
       panel.querySelector('[data-panel-close]')?.addEventListener('click', () => panel.remove());
       panel.querySelector('[data-module-cancel]')?.addEventListener('click', clearForm);
-      panel.querySelector('[data-module-save]')?.addEventListener('click', () => {
+      panel.querySelector('[data-module-save]')?.addEventListener('click', async () => {
         const record = {};
         panel.querySelectorAll('[data-module-field]').forEach((input) => {
           if (input instanceof HTMLInputElement) {
@@ -2863,16 +3539,21 @@
           toast(`请先填写${config.title}内容`);
           return;
         }
-        if (editingIndex >= 0) {
-          records[editingIndex] = record;
-        } else {
-          records.push(record);
+        try {
+          if (editingIndex >= 0) {
+            const id = records[editingIndex]?.id;
+            await putJson(`/api/me/profile/modules/${encodeURIComponent(action)}/${id}`, { fields: record });
+          } else {
+            await postJson(`/api/me/profile/modules/${encodeURIComponent(action)}`, { fields: record });
+          }
+          toast(`${config.title}已保存到数据库`);
+          editingIndex = -1;
+          records = await fetchModuleRecords(action);
+          renderModuleRoutePage();
+          panel.remove();
+        } catch (error) {
+          toast(error instanceof Error ? error.message : `${config.title}保存失败，请稍后重试。`);
         }
-        saveModuleRecords(action, records);
-        toast(`${config.title}已保存`);
-        editingIndex = -1;
-        renderModuleRoutePage();
-        render();
       });
       panel.querySelectorAll('[data-module-edit]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -2885,14 +3566,28 @@
         });
       });
       panel.querySelectorAll('[data-module-delete]').forEach((button) => {
-        button.addEventListener('click', () => {
-          records = records.filter((_, index) => index !== Number(button.getAttribute('data-module-delete')));
-          saveModuleRecords(action, records);
-          toast(`${config.title}已删除`);
-          renderModuleRoutePage();
-          render();
+        button.addEventListener('click', async () => {
+          const index = Number(button.getAttribute('data-module-delete'));
+          const id = records[index]?.id;
+          try {
+            await deleteJson(`/api/me/profile/modules/${encodeURIComponent(action)}/${id}`);
+            records = await fetchModuleRecords(action);
+            toast(`${config.title}已删除`);
+            renderModuleRoutePage();
+            render();
+          } catch (error) {
+            toast(error instanceof Error ? error.message : `${config.title}删除失败，请稍后重试。`);
+          }
         });
       });
+
+      if (editingIndex >= 0 && records[editingIndex]) {
+        setForm(records[editingIndex]);
+        const saveButton = panel.querySelector('[data-module-save]');
+        if (saveButton) {
+          saveButton.textContent = '保存修改';
+        }
+      }
     };
 
     render();
@@ -2977,7 +3672,7 @@
         go('/analytics');
         break;
       case 'talent-detail':
-        go('/talents/sample');
+        go('/talents/1');
         break;
       case 'recruitment-detail':
         go('/recruitments/sample');
@@ -3010,16 +3705,24 @@
         go(personalCenterPath(action));
         break;
       case 'manage-module':
-        openRecordManager(element?.dataset.modulePageManage || moduleActionFromPath());
+        openRecordManager(
+          element?.dataset.modulePageManage || moduleActionFromPath(),
+          Number(element?.dataset.modulePageIndex ?? -1)
+        );
         break;
       case 'delete-module-record': {
         const [moduleAction, indexText] = String(element?.dataset.modulePageDelete || '').split(':');
-        const records = loadModuleRecords(moduleAction);
+        const records = cachedModuleRecords(moduleAction);
         const index = Number(indexText);
         if (moduleConfigs[moduleAction] && Number.isInteger(index)) {
-          saveModuleRecords(moduleAction, records.filter((_, recordIndex) => recordIndex !== index));
-          toast(`${moduleConfigs[moduleAction].title}已删除`);
-          renderModuleRoutePage();
+          const id = records[index]?.id;
+          deleteJson(`/api/me/profile/modules/${encodeURIComponent(moduleAction)}/${id}`)
+            .then(() => fetchModuleRecords(moduleAction))
+            .then(() => {
+              toast(`${moduleConfigs[moduleAction].title}已删除`);
+              renderModuleRoutePage();
+            })
+            .catch((error) => toast(error instanceof Error ? error.message : `${moduleConfigs[moduleAction].title}删除失败，请稍后重试。`));
         }
         break;
       }
@@ -3031,7 +3734,9 @@
         break;
       case 'logout':
         localStorage.removeItem(roleKey);
+        localStorage.removeItem(usernameKey);
         document.cookie = roleKey + '=; Max-Age=0; path=/';
+        document.cookie = usernameKey + '=; Max-Age=0; path=/';
         go('/');
         break;
       case 'send-code':
@@ -3092,7 +3797,11 @@
         openPanel('排序方式', '默认按最新发布或最近更新优先。也可按薪资、需求人数、到岗时间排序。');
         break;
       case 'bookmark':
-        toast('已收藏该岗位，可在个人中心查看收藏记录');
+        if (element instanceof HTMLElement) {
+          element.classList.add('bg-primary', 'text-white');
+          element.setAttribute('aria-pressed', 'true');
+        }
+        toast('已收藏该岗位');
         break;
       case 'talent-search':
         applyTalentSearch();
@@ -3154,6 +3863,7 @@
   }
 
   function classifyButton(button) {
+    if (button.dataset.stitchAction) return button.dataset.stitchAction;
     const label = textOf(button);
     const iconText = Array.from(button.querySelectorAll('.material-symbols-outlined'))
       .map((icon) => textOf(icon))
@@ -3191,9 +3901,13 @@
     setupAuthFieldIds();
     setupRegisterTabs();
     renderBlankBusinessState();
+    ensurePersonalRequiredFields();
     renderHomeRecruitments();
+    renderRecruitmentDetailPage();
     renderRecruitmentApplyPage();
     prepareTalentSearchPage();
+    renderTalentDetailPage();
+    renderAnalyticsPage();
     translateTemplateLabels();
     renderRoleSidebars();
 

@@ -46,8 +46,14 @@ public class AuthController {
                 .maxAge(Duration.ofHours(8))
                 .sameSite("Lax")
                 .build();
+        ResponseCookie usernameCookie = ResponseCookie.from(CurrentUserRoleResolver.USERNAME_COOKIE, response.username())
+                .path("/")
+                .maxAge(Duration.ofHours(8))
+                .sameSite("Lax")
+                .build();
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .header(HttpHeaders.SET_COOKIE, usernameCookie.toString())
                 .body(response);
     }
 }

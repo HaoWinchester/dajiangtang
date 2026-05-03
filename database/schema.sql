@@ -8,11 +8,13 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS qualification_certificates;
+DROP TABLE IF EXISTS profile_module_records;
 DROP TABLE IF EXISTS education_experiences;
 DROP TABLE IF EXISTS honors;
 DROP TABLE IF EXISTS project_experiences;
 DROP TABLE IF EXISTS work_experiences;
 DROP TABLE IF EXISTS personal_profiles;
+DROP TABLE IF EXISTS user_uploads;
 DROP TABLE IF EXISTS recruitment_applications;
 DROP TABLE IF EXISTS talent_certificates;
 DROP TABLE IF EXISTS talents;
@@ -35,12 +37,25 @@ CREATE TABLE recruitments (
   position VARCHAR(128) NOT NULL,
   salary VARCHAR(64) NOT NULL,
   company_name VARCHAR(160) NOT NULL,
+  department VARCHAR(128),
+  recruitment_post VARCHAR(128),
+  job_tags VARCHAR(255),
   city VARCHAR(64) NOT NULL,
+  work_location VARCHAR(255),
   owner VARCHAR(64) NOT NULL,
   headcount INT NOT NULL,
   cspm_preferred BOOLEAN NOT NULL DEFAULT FALSE COMMENT '首页与列表展示时是否标记为CSPM优先',
   status ENUM('ACTIVE', 'RECRUITING', 'PAUSED', 'CLOSED') NOT NULL,
   contact_phone VARCHAR(32) NOT NULL,
+  required_arrival_date DATE,
+  recruitment_progress VARCHAR(64),
+  job_description TEXT,
+  job_requirement TEXT,
+  skill_requirement TEXT,
+  welfare TEXT,
+  follower VARCHAR(128),
+  level VARCHAR(64),
+  remark TEXT,
   published_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP NOT NULL,
   INDEX idx_recruitments_position (position),
@@ -50,6 +65,7 @@ CREATE TABLE recruitments (
 
 CREATE TABLE companies (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  account_username VARCHAR(64) UNIQUE,
   company_type VARCHAR(64),
   company_name VARCHAR(160) NOT NULL,
   full_name VARCHAR(220),
@@ -69,8 +85,10 @@ CREATE TABLE companies (
   status VARCHAR(64),
   user_level ENUM('重点用户', '一般用户') DEFAULT '一般用户',
   remark TEXT,
+  fields_json JSON,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_companies_account (account_username),
   INDEX idx_companies_name (company_name),
   INDEX idx_companies_city (city),
   INDEX idx_companies_industry (industry)
@@ -78,6 +96,7 @@ CREATE TABLE companies (
 
 CREATE TABLE talents (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  account_username VARCHAR(64) UNIQUE,
   masked_name VARCHAR(64) NOT NULL,
   gender VARCHAR(16),
   job_intention VARCHAR(128),
@@ -97,6 +116,16 @@ CREATE TABLE talents (
   INDEX idx_talents_industry (industry)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='人才库列表与详情';
 
+CREATE TABLE profile_module_records (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  account_username VARCHAR(64) NOT NULL,
+  module_name VARCHAR(64) NOT NULL,
+  fields_json JSON NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_profile_module_account (account_username, module_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='个人中心多轮资料记录';
+
 CREATE TABLE talent_certificates (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   talent_id BIGINT NOT NULL,
@@ -109,6 +138,7 @@ CREATE TABLE talent_certificates (
 CREATE TABLE recruitment_applications (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   recruitment_id VARCHAR(32) NOT NULL,
+  account_username VARCHAR(64) NOT NULL,
   applicant_name VARCHAR(64) NOT NULL,
   phone VARCHAR(32) NOT NULL,
   note TEXT,
@@ -116,8 +146,21 @@ CREATE TABLE recruitment_applications (
   submitted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (recruitment_id) REFERENCES recruitments(id) ON DELETE CASCADE,
   INDEX idx_applications_recruitment (recruitment_id),
+  INDEX idx_applications_account (account_username),
   INDEX idx_applications_phone (phone)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='招聘申请';
+
+CREATE TABLE user_uploads (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  account_username VARCHAR(64) NOT NULL,
+  page_path VARCHAR(255) NOT NULL,
+  target VARCHAR(64) NOT NULL,
+  data_url LONGTEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_user_upload_target (account_username, page_path, target),
+  INDEX idx_user_upload_account (account_username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户上传图片数据';
 
 CREATE TABLE personal_profiles (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
