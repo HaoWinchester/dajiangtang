@@ -236,6 +236,15 @@ const router = createRouter({
       meta: { requiresAuth: true, requiresAdmin: true }
     },
     {
+      path: '/recruitments/:id/apply',
+      name: 'recruitment-apply',
+      component: StitchFrameView,
+      props: {
+        src: '/stitch_cspm/_14/code.html',
+        title: '招聘申请 - 提交申请'
+      }
+    },
+    {
       path: '/recruitments/:id',
       name: 'recruitment-detail',
       component: StitchFrameView,

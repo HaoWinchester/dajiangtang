@@ -172,8 +172,21 @@ onMounted(() => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in list.items" :key="item.id">
-                  <td>{{ item.position }}</td>
+                <tr
+                  v-for="item in list.items"
+                  :key="item.id"
+                  class="clickable-row"
+                  @click="$router.push({ name: 'recruitment-detail', params: { id: item.id } })"
+                >
+                  <td>
+                    <RouterLink
+                      class="table-row-link"
+                      :to="{ name: 'recruitment-detail', params: { id: item.id } }"
+                      @click.stop
+                    >
+                      {{ item.position }}
+                    </RouterLink>
+                  </td>
                   <td>{{ item.salary }}</td>
                   <td>{{ item.companyName }}</td>
                   <td>{{ item.city }}</td>

@@ -591,6 +591,24 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover td {
+  background: #f6f9fc;
+}
+
+.table-row-link {
+  color: #135f83;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.table-row-link:hover {
+  text-decoration: underline;
+}
+
 .state-block {
   min-height: 240px;
   display: grid;

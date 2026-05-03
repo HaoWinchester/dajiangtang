@@ -34,13 +34,18 @@ function jsonResponse(body: RecruitmentListResponse): Response {
   } as Response;
 }
 
-function mountView() {
+function mountView(routerPush = vi.fn()) {
   return mount(RecruitmentListView, {
     global: {
+      mocks: {
+        $router: {
+          push: routerPush
+        }
+      },
       stubs: {
         RouterLink: {
           props: ['to'],
-          template: '<a data-test="router-link"><slot /></a>'
+          template: `<a data-test="router-link" :data-to-name="to.name" :data-to-id="to.params?.id || ''"><slot /></a>`
         }
       }
     }
@@ -84,6 +89,37 @@ describe('RecruitmentListView', () => {
     await flushPromises();
 
     expect(wrapper.findAll('tbody td')[0].text()).toBe('项目经理');
+  });
+
+  it('links each recruitment position to its detail route', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    const link = wrapper
+      .findAll('[data-test="router-link"]')
+      .find((candidate) => candidate.attributes('data-to-name') === 'recruitment-detail');
+    if (!link) {
+      throw new Error('未找到招聘详情链接');
+    }
+    expect(link.text()).toBe('项目经理');
+    expect(link.attributes('data-to-name')).toBe('recruitment-detail');
+    expect(link.attributes('data-to-id')).toBe('rec-001');
+  });
+
+  it('opens the matching detail route when clicking a recruitment row', async () => {
+    const routerPush = vi.fn();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(listResponse())));
+
+    const wrapper = mountView(routerPush);
+    await flushPromises();
+    await wrapper.find('tbody tr').trigger('click');
+
+    expect(routerPush).toHaveBeenCalledWith({
+      name: 'recruitment-detail',
+      params: { id: 'rec-001' }
+    });
   });
 
   it('renders the salary field in the first data row', async () => {

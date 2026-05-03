@@ -281,6 +281,28 @@ test('列表页面不展示后端返回的联系电话和详情字段', async ({
   await expect(page.getByText('详情字段不应出现在列表')).toHaveCount(0);
 });
 
+test('点击招聘列表中的岗位行会进入对应详情页', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByRole('link', { name: '项目经理' }).click();
+
+  await expect(page).toHaveURL(/\/recruitments\/rec-001$/);
+  const design = page.frameLocator('iframe[title="招聘信息 - 详情"]');
+  await expect(design.getByRole('heading', { name: '高级项目管理专家 (Senior PMO)' })).toBeVisible();
+});
+
+test('点击招聘列表行内非链接区域也会进入对应详情页', async ({ page }) => {
+  await loginAs(page, 'USER');
+  await mockRecruitments(page);
+
+  await page.goto('/recruitments');
+  await page.getByRole('cell', { name: '北京示例科技有限公司' }).click();
+
+  await expect(page).toHaveURL(/\/recruitments\/rec-001$/);
+});
+
 test('岗位和城市组合搜索会刷新列表并携带查询条件', async ({ page }) => {
   await loginAs(page, 'ADMIN');
   await mockRecruitments(page);

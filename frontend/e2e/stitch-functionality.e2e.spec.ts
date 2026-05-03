@@ -17,6 +17,8 @@ const stitchPages = [
   { path: '/personal-center/education-experience', title: '个人中心 - 教育经历' },
   { path: '/personal-center/professional-skills', title: '个人中心 - 专业技能' },
   { path: '/personal-center/certificates', title: '个人中心 - 资格证书' },
+  { path: '/talents', title: '人才信息 - 列表' },
+  { path: '/talents/sample', title: '人才信息 - 详情' },
   { path: '/analytics', title: '数据分析' }
 ];
 
@@ -109,6 +111,10 @@ async function authorizeProtectedStitchPage(page: Page, path: string) {
     await loginAs(page, 'ADMIN');
     return;
   }
+  if (path.startsWith('/talents')) {
+    await loginAs(page, 'ADMIN');
+    return;
+  }
   if (path.startsWith('/personal-center') || path.startsWith('/enterprise-center')) {
     await loginAs(page, path.startsWith('/enterprise-center') ? 'COMPANY' : 'USER');
   }
@@ -184,6 +190,62 @@ test.describe('单点功能 - Stitch 页面控件', () => {
     const asideText = await frame.locator('aside').first().innerText();
     expect(asideText).toContain('数据分析');
     expect(asideText).not.toMatch(/TalentArch|Enterprise Portal|Dashboard|Jobs|Talent Pool|Analytics|Privacy Policy|Terms of Service|Cookie Settings|Contact Admin/);
+  });
+
+  test('人才库信息检索会按姓名、公司、行业、城市真实过滤', async ({ page }) => {
+    await loginAs(page, 'ADMIN');
+    await page.goto('/talents');
+    const frame = await frameByTitle(page, '人才信息 - 列表');
+
+    await expect(frame.getByText('张*明')).toBeVisible();
+    await expect(frame.getByText('李*华')).toBeVisible();
+    await expect(frame.locator('#talent-result-summary')).toContainText('共 4 条结果');
+
+    await frame.getByPlaceholder('输入姓名（脱敏）').fill('李');
+    await frame.getByRole('button', { name: '开始检索' }).click();
+    await expect(frame.getByText('李*华')).toBeVisible();
+    await expect(frame.getByText('张*明')).not.toBeVisible();
+    await expect(frame.locator('#talent-result-summary')).toContainText('共 1 条结果');
+
+    await frame.getByRole('button', { name: '重置条件' }).click();
+    await frame.getByPlaceholder('搜索公司名称').fill('中信');
+    await frame.getByRole('button', { name: '开始检索' }).click();
+    await expect(frame.getByText('李*华')).toBeVisible();
+    await expect(frame.getByText('当前公司：中信咨询集团')).toBeVisible();
+    await expect(frame.getByText('张*明')).not.toBeVisible();
+
+    await frame.getByRole('button', { name: '重置条件' }).click();
+    await frame.locator('select').selectOption({ label: '制造业' });
+    await frame.getByRole('button', { name: '开始检索' }).click();
+    await expect(frame.getByText('陈*刚')).toBeVisible();
+    await expect(frame.getByText('李*华')).not.toBeVisible();
+
+    await frame.getByRole('button', { name: '重置条件' }).click();
+    await frame.getByPlaceholder('输入城市名称').fill('上海');
+    await frame.getByRole('button', { name: '开始检索' }).click();
+    await expect(frame.getByText('张*明')).toBeVisible();
+    await expect(frame.getByText('陈*刚')).toBeVisible();
+    await expect(frame.getByText('李*华')).not.toBeVisible();
+  });
+
+  test('人才库信息检索无结果时显示空状态，重置后恢复列表', async ({ page }) => {
+    await loginAs(page, 'ADMIN');
+    await page.goto('/talents');
+    const frame = await frameByTitle(page, '人才信息 - 列表');
+
+    await frame.getByPlaceholder('输入城市名称').fill('不存在城市');
+    await frame.getByRole('button', { name: '开始检索' }).click();
+
+    await expect(frame.getByText('暂无匹配人才')).toBeVisible();
+    await expect(frame.locator('#talent-result-summary')).toContainText('共 0 条结果');
+    await expect(frame.locator('#stitch-toast')).toContainText('未检索到匹配人才');
+    await expect(frame.getByText('张*明')).not.toBeVisible();
+
+    await frame.getByRole('button', { name: '重置条件' }).click();
+    await expect(frame.getByText('暂无匹配人才')).not.toBeVisible();
+    await expect(frame.getByText('张*明')).toBeVisible();
+    await expect(frame.getByText('李*华')).toBeVisible();
+    await expect(frame.locator('#talent-result-summary')).toContainText('共 4 条结果');
   });
 
   test('固定顶部栏在宽屏下铺满视口右侧不留缺口', async ({ page }) => {
@@ -616,6 +678,30 @@ test.describe('工作流程功能 - 页面跳转', () => {
     await frame.getByText('招聘信息').click();
 
     await expect(page).toHaveURL(/\/login-required$/);
+  });
+
+  test('首页立即申请进入岗位申请页而不是招聘列表', async ({ page }) => {
+    await page.goto('/');
+    const frame = await frameByTitle(page, '项目管理人才库 首页');
+
+    await frame.getByRole('button', { name: '立即申请' }).first().click();
+
+    await expect(page).toHaveURL(/\/recruitments\/featured\/apply$/);
+    const application = await frameByTitle(page, '招聘申请 - 提交申请');
+    await expect(application.getByRole('heading', { name: '岗位申请' })).toBeVisible();
+    await expect(application.getByText('申请材料')).toBeVisible();
+  });
+
+  test('招聘详情页立即申请会进入当前岗位申请页', async ({ page }) => {
+    await loginAs(page, 'USER');
+    await page.goto('/recruitments/rec-001');
+    const detail = await frameByTitle(page, '招聘信息 - 详情');
+
+    await detail.getByRole('button', { name: '立即申请' }).click();
+
+    await expect(page).toHaveURL(/\/recruitments\/rec-001\/apply$/);
+    const application = await frameByTitle(page, '招聘申请 - 提交申请');
+    await expect(application.getByRole('button', { name: '提交申请' })).toBeVisible();
   });
 
   test('注册页立即登录按钮跳转登录页', async ({ page }) => {

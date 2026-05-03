@@ -212,6 +212,13 @@ describe('recruitment route guard', () => {
     expect(router.resolve('/analytics').meta.allowedRoles).toEqual(['ADMIN', 'COMPANY']);
   });
 
+  it('maps recruitment application pages to the public Stitch application design', async () => {
+    const { default: router } = await import('./index');
+
+    expect(router.resolve('/recruitments/rec-001/apply').name).toBe('recruitment-apply');
+    expect(router.resolve('/recruitments/rec-001/apply').meta.requiresAuth).toBeUndefined();
+  });
+
   it('maps work experience to the stitch work experience design', async () => {
     const { default: router } = await import('./index');
 

@@ -78,6 +78,7 @@
     if (path === '/analytics') return 'analytics';
     if (path === '/recruitments') return 'recruitment-list';
     if (path === '/recruitments/new') return 'recruitment-create';
+    if (path.startsWith('/recruitments/') && path.endsWith('/apply')) return 'recruitment-apply';
     if (path.startsWith('/recruitments/')) return 'recruitment-detail';
     if (path.includes('/personal-center/work-experience')) return 'work';
     if (path.includes('/personal-center/')) return 'work';
@@ -412,7 +413,7 @@
     if (pageName === 'home') return 'home';
     if (pageName === 'talent-list' || pageName === 'talent-detail') return 'talents';
     if (pageName === 'analytics') return 'analytics';
-    if (pageName === 'recruitment-list' || pageName === 'recruitment-create' || pageName === 'recruitment-detail') return 'recruitments';
+    if (pageName === 'recruitment-list' || pageName === 'recruitment-create' || pageName === 'recruitment-detail' || pageName === 'recruitment-apply') return 'recruitments';
     if (pageName === 'enterprise') return 'enterprise-center';
     if (pageName === 'personal' || pageName === 'work') return 'personal-center';
     return '';
@@ -466,6 +467,13 @@
     if (path.startsWith('/talents')) return 'talents';
     if (path.endsWith('/work-experience')) return 'work-experience';
     return moduleActionFromPath(path) || (path.startsWith('/personal-center') ? 'personal-center' : '');
+  }
+
+  function recruitmentIdFromPath(defaultId = 'sample') {
+    const parts = window.parent.location.pathname.split('/').filter(Boolean);
+    const index = parts.indexOf('recruitments');
+    const id = index >= 0 ? parts[index + 1] : '';
+    return id && id !== 'new' && id !== 'apply' ? id : defaultId;
   }
 
   function renderRoleSidebars() {
@@ -782,7 +790,10 @@
         body.stitch-page-home main,
         body.stitch-page-enterprise main,
         body.stitch-page-personal main,
-        body.stitch-page-work main {
+        body.stitch-page-work main,
+        body.stitch-page-talent-list main,
+        body.stitch-page-talent-detail main,
+        body.stitch-page-recruitment-apply main {
           padding-top: 96px !important;
         }
         body.stitch-page-home main {
@@ -800,7 +811,9 @@
         }
         body.stitch-page-enterprise aside,
         body.stitch-page-personal aside,
-        body.stitch-page-work aside {
+        body.stitch-page-work aside,
+        body.stitch-page-talent-list aside,
+        body.stitch-page-talent-detail aside {
           border-color: #d9e3ec !important;
           background: #ffffff !important;
           box-shadow: 0 18px 50px rgba(30, 52, 73, 0.10) !important;
@@ -862,16 +875,22 @@
         }
         body.stitch-page-enterprise > .flex > aside,
         body.stitch-page-personal aside.fixed,
-        body.stitch-page-work aside.fixed {
+        body.stitch-page-work aside.fixed,
+        body.stitch-page-talent-list aside.fixed,
+        body.stitch-page-talent-detail aside.fixed {
           top: 64px !important;
           height: calc(100vh - 64px) !important;
         }
         body.stitch-page-enterprise section,
         body.stitch-page-personal section,
         body.stitch-page-work section,
+        body.stitch-page-talent-list section,
+        body.stitch-page-talent-detail section,
         body.stitch-page-enterprise .bg-white,
         body.stitch-page-personal .bg-white,
-        body.stitch-page-work .bg-white {
+        body.stitch-page-work .bg-white,
+        body.stitch-page-talent-list .bg-white,
+        body.stitch-page-talent-detail .bg-white {
           border-color: #d9e3ec !important;
           border-radius: 8px !important;
           box-shadow: 0 14px 36px rgba(42, 58, 78, 0.08) !important;
@@ -1026,7 +1045,10 @@
           }
           body.stitch-page-enterprise > .flex,
           body.stitch-page-personal > .flex,
-          body.stitch-page-work > .flex {
+          body.stitch-page-work > .flex,
+          body.stitch-page-talent-list main > .flex,
+          body.stitch-page-talent-detail main,
+          body.stitch-page-recruitment-apply main {
             display: flex !important;
             flex-direction: column !important;
             width: 100% !important;
@@ -1035,8 +1057,12 @@
           body.stitch-page-enterprise aside.stitch-role-sidebar,
           body.stitch-page-personal aside.stitch-role-sidebar,
           body.stitch-page-work aside.stitch-role-sidebar,
+          body.stitch-page-talent-list aside.stitch-role-sidebar,
+          body.stitch-page-talent-detail aside.stitch-role-sidebar,
           body.stitch-page-personal aside.fixed,
-          body.stitch-page-work aside.fixed {
+          body.stitch-page-work aside.fixed,
+          body.stitch-page-talent-list aside.fixed,
+          body.stitch-page-talent-detail aside.fixed {
             position: static !important;
             top: auto !important;
             z-index: auto !important;
@@ -1049,7 +1075,9 @@
             border-bottom: 1px solid #d9e3ec !important;
             box-shadow: none !important;
           }
-          body.stitch-page-enterprise aside.stitch-role-sidebar {
+          body.stitch-page-enterprise aside.stitch-role-sidebar,
+          body.stitch-page-talent-list aside.stitch-role-sidebar,
+          body.stitch-page-talent-detail aside.stitch-role-sidebar {
             padding-top: 16px !important;
           }
           .stitch-role-card {
@@ -1068,7 +1096,10 @@
           }
           body.stitch-page-enterprise main,
           body.stitch-page-personal main,
-          body.stitch-page-work main {
+          body.stitch-page-work main,
+          body.stitch-page-talent-list main,
+          body.stitch-page-talent-detail main,
+          body.stitch-page-recruitment-apply main {
             width: 100% !important;
             max-width: 100% !important;
             min-width: 0 !important;
@@ -1076,7 +1107,10 @@
             padding: 88px 16px 32px !important;
             box-sizing: border-box !important;
           }
-          body.stitch-page-enterprise main {
+          body.stitch-page-enterprise main,
+          body.stitch-page-talent-list main,
+          body.stitch-page-talent-detail main,
+          body.stitch-page-recruitment-apply main {
             padding-top: 0 !important;
           }
           body.stitch-page-enterprise main > header {
@@ -1107,26 +1141,82 @@
           body.stitch-page-enterprise main > div,
           body.stitch-page-personal main > div,
           body.stitch-page-work main > div,
+          body.stitch-page-talent-list main > div,
+          body.stitch-page-talent-detail main > div,
+          body.stitch-page-recruitment-apply main > div,
           body.stitch-page-enterprise section,
           body.stitch-page-personal section,
-          body.stitch-page-work section {
+          body.stitch-page-work section,
+          body.stitch-page-talent-list section,
+          body.stitch-page-talent-detail section,
+          body.stitch-page-recruitment-apply section {
             max-width: 100% !important;
             min-width: 0 !important;
           }
           body.stitch-page-enterprise main .grid,
           body.stitch-page-personal main .grid,
-          body.stitch-page-work main .grid {
+          body.stitch-page-work main .grid,
+          body.stitch-page-talent-list main .grid,
+          body.stitch-page-talent-detail main .grid,
+          body.stitch-page-recruitment-apply main .grid {
             grid-template-columns: minmax(0, 1fr) !important;
           }
           body.stitch-page-enterprise main [class*="col-span-"],
           body.stitch-page-personal main [class*="col-span-"],
-          body.stitch-page-work main [class*="col-span-"] {
+          body.stitch-page-work main [class*="col-span-"],
+          body.stitch-page-talent-list main [class*="col-span-"],
+          body.stitch-page-talent-detail main [class*="col-span-"],
+          body.stitch-page-recruitment-apply main [class*="col-span-"] {
             grid-column: 1 / -1 !important;
           }
           body.stitch-page-personal main button,
-          body.stitch-page-work main button {
+          body.stitch-page-work main button,
+          body.stitch-page-talent-list main button,
+          body.stitch-page-talent-detail main button,
+          body.stitch-page-recruitment-apply main button {
             max-width: 100% !important;
             white-space: normal !important;
+          }
+          body.stitch-page-talent-list main > .flex > div,
+          body.stitch-page-talent-detail main > div,
+          body.stitch-page-recruitment-apply main > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            margin-left: 0 !important;
+            padding: 16px !important;
+            box-sizing: border-box !important;
+          }
+          body.stitch-page-talent-list table {
+            min-width: 760px !important;
+          }
+          body.stitch-page-talent-list main .absolute.w-64.h-64,
+          body.stitch-page-talent-detail main .absolute.w-64.h-64,
+          body.stitch-page-recruitment-apply main .absolute.w-64.h-64 {
+            display: none !important;
+          }
+          body.stitch-page-talent-list main .bg-white:has(table) {
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            -webkit-overflow-scrolling: touch;
+          }
+          body.stitch-page-talent-list main .flex.items-center.justify-between,
+          body.stitch-page-talent-detail main .flex.items-center.justify-between,
+          body.stitch-page-recruitment-apply main .flex.items-center.justify-between,
+          body.stitch-page-talent-detail main .flex.items-center.gap-4,
+          body.stitch-page-recruitment-apply main .flex.items-center.gap-4 {
+            align-items: flex-start !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+          }
+          body.stitch-page-talent-detail main .sticky,
+          body.stitch-page-recruitment-apply main .sticky {
+            position: static !important;
+            top: auto !important;
+          }
+          body.stitch-page-talent-detail main img,
+          body.stitch-page-recruitment-apply main img {
+            max-width: 100% !important;
           }
         }
       `;
@@ -1276,6 +1366,211 @@
 
     renderRoleSidebars();
     restoreSavedPageData();
+  }
+
+  function renderRecruitmentApplyPage() {
+    if (currentPageName() !== 'recruitment-apply') {
+      return;
+    }
+
+    setText('main h1', '岗位申请');
+
+    const summary = Array.from(document.querySelectorAll('main p')).find((item) => textOf(item).includes('作为高级项目管理专家'));
+    if (summary) {
+      summary.textContent = '请确认岗位信息并补充申请说明。提交后，平台联系人会根据您的个人资料、项目经历与资格证书协助推进沟通。';
+    }
+
+    const actionButton = Array.from(document.querySelectorAll('main button')).find((button) => /立即申请/.test(textOf(button)));
+    if (actionButton instanceof HTMLButtonElement) {
+      actionButton.textContent = '提交申请';
+      mark(actionButton, 'submit-application');
+    }
+
+    const contentColumn = document.querySelector('main .col-span-12.lg\\:col-span-8');
+    if (!contentColumn || document.getElementById('application-materials')) {
+      return;
+    }
+
+    const application = document.createElement('section');
+    application.id = 'application-materials';
+    application.className = 'bg-white border border-slate-100 p-xl rounded-lg space-y-md';
+    application.innerHTML = `
+      <div>
+        <p class="text-label-sm text-secondary uppercase">申请信息</p>
+        <h2 class="font-h3 text-h3 text-primary">申请材料</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+        <label class="flex flex-col gap-xs">
+          <span class="text-label-sm text-secondary">申请人姓名</span>
+          <input class="rounded-lg border border-outline-variant px-md py-sm" type="text" placeholder="请输入姓名" />
+        </label>
+        <label class="flex flex-col gap-xs">
+          <span class="text-label-sm text-secondary">联系电话</span>
+          <input class="rounded-lg border border-outline-variant px-md py-sm" type="tel" placeholder="请输入手机号" />
+        </label>
+      </div>
+      <label class="flex flex-col gap-xs">
+        <span class="text-label-sm text-secondary">申请说明</span>
+        <textarea class="min-h-28 rounded-lg border border-outline-variant px-md py-sm" placeholder="请补充与该岗位匹配的项目经验、证书或到岗时间"></textarea>
+      </label>
+      <label class="flex items-start gap-sm text-body-sm text-secondary">
+        <input class="mt-1 rounded border-outline-variant" type="checkbox" />
+        <span>本人确认申请信息真实有效，并同意平台联系人基于本次岗位申请进行沟通。</span>
+      </label>
+    `;
+    contentColumn.insertBefore(application, contentColumn.firstElementChild?.nextElementSibling || null);
+  }
+
+  const talentCompanies = [
+    '华东数字科技有限公司',
+    '中信咨询集团',
+    '深圳智造科技有限公司',
+    '苏州精工智能制造有限公司'
+  ];
+
+  function normalizeSearchText(value = '') {
+    return String(value).replace(/\s+/g, '').toLowerCase();
+  }
+
+  function talentSearchFields() {
+    return {
+      name: document.querySelector('input[placeholder*="姓名"]'),
+      company: document.querySelector('input[placeholder*="公司"]'),
+      industry: document.querySelector('select'),
+      city: document.querySelector('input[placeholder*="城市"]')
+    };
+  }
+
+  function talentRows() {
+    return Array.from(document.querySelectorAll('tbody tr'))
+      .filter((row) => row instanceof HTMLTableRowElement && row.id !== 'talent-empty-state');
+  }
+
+  function matchesTalentIndustry(rowIndustry, selectedIndustry) {
+    const row = normalizeSearchText(rowIndustry);
+    const selected = normalizeSearchText(selectedIndustry);
+    if (!selected || selected.includes('不限')) {
+      return true;
+    }
+    if (row.includes(selected)) {
+      return true;
+    }
+    return ['互联网', '金融', '制造', '医疗'].some((token) => selected.includes(token) && row.includes(token));
+  }
+
+  function prepareTalentSearchPage() {
+    if (currentPageName() !== 'talent-list') {
+      return;
+    }
+
+    const rows = talentRows();
+    rows.forEach((row, index) => {
+      const cells = row.querySelectorAll('td');
+      const company = talentCompanies[index] || '项目管理人才库合作企业';
+      row.dataset.talentName = textOf(cells[0] || row);
+      row.dataset.talentCompany = company;
+      row.dataset.talentCity = textOf(cells[3] || row);
+      row.dataset.talentIndustry = textOf(cells[4] || row);
+      row.dataset.talentOriginalDisplay = row.style.display || '';
+
+      const profile = cells[0]?.querySelector('.text-xs.text-slate-400');
+      if (profile && !profile.parentElement?.querySelector('[data-talent-company]')) {
+        const companyLine = document.createElement('div');
+        companyLine.dataset.talentCompany = 'true';
+        companyLine.className = 'text-xs text-slate-500';
+        companyLine.textContent = `当前公司：${company}`;
+        profile.parentElement.appendChild(companyLine);
+      }
+    });
+
+    const table = document.querySelector('table');
+    const tbody = table?.querySelector('tbody');
+    if (tbody && !document.getElementById('talent-empty-state')) {
+      const emptyRow = document.createElement('tr');
+      emptyRow.id = 'talent-empty-state';
+      emptyRow.className = 'hidden';
+      emptyRow.innerHTML = `
+        <td colspan="7" class="px-6 py-12 text-center">
+          <div class="text-body-md font-semibold text-slate-700">暂无匹配人才</div>
+          <div class="mt-2 text-body-sm text-slate-500">请调整姓名、公司、行业或城市条件后重新检索。</div>
+        </td>
+      `;
+      tbody.appendChild(emptyRow);
+    }
+
+    const summary = Array.from(document.querySelectorAll('div')).find((item) => {
+      const text = textOf(item);
+      return /^显示第 .+ 条，共 .+ 条结果$/.test(text) && item.querySelectorAll('div, section, table').length === 0;
+    });
+    if (summary instanceof HTMLElement) {
+      summary.id = 'talent-result-summary';
+    }
+
+    applyTalentSearch(false);
+  }
+
+  function updateTalentSearchSummary(total) {
+    const countBadge = Array.from(document.querySelectorAll('span')).find((item) => textOf(item).includes('名候选人'));
+    if (countBadge) {
+      const icon = countBadge.querySelector('.material-symbols-outlined')?.outerHTML || '';
+      countBadge.innerHTML = `${icon}${total} 名候选人`;
+    }
+
+    const summary = document.getElementById('talent-result-summary');
+    if (summary) {
+      summary.innerHTML = total > 0
+        ? `显示第 <span class="font-bold">1-${total}</span> 条，共 <span class="font-bold">${total}</span> 条结果`
+        : `显示第 <span class="font-bold">0-0</span> 条，共 <span class="font-bold">0</span> 条结果`;
+    }
+
+    const empty = document.getElementById('talent-empty-state');
+    if (empty) {
+      empty.classList.toggle('hidden', total > 0);
+    }
+  }
+
+  function applyTalentSearch(showToast = true) {
+    const fields = talentSearchFields();
+    const name = normalizeSearchText(fields.name?.value || '');
+    const company = normalizeSearchText(fields.company?.value || '');
+    const industry = fields.industry?.value || '';
+    const city = normalizeSearchText(fields.city?.value || '');
+    const rows = talentRows();
+
+    let total = 0;
+    rows.forEach((row) => {
+      const visible = (!name || normalizeSearchText(row.dataset.talentName).includes(name))
+        && (!company || normalizeSearchText(row.dataset.talentCompany).includes(company))
+        && matchesTalentIndustry(row.dataset.talentIndustry || '', industry)
+        && (!city || normalizeSearchText(row.dataset.talentCity).includes(city));
+
+      row.style.display = visible ? (row.dataset.talentOriginalDisplay || '') : 'none';
+      if (visible) {
+        total += 1;
+      }
+    });
+
+    updateTalentSearchSummary(total);
+    if (showToast) {
+      toast(total > 0 ? `已检索到 ${total} 名匹配人才` : '未检索到匹配人才，请调整条件后重试');
+    }
+  }
+
+  function resetTalentSearch() {
+    const fields = talentSearchFields();
+    [fields.name, fields.company, fields.city].forEach((field) => {
+      if (field instanceof HTMLInputElement) {
+        field.value = '';
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+        field.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+    if (fields.industry instanceof HTMLSelectElement) {
+      fields.industry.selectedIndex = 0;
+      fields.industry.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    applyTalentSearch(false);
+    toast('人才检索条件已重置，已恢复全部人才');
   }
 
   function toast(message) {
@@ -2174,7 +2469,15 @@
     if (/^人才$/.test(label)) return 'talents';
     if (/Employee Management/.test(label)) return 'talents';
     if (/查看详情/.test(label)) return pageName === 'talent-list' ? 'talent-detail' : 'recruitment-detail';
-    if (/立即申请|更多机会/.test(label)) return 'recruitments';
+    if (/开始检索/.test(label)) return 'talent-search';
+    if (/重置条件/.test(label)) return 'talent-search-reset';
+    if (/chevron_left|chevron_right|^\d+$|^\.\.\.$/.test(label)) return 'talent-pagination';
+    if (/立即邀约 CSPM 专家|add/.test(label) && pageName === 'talent-list') return 'invite-cspm';
+    if (/立即沟通|forum/.test(label)) return 'contact-talent';
+    if (/下载简历|download/.test(label)) return 'download-resume';
+    if (/立即申请/.test(label)) return 'apply-recruitment';
+    if (/提交申请/.test(label)) return 'submit-application';
+    if (/更多机会/.test(label)) return 'recruitments';
     if (/筛选|filter_list/.test(label)) return 'filter-panel';
     if (/排序|sort/.test(label)) return 'sort-panel';
     if (/bookmark|收藏/.test(label)) return 'bookmark';
@@ -2215,6 +2518,9 @@
         break;
       case 'recruitment-detail':
         go('/recruitments/sample');
+        break;
+      case 'apply-recruitment':
+        go(`/recruitments/${recruitmentIdFromPath('featured')}/apply`);
         break;
       case 'new-recruitment':
         go('/recruitments/new');
@@ -2325,6 +2631,34 @@
       case 'bookmark':
         toast('已收藏该岗位，可在个人中心查看收藏记录');
         break;
+      case 'talent-search':
+        applyTalentSearch();
+        break;
+      case 'talent-search-reset':
+        resetTalentSearch();
+        break;
+      case 'talent-pagination':
+        toast('人才列表分页已切换');
+        break;
+      case 'invite-cspm':
+        openPanel('邀约 CSPM 专家', '已进入 CSPM 认证人才邀约流程，可根据候选人认证等级、期望城市和求职意向发起沟通。');
+        break;
+      case 'contact-talent':
+        openPanel('立即沟通', '已生成候选人沟通任务，平台联系人会协助确认候选人意向与可面试时间。');
+        break;
+      case 'download-resume':
+        toast('简历下载任务已创建，请在下载中心查看');
+        break;
+      case 'submit-application':
+        if (!currentRole()) {
+          openPanel('请先登录后提交申请', '岗位申请页已打开。登录或注册后即可提交申请并同步个人资料。', [
+            { label: '去登录', action: 'login' },
+            { label: '去注册', action: 'register' }
+          ]);
+        } else {
+          toast('申请已提交，平台联系人会尽快跟进');
+        }
+        break;
       case 'ai-match':
         openPanel('AI 匹配', 'AI 匹配会基于岗位要求、项目经历、资格证书和求职意向生成候选人推荐。');
         break;
@@ -2396,6 +2730,8 @@
     setupAuthFieldIds();
     setupRegisterTabs();
     renderBlankBusinessState();
+    renderRecruitmentApplyPage();
+    prepareTalentSearchPage();
     renderRoleSidebars();
 
     document.querySelectorAll('a').forEach((link) => {

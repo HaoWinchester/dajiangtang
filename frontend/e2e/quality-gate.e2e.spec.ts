@@ -19,6 +19,8 @@ const stitchPages: StitchPage[] = [
   { path: '/personal-center/education-experience', title: '个人中心 - 教育经历', role: 'USER' },
   { path: '/personal-center/professional-skills', title: '个人中心 - 专业技能', role: 'USER' },
   { path: '/personal-center/certificates', title: '个人中心 - 资格证书', role: 'USER' },
+  { path: '/talents', title: '人才信息 - 列表', role: 'ADMIN' },
+  { path: '/talents/sample', title: '人才信息 - 详情', role: 'ADMIN' },
   { path: '/analytics', title: '数据分析', role: 'ADMIN' }
 ];
 

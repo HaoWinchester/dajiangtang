@@ -13,6 +13,8 @@ const stitchPages: Array<{ path: string; title: string; role?: Role }> = [
   { path: '/personal-center/education-experience', title: '个人中心 - 教育经历', role: 'USER' },
   { path: '/personal-center/professional-skills', title: '个人中心 - 专业技能', role: 'USER' },
   { path: '/personal-center/certificates', title: '个人中心 - 资格证书', role: 'USER' },
+  { path: '/talents', title: '人才信息 - 列表', role: 'ADMIN' },
+  { path: '/talents/sample', title: '人才信息 - 详情', role: 'ADMIN' },
   { path: '/analytics', title: '数据分析', role: 'ADMIN' }
 ];
 
@@ -204,6 +206,8 @@ test.describe('控件矩阵 - 自动巡检', () => {
     '/personal-center/education-experience': ['education-experience'],
     '/personal-center/professional-skills': ['professional-skills'],
     '/personal-center/certificates': ['certificates'],
+    '/talents': ['talents'],
+    '/talents/sample': ['talent-detail'],
     '/analytics': ['analytics']
   };
 
