@@ -61,7 +61,12 @@ public class InMemoryTalentRepository implements TalentRepository {
         if (name.isBlank()) {
             return;
         }
-        long id = profileTalentIds.computeIfAbsent(username, ignored -> ids.getAndIncrement());
+        long id = profileTalentIds.computeIfAbsent(normalize(username), ignored -> ids.getAndIncrement());
+        List<String> certificates = talents.stream()
+                .filter(talent -> talent.id() == id)
+                .findFirst()
+                .map(TalentDetailResponse::certificates)
+                .orElse(List.of());
         talents.removeIf(talent -> talent.id() == id);
         talents.add(new TalentDetailResponse(
                 id,
@@ -77,8 +82,41 @@ public class InMemoryTalentRepository implements TalentRepository {
                 fields.getOrDefault("personalAdvantage", ""),
                 fields.getOrDefault("personalAdvantage", ""),
                 "赵义民",
-                List.of(),
+                certificates,
                 List.of("赵义民", "贺强", "蔡钰炜")
+        ));
+    }
+
+    @Override
+    public synchronized void replaceCertificates(String username, List<String> certificates) {
+        Long id = profileTalentIds.get(normalize(username));
+        if (id == null) {
+            return;
+        }
+        Optional<TalentDetailResponse> current = talents.stream()
+                .filter(talent -> talent.id() == id)
+                .findFirst();
+        if (current.isEmpty()) {
+            return;
+        }
+        TalentDetailResponse talent = current.get();
+        talents.removeIf(item -> item.id() == id);
+        talents.add(new TalentDetailResponse(
+                talent.id(),
+                talent.maskedName(),
+                talent.name(),
+                talent.gender(),
+                talent.currentCompany(),
+                talent.positionTitle(),
+                talent.currentCity(),
+                talent.industry(),
+                talent.jobIntention(),
+                talent.expectedCity(),
+                talent.personalAdvantage(),
+                talent.profile(),
+                talent.contactOwner(),
+                List.copyOf(certificates == null ? List.of() : certificates),
+                talent.contacts()
         ));
     }
 
@@ -99,6 +137,10 @@ public class InMemoryTalentRepository implements TalentRepository {
 
     private boolean contains(String value, String keyword) {
         return keyword == null || keyword.isBlank() || value.toLowerCase(Locale.ROOT).contains(keyword.toLowerCase(Locale.ROOT));
+    }
+
+    private String normalize(String username) {
+        return username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
     }
 
     private static TalentDetailResponse talent(long id, String masked, String name, String gender, String company, String position, String city, String industry, String intention, String expectedCity, String advantage, String profile, String owner, List<String> certificates) {

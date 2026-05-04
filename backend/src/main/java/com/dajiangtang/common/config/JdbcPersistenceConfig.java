@@ -26,15 +26,24 @@ public class JdbcPersistenceConfig {
 
     @Bean
     public HikariDataSource dataSource(DataSourceProperties properties, HikariConfig hikariConfig) {
+        if (!hasText(properties.getUrl())) {
+            throw new IllegalStateException("JDBC 数据源 URL 未配置，请确认已启用 jdbc profile 或设置 spring.datasource.url。");
+        }
         hikariConfig.setJdbcUrl(properties.getUrl());
         hikariConfig.setUsername(properties.getUsername());
         hikariConfig.setPassword(properties.getPassword());
-        hikariConfig.setDriverClassName(properties.getDriverClassName());
+        if (hasText(properties.getDriverClassName())) {
+            hikariConfig.setDriverClassName(properties.getDriverClassName());
+        }
         return new HikariDataSource(hikariConfig);
     }
 
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         return new JdbcTemplate(dataSource);
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

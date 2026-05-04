@@ -19,4 +19,6 @@ public interface TalentRepository {
     long countAll();
 
     void upsertFromProfile(String username, Map<String, String> fields);
+
+    void replaceCertificates(String username, List<String> certificates);
 }

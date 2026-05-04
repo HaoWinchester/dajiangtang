@@ -1627,12 +1627,6 @@
                 </div>
               </div>
             </div>
-            <div class="mt-8 flex gap-3">
-              <button class="flex-1 bg-primary text-on-primary font-label-md text-label-md py-3 rounded hover:opacity-90 transition-opacity" data-home-recruitment-apply="${escapeHtml(item.id)}">立即申请</button>
-              <button class="px-4 py-3 border border-outline text-on-surface-variant rounded hover:bg-slate-50 transition-colors" data-home-recruitment-bookmark="${escapeHtml(item.id)}" aria-label="收藏${escapeHtml(item.position)}">
-                <span class="material-symbols-outlined">bookmark</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -1791,14 +1785,6 @@
               ${detailInfo('location_on', '工作地点', detail.workLocation || detail.city || '待沟通')}
               ${detailInfo('calendar_today', '到岗日期', detail.requiredArrivalDate || '待沟通')}
               ${detailInfo('work', '招聘进度', detail.recruitmentProgress || detail.status || '招聘中')}
-              ${detailInfo('person', '负责人', detail.owner || '待定')}
-            </div>
-            <div class="flex gap-md">
-              <button class="flex-1 bg-primary text-white py-md rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-sm" data-stitch-action="apply-recruitment">立即申请</button>
-              <button class="px-xl py-md border border-outline text-secondary rounded-lg font-label-md hover:bg-slate-50 transition-all flex items-center justify-center gap-sm" data-stitch-action="bookmark">
-                <span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
-                收藏职位
-              </button>
             </div>
           </section>
           <section class="bg-white border border-slate-100 p-xl rounded-lg space-y-xl">
@@ -1830,13 +1816,11 @@
         </div>
         <aside class="col-span-12 lg:col-span-4 flex flex-col gap-lg">
           <section class="bg-white border border-slate-100 p-xl rounded-lg">
-            <h3 class="font-h3 text-h3 text-primary mb-lg">联系信息</h3>
+            <h3 class="font-h3 text-h3 text-primary mb-lg">招聘请联系微信</h3>
             <div class="space-y-md">
-              ${sideInfo('公司', detail.companyName)}
-              ${sideInfo('负责人', detail.owner)}
-              ${sideInfo('联系电话', detail.contactPhone)}
-              ${sideInfo('跟进人员', detail.follower || '待分配')}
-              ${sideInfo('岗位标签', detail.jobTags || '无')}
+              ${sideInfo('赵杨', 'zy1234567111')}
+              ${sideInfo('贺强', 'asdffdadsdf')}
+              ${sideInfo('蔡钰炜', 'cyw-613')}
             </div>
           </section>
           <section class="bg-white border border-slate-100 p-xl rounded-lg">
@@ -1844,7 +1828,7 @@
             <p class="text-body-sm font-semibold text-on-surface">${escapeHtml(detail.workLocation || detail.city || '待沟通')}</p>
           </section>
           <section class="bg-primary p-xl rounded-lg text-white">
-            <h3 class="font-h3 text-h3 mb-sm">备注</h3>
+            <h3 class="font-h3 text-h3 mb-sm" style="    color: #fff !important;">备注</h3>
             <p class="text-body-sm opacity-90 leading-relaxed">${escapeHtml(detail.remark || '暂无备注。')}</p>
           </section>
         </aside>
@@ -1943,7 +1927,6 @@
               ${detailInfo('payments', '薪资', detail.salary || '待沟通')}
               ${detailInfo('location_on', '工作地点', detail.workLocation || detail.city || '待沟通')}
               ${detailInfo('calendar_today', '到岗日期', detail.requiredArrivalDate || '待沟通')}
-              ${detailInfo('person', '负责人', detail.owner || '待定')}
             </div>
           </section>
           <section id="application-materials" class="bg-white border border-slate-100 p-xl rounded-lg space-y-md">
@@ -2040,7 +2023,7 @@
     '深圳智造科技有限公司',
     '苏州精工智能制造有限公司'
   ];
-  const TALENT_DEFAULT_PAGE_SIZE = 2;
+  const TALENT_DEFAULT_PAGE_SIZE = 10;
   const TALENT_PAGE_SIZE_OPTIONS = [2, 4, 10];
 
   function normalizeSearchText(value = '') {
@@ -2394,7 +2377,7 @@
     }
   }
 
-  const talentState = { page: 1, pageSize: 2, totalPages: 1, query: {} };
+  const talentState = { page: 1, pageSize: 10, totalPages: 1, query: {} };
 
   function talentQueryFromPage() {
     return {
@@ -2476,8 +2459,12 @@
         </section>
       </div>
     `;
-    document.getElementById('talent-page-size')?.addEventListener('change', (event) => {
-      talentState.pageSize = Number(event.target.value) || 2;
+    const talentPageSizeSelect = document.getElementById('talent-page-size');
+    if (talentPageSizeSelect instanceof HTMLSelectElement) {
+      talentPageSizeSelect.value = String(talentState.pageSize);
+    }
+    talentPageSizeSelect?.addEventListener('change', (event) => {
+      talentState.pageSize = Number(event.target.value) || 10;
       loadTalentList(1).catch((error) => toast(error.message));
     });
     wireStitchActionButtons(main);
@@ -2585,13 +2572,13 @@
           </section>
           <aside class="col-span-12 lg:col-span-4 space-y-6">
             <section class="bg-white border border-slate-100 rounded-xl p-6">
-              <h2 class="font-h3 text-h3 text-primary">联系人</h2>
-              <div class="mt-4 space-y-3">${(talent.contacts || ['赵义民', '贺强', '蔡钰炜']).map((name) => `<p class="rounded bg-slate-50 p-3 font-bold">${escapeHtml(name)}</p>`).join('')}</div>
+              <h2 class="font-h3 text-h3 text-primary">联系人微信</h2>
+              <div class="mt-4 space-y-3">${(['赵杨（zy1234567111）', '贺强（asdffdadsdf）', '蔡钰炜（cyw-613）']).map((name) => `<p class="rounded bg-slate-50 p-3 font-bold">${escapeHtml(name)}</p>`).join('')}</div>
             </section>
             <section class="bg-white border border-slate-100 rounded-xl p-6 space-y-3">
               <button class="w-full rounded bg-primary py-3 text-white" type="button" data-stitch-action="contact-talent">立即沟通</button>
-              <button class="w-full rounded border border-slate-200 py-3 text-slate-600" type="button" data-stitch-action="download-resume">下载简历 (PDF)</button>
-              <button class="w-full rounded border border-slate-200 py-3 text-slate-600" type="button" data-stitch-action="bookmark">收藏此人</button>
+<!--              <button class="w-full rounded border border-slate-200 py-3 text-slate-600" type="button" data-stitch-action="download-resume">下载简历 (PDF)</button>-->
+<!--              <button class="w-full rounded border border-slate-200 py-3 text-slate-600" type="button" data-stitch-action="bookmark">收藏此人</button>-->
             </section>
           </aside>
         </div>

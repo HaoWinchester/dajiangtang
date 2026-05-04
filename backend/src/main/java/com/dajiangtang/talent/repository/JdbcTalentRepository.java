@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -114,6 +115,24 @@ public class JdbcTalentRepository implements TalentRepository {
         );
     }
 
+    @Override
+    public void replaceCertificates(String username, List<String> certificates) {
+        Long talentId = findTalentId(username);
+        if (talentId == null) {
+            return;
+        }
+        jdbcTemplate.update("DELETE FROM talent_certificates WHERE talent_id = ?", talentId);
+        for (String certificate : certificates == null ? List.<String>of() : certificates) {
+            String trimmed = certificate == null ? "" : certificate.trim();
+            if (!trimmed.isBlank()) {
+                jdbcTemplate.update("""
+                        INSERT INTO talent_certificates (talent_id, certificate_name, certificate_level, issued_at)
+                        VALUES (?, ?, NULL, NULL)
+                        """, talentId, trimmed);
+            }
+        }
+    }
+
     private TalentListItemResponse mapListItem(ResultSet rs, int row) throws SQLException {
         return new TalentListItemResponse(
                 rs.getLong("id"),
@@ -199,6 +218,18 @@ public class JdbcTalentRepository implements TalentRepository {
 
     private String normalize(String username) {
         return username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private Long findTalentId(String username) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    "SELECT id FROM talents WHERE account_username = ?",
+                    Long.class,
+                    normalize(username)
+            );
+        } catch (EmptyResultDataAccessException exception) {
+            return null;
+        }
     }
 
     private String mask(String name) {

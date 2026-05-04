@@ -153,6 +153,35 @@ class ProfileTalentApplicationWorkflowTest {
                 .andExpect(jsonPath("$.items[0].jobIntention").value("待完善"));
     }
 
+    @Test
+    void certificateModuleRecordsAreSyncedToTalentList() throws Exception {
+        String username = "cert_user_" + System.nanoTime();
+        saveProfile(username, username, "Shanghai");
+
+        mockMvc.perform(post("/api/me/profile/modules/certificates")
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "USER")
+                        .header(CurrentUserRoleResolver.USERNAME_HEADER, username)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "fields": {
+                                    "\u662f\u5426\u5177\u5907CSPM\u8ba4\u8bc1": "\u662f",
+                                    "\u5176\u4ed6\u8d44\u683c\u8bc1\u4e66": "PMP\uff0c\u8f6f\u8003\u9ad8\u7ea7"
+                                  }
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/talents")
+                        .param("name", username)
+                        .header(CurrentUserRoleResolver.ROLE_HEADER, "ADMIN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalItems").value(1))
+                .andExpect(jsonPath("$.items[0].certificates[0]").value("CSPM"))
+                .andExpect(jsonPath("$.items[0].certificates[1]").value("PMP"))
+                .andExpect(jsonPath("$.items[0].certificates[2]").value("\u8f6f\u8003\u9ad8\u7ea7"));
+    }
+
     private void saveProfile(String username, String name, String city) throws Exception {
         mockMvc.perform(put("/api/me/profile")
                         .header(CurrentUserRoleResolver.ROLE_HEADER, "USER")

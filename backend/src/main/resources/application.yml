@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: dajiangtang-backend
+  profiles:
+    active: jdbc
 
 app:
   persistence: memory

@@ -194,7 +194,7 @@ onMounted(() => {
                   <th scope="col">薪资</th>
                   <th scope="col">公司名称</th>
                   <th scope="col">城市</th>
-                  <th scope="col">负责人</th>
+<!--                  <th scope="col">负责人</th>-->
                   <th scope="col">需求人数</th>
                 </tr>
               </thead>
@@ -217,7 +217,7 @@ onMounted(() => {
                   <td>{{ item.salary }}</td>
                   <td>{{ item.companyName }}</td>
                   <td>{{ item.city }}</td>
-                  <td>{{ item.owner }}</td>
+<!--                  <td>{{ item.owner }}</td>-->
                   <td>{{ item.headcount }}</td>
                 </tr>
               </tbody>

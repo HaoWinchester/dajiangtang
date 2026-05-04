@@ -124,7 +124,7 @@ CREATE TABLE profile_module_records (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_profile_module_account (account_username, module_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='个人中心多轮资料记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='个人中心多轮资料记录';
 
 CREATE TABLE talent_certificates (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
@@ -160,7 +160,7 @@ CREATE TABLE user_uploads (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY uk_user_upload_target (account_username, page_path, target),
   INDEX idx_user_upload_account (account_username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户上传图片数据';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户上传图片数据';
 
 CREATE TABLE personal_profiles (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
